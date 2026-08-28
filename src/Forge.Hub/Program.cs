@@ -50,6 +50,9 @@ sealed class Program
         }
 
         App.StartHidden = args.Contains("--tray");
+        // The editor plugin passes the engine it runs from; the hub opens on that one.
+        var engineAt = Array.IndexOf(args, "--engine");
+        if (engineAt >= 0 && engineAt + 1 < args.Length) App.PreferredEngine = args[engineAt + 1];
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         return 0;
     }

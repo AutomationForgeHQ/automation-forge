@@ -60,7 +60,7 @@ public static class Elevated
                     var r = installer.InstallAsync(new InstallRequest(p, v, target)).GetAwaiter().GetResult();
                     if (r.Outcome == "already-current") Say($"current: {id} {v.Version}");
                 }
-                catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException or UnauthorizedAccessException)
+                catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException or UnauthorizedAccessException or IOException)
                 {
                     Say($"failed: {id} — {ex.Message}"); failures++;
                 }

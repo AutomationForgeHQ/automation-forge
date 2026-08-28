@@ -108,7 +108,9 @@ public partial class MainViewModel : ViewModelBase
         _notifyOnUpdates = _settings.NotifyOnUpdates;
         _startWithWindows = Autostart.Enabled;
         foreach (var e in EngineLocator.Find()) Engines.Add(e);
-        SelectedEngine = Engines.FirstOrDefault();
+        var preferred = App.PreferredEngine is { } spec ? EngineLocator.Resolve(spec) : null;
+        SelectedEngine = Engines.FirstOrDefault(e => preferred is not null && string.Equals(e.Path.TrimEnd('\\', '/'), preferred.Path.TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase))
+                         ?? Engines.FirstOrDefault();
         _ = RefreshAsync();
         if (_settings.CheckForUpdates) _ = CheckHubUpdateAsync(quiet: true);
     }
@@ -377,6 +379,7 @@ public partial class MainViewModel : ViewModelBase
         Busy = true;
         try
         {
+            WarnIfEditorRuns();
             if (Installer.IsWritable(Target.Root))
             {
                 var installer = new Installer(_http, _state, _entitlements, Say);
@@ -392,7 +395,7 @@ public partial class MainViewModel : ViewModelBase
                         var r = await installer.InstallAsync(new InstallRequest(p, v, Target), progress: new Progress<double>(f => Status = $"Downloading {id} {v.Version} — {(int)(f * 100)}%"));
                         if (r.Outcome == "already-current") Say($"current: {id} {v.Version}");
                     }
-                    catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException)
+                    catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException or IOException)
                     {
                         Say($"failed: {id} — {ex.Message}");
                     }
@@ -409,6 +412,22 @@ public partial class MainViewModel : ViewModelBase
             Rebuild();
             Busy = false;
         }
+    }
+
+    /// <summary>A plugin the editor has loaded cannot be replaced; say so before trying, not after.</summary>
+    private void WarnIfEditorRuns()
+    {
+        if (SelectedEngine is null || Target?.Kind != "engine") return;
+        var root = SelectedEngine.Path.TrimEnd('\\', '/');
+        var running = 0;
+        foreach (var p in Process.GetProcessesByName("UnrealEditor"))
+        {
+            try { if (p.MainModule?.FileName?.StartsWith(root, StringComparison.OrdinalIgnoreCase) == true) running++; }
+            catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException) { }
+            finally { p.Dispose(); }
+        }
+        if (running > 0)
+            Say($"Unreal Editor is running from this engine. A plugin it has loaded cannot be replaced — if the install fails, close the editor and try again.");
     }
 
     /// <summary>Relaunch this executable elevated, headless, then read back what it did.</summary>

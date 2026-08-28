@@ -75,7 +75,14 @@ public sealed class Installer
                 throw new InvalidDataException($"The package has no {plugin.Id}.uplugin at its root.");
 
             var outcome = Directory.Exists(dest) ? "updated" : "installed";
-            if (Directory.Exists(dest)) Directory.Delete(dest, recursive: true);
+            if (Directory.Exists(dest))
+            {
+                try { Directory.Delete(dest, recursive: true); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    throw new IOException($"{plugin.Id} is in use — Unreal Editor has it loaded. Close the editor and try again. ({ex.Message})");
+                }
+            }
             Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
             Directory.Move(folder, dest);
 

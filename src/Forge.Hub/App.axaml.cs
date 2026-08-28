@@ -21,6 +21,9 @@ public partial class App : Application
     /// <summary>Set by --tray: come up in the tray with no window.</summary>
     public static bool StartHidden { get; set; }
 
+    /// <summary>Set by --engine: the engine (version or path) to select first.</summary>
+    public static string? PreferredEngine { get; set; }
+
     private IClassicDesktopStyleApplicationLifetime? _desktop;
     private Settings _settings = null!;
     private UpdateWatcher _watcher = null!;
