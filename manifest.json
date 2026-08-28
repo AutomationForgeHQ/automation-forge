@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-28T11:09:02Z",
+  "generatedAt": "2026-08-28T17:42:41Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -12,6 +12,7 @@
       "name": "AutomationForge",
       "members": [
         "AutomationForge",
+        "AutomationForgeHub",
         "AutomationForgePipelines",
         "AutomationForgeToolset"
       ]
@@ -82,6 +83,28 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforge-v0.1.0/AutomationForge-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T11:01:34Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforge-v0.1.0"
+        }
+      ]
+    },
+    {
+      "id": "AutomationForgeHub",
+      "set": "automationforge",
+      "role": "hub",
+      "distribution": "open",
+      "dependencies": [],
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgehub-v0.1.0/AutomationForgeHub-0.1.0-UE5.8-Win64.zip",
+          "size": 137573,
+          "sha256": "d9138ffe725b9e650af2ac0ff254fd39910da93926089b59e69b2ab0193de7fc",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgehub-v0.1.0/AutomationForgeHub-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T17:41:13Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgehub-v0.1.0"
         }
       ]
     },
