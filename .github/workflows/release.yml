@@ -1,0 +1,44 @@
+# A stable release is a tag: v<VERSION>. The tag must match the VERSION file,
+# so the number in the binaries, the tag and the release page can never drift.
+# A tag with a pre-release suffix (v0.3.0-rc.1) is allowed through as a
+# pre-release without the VERSION check.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: |
+          tag='${{ github.ref_name }}'
+          version="${tag#v}"
+          expected="$(tr -d '[:space:]' < VERSION)"
+          if [[ "$version" == *-* ]]; then
+            prerelease=true
+          else
+            prerelease=false
+            if [[ "$version" != "$expected" ]]; then
+              echo "::error::tag $tag does not match VERSION ($expected). Bump VERSION first, then tag."
+              exit 1
+            fi
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    uses: ./.github/workflows/build.yml
+    permissions:
+      contents: write
+    with:
+      version: ${{ needs.plan.outputs.version }}
+      tag: ${{ github.ref_name }}
+      prerelease: ${{ needs.plan.outputs.prerelease == 'true' }}

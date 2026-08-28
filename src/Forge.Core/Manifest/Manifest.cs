@@ -57,9 +57,14 @@ public sealed class PluginInfo
 
     public bool IsPaid => Distribution == "paid";
 
-    /// <summary>Newest version for an engine on a channel, or null when none is published.</summary>
-    public VersionInfo? Latest(string engine, string channel = "stable") =>
-        Versions.Where(v => v.Engine == engine && v.Channel == channel)
+    /// <summary>
+    /// Newest version for an engine on a channel, or null when none is published.
+    /// The stable channel sees stable releases only; the nightly channel sees
+    /// whichever is newest of both, so a stable release published after a
+    /// nightly supersedes it.
+    /// </summary>
+    public VersionInfo? Latest(string engine, string channel = Settings.Stable) =>
+        Versions.Where(v => v.Engine == engine && (channel == Settings.Nightly || v.Channel == Settings.Stable))
                 .OrderByDescending(v => v.ReleasedAt, StringComparer.Ordinal)
                 .FirstOrDefault();
 }

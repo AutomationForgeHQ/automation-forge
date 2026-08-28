@@ -1,0 +1,74 @@
+# Every night, if main moved since the last nightly: build it as
+# <VERSION>-nightly.<yyyymmdd>, publish it as a pre-release, and prune
+# nightlies older than fourteen days. The hub's nightly channel sees these;
+# the stable channel never does.
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.v.outputs.build }}
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: v
+        run: |
+          base="$(tr -d '[:space:]' < VERSION)"
+          if git rev-parse -q --verify "refs/tags/v$base" >/dev/null; then
+            echo "::warning::VERSION is $base and v$base is already released — bump VERSION so nightlies sort above it."
+            echo "build=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          last="$(git tag -l 'v*-nightly.*' --sort=-creatordate | head -n1)"
+          if [[ -n "$last" && "$(git rev-list -n1 "$last")" == "$(git rev-parse HEAD)" ]]; then
+            echo "nothing new since $last"
+            echo "build=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          version="$base-nightly.$(date -u +%Y%m%d)"
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "v$version already exists"
+            echo "build=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "build=true" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.build == 'true'
+    uses: ./.github/workflows/build.yml
+    permissions:
+      contents: write
+    with:
+      version: ${{ needs.plan.outputs.version }}
+      tag: ${{ needs.plan.outputs.tag }}
+      prerelease: true
+
+  prune:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Drop nightlies older than 14 days
+        run: |
+          cutoff="$(date -u -d '-14 days' +%s)"
+          gh release list --limit 200 --json tagName,isPrerelease,createdAt \
+            --jq '.[] | select(.isPrerelease and (.tagName | test("-nightly\\."))) | "\(.tagName) \(.createdAt)"' |
+          while read -r tag created; do
+            if [[ "$(date -u -d "$created" +%s)" -lt "$cutoff" ]]; then
+              echo "pruning $tag"
+              gh release delete "$tag" --cleanup-tag --yes
+            fi
+          done

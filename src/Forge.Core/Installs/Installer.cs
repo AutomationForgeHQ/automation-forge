@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using System.Security.Cryptography;
 using Forge.Core.Entitlements;
 using Forge.Core.Manifest;
 
@@ -147,9 +146,5 @@ public sealed class Installer
         }
     }
 
-    private static string Sha256Of(string file)
-    {
-        using var stream = File.OpenRead(file);
-        return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
-    }
+    private static string Sha256Of(string file) => Checksums.Sha256Of(file);
 }

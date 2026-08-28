@@ -29,8 +29,17 @@
     <SolidColorBrush x:Key="DimBrush" Color="{StaticResource Dim}" />
     <SolidColorBrush x:Key="AmberBrush" Color="{StaticResource Amber}" />
 
-    <FontFamily x:Key="DisplayFont">avares://Forge.Hub/Assets/Fonts#Archivo</FontFamily>
-    <FontFamily x:Key="MonoFont">avares://Forge.Hub/Assets/Fonts#IBM Plex Mono</FontFamily>
+    <!-- Fluent's accent is ours: radios, checkboxes and selection highlights turn amber. -->
+    <Color x:Key="SystemAccentColor">#e39a2b</Color>
+    <Color x:Key="SystemAccentColorDark1">#c9862a</Color>
+    <Color x:Key="SystemAccentColorDark2">#a86f24</Color>
+    <Color x:Key="SystemAccentColorDark3">#8a6320</Color>
+    <Color x:Key="SystemAccentColorLight1">#e9ab4d</Color>
+    <Color x:Key="SystemAccentColorLight2">#efbd70</Color>
+    <Color x:Key="SystemAccentColorLight3">#f5cf94</Color>
+
+    <FontFamily x:Key="DisplayFont">avares://AutomationForgeHub/Assets/Fonts#Archivo</FontFamily>
+    <FontFamily x:Key="MonoFont">avares://AutomationForgeHub/Assets/Fonts#IBM Plex Mono</FontFamily>
   </Application.Resources>
 
   <Application.Styles>
@@ -111,6 +120,20 @@
     <Style Selector="Button.link:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+    </Style>
+    <Style Selector="Button.link.amber">
+      <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
+    </Style>
+
+    <!-- Choices in the settings panel: quiet controls, our type inside them. -->
+    <Style Selector="RadioButton">
+      <Setter Property="Padding" Value="10,0,0,0" />
+      <Setter Property="VerticalContentAlignment" Value="Top" />
+      <Setter Property="Margin" Value="0,2" />
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="Padding" Value="8,0,0,0" />
+      <Setter Property="MinHeight" Value="24" />
     </Style>
 
     <!-- Caption buttons: 46px targets, quiet until hovered; close warms to red like every Windows app. -->

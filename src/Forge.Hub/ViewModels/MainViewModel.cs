@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Forge.Core;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
 using Forge.Core.Installs;
@@ -15,16 +18,21 @@ namespace Forge.Hub.ViewModels;
 /// The hub over Forge.Core. Three sources, one view: the manifest (what each
 /// plugin is), the releases repository (what is actually published), and the
 /// install receipts (what is on this machine). Privileged writes relaunch the
-/// hub itself elevated, headless, and read its log back.
+/// hub itself elevated, headless, and read its log back. The hub also watches
+/// its own releases and replaces itself through the installer.
 /// </summary>
 public partial class MainViewModel : ViewModelBase
 {
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(10) };
     private readonly ManifestClient _manifestClient;
     private readonly ReleaseDiscovery _releases;
+    private readonly HubReleases _hubReleases;
     private readonly InstallState _state = new();
     private readonly IEntitlementProvider _entitlements = new AnonymousEntitlements();
+    private readonly Settings _settings;
+    private readonly UpdateWatcher? _watcher;
     private Manifest? _manifest;
+    private HubRelease? _hubUpdate;
 
     public ObservableCollection<EngineInstall> Engines { get; } = [];
     public ObservableCollection<SetGroup> Sets { get; } = [];
@@ -36,25 +44,111 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _status = "Ready.";
     [ObservableProperty] private bool _busy;
     [ObservableProperty] private bool _showDetails;
+    [ObservableProperty] private bool _showSettings;
     [ObservableProperty] private int _updatesCount;
     [ObservableProperty] private int _installedCount;
     [ObservableProperty] private string _accountLabel = "Sign in";
+    [ObservableProperty] private bool _isNightly;
+    [ObservableProperty] private bool _checkForUpdates;
+    [ObservableProperty] private bool _runInBackground;
+    [ObservableProperty] private bool _notifyOnUpdates;
+    [ObservableProperty] private bool _startWithWindows;
+    [ObservableProperty] private string _hubUpdateLine = "";
+    [ObservableProperty] private bool _hasHubUpdate;
+
+    public bool CanAutostart => Autostart.Supported;
+    public string WatchLine => _watcher?.Last is { } last
+        ? $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Last look {last.CheckedAt:HH:mm}. Nothing installs by itself."
+        : $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Nothing installs by itself.";
 
     public bool HasUpdates => UpdatesCount > 0;
     public string UpdatesLabel => UpdatesCount == 1 ? "1 update available" : $"{UpdatesCount} updates available";
 
-    public MainViewModel()
+    public string HubVersion => $"hub {AppInfo.Version}";
+    public string DataDir => Paths.DataDir;
+    public string InstallLocation => HubUpdater.IsInstalled
+        ? $"Installed at {HubUpdater.InstallDir}"
+        : $"Running from {Path.GetDirectoryName(Environment.ProcessPath)} (not installed)";
+
+    /// <summary>The Stable radio: setting it true is the only way it changes anything.</summary>
+    public bool IsStable
     {
-        _http.DefaultRequestHeaders.UserAgent.ParseAdd("forge-hub/0.1");
+        get => !IsNightly;
+        set { if (value) IsNightly = false; }
+    }
+
+    public string Channel => IsNightly ? Settings.Nightly : Settings.Stable;
+    public string HubUpdateLabel => _hubUpdate is null ? "" : $"hub {_hubUpdate.Version} available — {(HubUpdater.IsInstalled ? "update" : "download")}";
+    public string HubUpdateAction => HubUpdater.IsInstalled ? "Update now" : "Open release";
+
+    /// <summary>The designer's constructor; the app passes its shared settings and watcher.</summary>
+    public MainViewModel() : this(Settings.Load(), null) { }
+
+    public MainViewModel(Settings settings, UpdateWatcher? watcher)
+    {
+        _settings = settings;
+        _watcher = watcher;
+        _http.DefaultRequestHeaders.UserAgent.ParseAdd(AppInfo.UserAgent("hub"));
         _manifestClient = new ManifestClient(_http);
         _releases = new ReleaseDiscovery(_http);
+        _hubReleases = new HubReleases(_http);
+        _isNightly = _settings.IsNightly;
+        _checkForUpdates = _settings.CheckForUpdates;
+        _runInBackground = _settings.RunInBackground;
+        _notifyOnUpdates = _settings.NotifyOnUpdates;
+        _startWithWindows = Autostart.Enabled;
         foreach (var e in EngineLocator.Find()) Engines.Add(e);
         SelectedEngine = Engines.FirstOrDefault();
         _ = RefreshAsync();
+        if (_settings.CheckForUpdates) _ = CheckHubUpdateAsync(quiet: true);
+    }
+
+    partial void OnRunInBackgroundChanged(bool value) { if (_settings.RunInBackground != value) { _settings.RunInBackground = value; _settings.Save(); } }
+    partial void OnNotifyOnUpdatesChanged(bool value) { if (_settings.NotifyOnUpdates != value) { _settings.NotifyOnUpdates = value; _settings.Save(); } }
+    partial void OnStartWithWindowsChanged(bool value)
+    {
+        if (Autostart.Enabled == value) return;
+        Autostart.Enabled = value;
+        var actual = Autostart.Enabled;
+        if (actual != value) StartWithWindows = actual;
+    }
+
+    /// <summary>Re-read receipts and releases without a word in the status line — the watcher found something.</summary>
+    public async Task RefreshQuietlyAsync()
+    {
+        try
+        {
+            var (manifest, _) = await _manifestClient.GetAsync();
+            await _releases.MergeIntoAsync(manifest);
+            _manifest = manifest;
+            _state.Reload();
+            Rebuild();
+            OnPropertyChanged(nameof(WatchLine));
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or InvalidDataException) { }
     }
 
     partial void OnSelectedEngineChanged(EngineInstall? value) => Rebuild();
     partial void OnUpdatesCountChanged(int value) { OnPropertyChanged(nameof(HasUpdates)); OnPropertyChanged(nameof(UpdatesLabel)); }
+
+    partial void OnIsNightlyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsStable));
+        OnPropertyChanged(nameof(Channel));
+        if (_settings.Channel == Channel) return;
+        _settings.Channel = Channel;
+        _settings.Save();
+        Rebuild();
+        Say(value ? "Nightly channel: the newest build of everything, stable or not." : "Stable channel: tagged releases only.");
+        _ = CheckHubUpdateAsync(quiet: true);
+    }
+
+    partial void OnCheckForUpdatesChanged(bool value)
+    {
+        if (_settings.CheckForUpdates == value) return;
+        _settings.CheckForUpdates = value;
+        _settings.Save();
+    }
 
     private InstallTarget? Target => SelectedEngine is null ? null : InstallTarget.Engine(SelectedEngine);
 
@@ -86,6 +180,64 @@ public partial class MainViewModel : ViewModelBase
     private void ToggleDetails() => ShowDetails = !ShowDetails;
 
     [RelayCommand]
+    private void ToggleSettings() => ShowSettings = !ShowSettings;
+
+    [RelayCommand]
+    private void OpenDataFolder()
+    {
+        Directory.CreateDirectory(Paths.DataDir);
+        Process.Start(new ProcessStartInfo { FileName = Paths.DataDir, UseShellExecute = true });
+    }
+
+    [RelayCommand]
+    private Task CheckHubUpdate() => CheckHubUpdateAsync(quiet: false);
+
+    private async Task CheckHubUpdateAsync(bool quiet)
+    {
+        try
+        {
+            var newer = await _hubReleases.NewerThanAsync(AppInfo.SemVer, Channel);
+            _hubUpdate = newer;
+            HasHubUpdate = newer is not null;
+            OnPropertyChanged(nameof(HubUpdateLabel));
+            HubUpdateLine = newer is null
+                ? $"{AppInfo.Version} is the newest on the {Channel} channel."
+                : $"{newer.Version} is available{(newer.Prerelease ? " (nightly)" : "")}.";
+            if (!quiet || newer is not null) Say(newer is null ? "This hub is current." : $"A newer hub is available: {newer.Version}.");
+        }
+        catch (Exception ex)
+        {
+            HubUpdateLine = $"Could not check: {ex.Message}";
+            if (!quiet) Say(HubUpdateLine);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ApplyHubUpdateAsync()
+    {
+        if (_hubUpdate is null) return;
+        if (!HubUpdater.IsInstalled || _hubUpdate.InstallerUrl is null)
+        {
+            HubUpdater.OpenInBrowser(_hubUpdate.HtmlUrl);
+            return;
+        }
+        Busy = true;
+        try
+        {
+            Status = $"Downloading hub {_hubUpdate.Version}…";
+            var file = await HubUpdater.DownloadAsync(_http, _hubUpdate, new Progress<double>(f => Status = $"Downloading hub {_hubUpdate.Version} — {(int)(f * 100)}%"));
+            Say($"Installing hub {_hubUpdate.Version}; the hub restarts by itself.");
+            HubUpdater.RunInstaller(file);
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) desktop.Shutdown();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or InvalidDataException or IOException or InvalidOperationException)
+        {
+            Say($"Hub update failed: {ex.Message}");
+            Busy = false;
+        }
+    }
+
+    [RelayCommand]
     private async Task UpdateAllAsync()
     {
         var ids = Sets.SelectMany(s => s.Plugins).Where(r => r.HasUpdate).Select(r => r.Id).ToArray();
@@ -104,7 +256,7 @@ public partial class MainViewModel : ViewModelBase
             foreach (var id in set.Members)
             {
                 if (_manifest.Plugin(id) is not { } p) continue;
-                group.Plugins.Add(new PluginRow(p, p.Latest(engine), _state.Find(Target, p.Id), this));
+                group.Plugins.Add(new PluginRow(p, p.Latest(engine, Channel), _state.Find(Target, p.Id), this));
             }
             group.Refresh();
             Sets.Add(group);
@@ -139,7 +291,7 @@ public partial class MainViewModel : ViewModelBase
                 {
                     if (uninstall) { if (!installer.Uninstall(Target, id)) Say($"not installed: {id}"); continue; }
                     var p = _manifest.Plugin(id)!;
-                    var v = p.Latest(SelectedEngine.Version);
+                    var v = p.Latest(SelectedEngine.Version, Channel);
                     if (v is null) { Say($"skipped: {id} has no release for UE {SelectedEngine.Version}"); continue; }
                     try
                     {
@@ -178,6 +330,7 @@ public partial class MainViewModel : ViewModelBase
         psi.ArgumentList.Add(verb);
         foreach (var id in ids) psi.ArgumentList.Add(id);
         psi.ArgumentList.Add("--engine"); psi.ArgumentList.Add(SelectedEngine!.Path);
+        psi.ArgumentList.Add("--channel"); psi.ArgumentList.Add(Channel);
         try
         {
             if (File.Exists(Elevated.LogPath)) File.Delete(Elevated.LogPath);
@@ -245,10 +398,12 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
     public bool IsPaid => Plugin.IsPaid;
     public bool HasUpdate => Installed is not null && Latest is not null && Installed.Version != Latest.Version;
 
+    private string LatestLabel => Latest is null ? "" : Latest.Channel == Settings.Nightly ? $"{Latest.Version} · nightly" : Latest.Version;
+
     public string VersionLine =>
         Latest is null ? "no release yet"
-        : Installed is null ? $"{Latest.Version} available"
-        : HasUpdate ? $"{Installed.Version} installed → {Latest.Version}"
+        : Installed is null ? $"{LatestLabel} available"
+        : HasUpdate ? $"{Installed.Version} installed → {LatestLabel}"
         : $"{Installed.Version} installed";
 
     public string Status =>

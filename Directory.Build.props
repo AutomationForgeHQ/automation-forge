@@ -1,0 +1,20 @@
+<Project>
+  <!--
+    One version for the hub, the CLI and the core: the VERSION file at the root.
+    It holds the version being worked on. A stable release is the tag v<VERSION>;
+    the release workflow refuses a tag that does not match. Nightlies are
+    <VERSION>-nightly.<yyyymmdd>, passed in as -p:Version=… by CI, so they sort
+    above the last stable release and below the next one.
+  -->
+  <PropertyGroup>
+    <VersionPrefix>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)VERSION').Trim())</VersionPrefix>
+    <Company>Blackcode SA</Company>
+    <Authors>Blackcode SA</Authors>
+    <Product>Automation Forge</Product>
+    <Copyright>© Blackcode SA</Copyright>
+    <RepositoryUrl>https://github.com/AutomationForgeHQ/automation-forge</RepositoryUrl>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+</Project>

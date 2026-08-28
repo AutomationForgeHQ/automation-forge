@@ -8,6 +8,7 @@
         x:DataType="vm:MainViewModel"
         Width="1180" Height="760" MinWidth="760" MinHeight="480"
         Background="{StaticResource InkBrush}"
+        Icon="/Assets/forge.ico"
         ExtendClientAreaToDecorationsHint="True"
         WindowDecorations="BorderOnly"
         ExtendClientAreaTitleBarHeightHint="-1"
@@ -26,7 +27,7 @@
         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9" Margin="16,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
           <Path Data="M 6.5 0 L 13 11.5 L 0 11.5 Z" Stroke="{StaticResource AmberBrush}" StrokeThickness="1.3" Fill="Transparent" Width="13" Height="12" VerticalAlignment="Center" />
           <TextBlock Classes="stamp" Text="Automation Forge" Foreground="{StaticResource BoneBrush}" VerticalAlignment="Center" />
-          <TextBlock Classes="stamp" Text="hub 0.1" VerticalAlignment="Center" />
+          <TextBlock Classes="stamp" Text="{Binding HubVersion}" VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal">
           <Button Classes="caption" Click="Minimize_Click" ToolTip.Tip="Minimise">
@@ -59,80 +60,148 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
           <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshCommand}" />
+          <Button Classes="ghost" Content="Settings" Command="{Binding ToggleSettingsCommand}" />
           <Button Classes="primary" Content="{Binding AccountLabel}" Command="{Binding LoginCommand}" />
         </WrapPanel>
         <Panel />
       </DockPanel>
     </Border>
 
-    <!-- Body: sets on the left, the selected set on the right -->
-    <Grid Grid.Row="2" ColumnDefinitions="248,*">
+    <!-- Body: sets on the left, the selected set on the right; settings slide over from the right -->
+    <Panel Grid.Row="2">
+      <Grid ColumnDefinitions="248,*">
 
-      <Border Grid.Column="0" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,1,0" Background="{StaticResource PlateBrush}">
-        <DockPanel>
-          <StackPanel DockPanel.Dock="Bottom" Margin="20,12,20,18" Spacing="10">
-            <TextBlock Classes="stamp" IsVisible="{Binding HasUpdates}" Text="{Binding UpdatesLabel}" Foreground="{StaticResource AmberBrush}" />
-            <Button Classes="primary" Content="Update all" Command="{Binding UpdateAllCommand}" IsVisible="{Binding HasUpdates}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
-            <TextBlock Classes="stamp" Text="Free on your own hardware. Open where it counts." TextWrapping="Wrap" />
-          </StackPanel>
-
-          <TextBlock DockPanel.Dock="Top" Classes="label" Text="SETS" Margin="20,18,20,8" />
-          <ListBox ItemsSource="{Binding Sets}" SelectedItem="{Binding SelectedSet}" Background="Transparent" BorderThickness="0" Padding="0">
-            <ListBox.ItemTemplate>
-              <DataTemplate x:DataType="vm:SetGroup">
-                <Grid ColumnDefinitions="*,Auto" Margin="20,10,16,10">
-                  <StackPanel Spacing="3">
-                    <TextBlock Classes="display" Text="{Binding Name}" FontSize="14" />
-                    <TextBlock Classes="stamp" Text="{Binding Summary}" TextTrimming="CharacterEllipsis" />
-                  </StackPanel>
-                  <Border Grid.Column="1" IsVisible="{Binding HasUpdates}" Background="{StaticResource AmberBrush}" CornerRadius="9" MinWidth="18" Height="18" VerticalAlignment="Center" Padding="6,0">
-                    <TextBlock Text="{Binding UpdateCount}" FontFamily="{StaticResource MonoFont}" FontSize="11" Foreground="{StaticResource InkBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                  </Border>
-                </Grid>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-        </DockPanel>
-      </Border>
-
-      <ScrollViewer Grid.Column="1" Padding="32,26,32,20" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel DataContext="{Binding SelectedSet}" x:DataType="vm:SetGroup">
-          <Grid ColumnDefinitions="*,Auto">
-            <StackPanel Spacing="6" VerticalAlignment="Center">
-              <TextBlock Classes="display" Text="{Binding Name}" FontSize="30" />
-              <TextBlock Classes="stamp" Text="{Binding Summary}" />
+        <Border Grid.Column="0" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,1,0" Background="{StaticResource PlateBrush}">
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Bottom" Margin="20,12,20,18" Spacing="10">
+              <TextBlock Classes="stamp" IsVisible="{Binding HasUpdates}" Text="{Binding UpdatesLabel}" Foreground="{StaticResource AmberBrush}" />
+              <Button Classes="primary" Content="Update all" Command="{Binding UpdateAllCommand}" IsVisible="{Binding HasUpdates}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+              <TextBlock Classes="stamp" Text="Free on your own hardware. Open where it counts." TextWrapping="Wrap" />
             </StackPanel>
-            <Button Grid.Column="1" Classes="ghost" Content="Install set" Command="{Binding InstallSetCommand}" IsEnabled="{Binding CanInstallSet}" VerticalAlignment="Center" />
-          </Grid>
 
-          <ItemsControl ItemsSource="{Binding Plugins}" Margin="0,22,0,0">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:PluginRow">
-                <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,14,0,14">
-                  <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="20">
-                    <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-                      <TextBlock Classes="display" Text="{Binding Id}" FontSize="15" TextTrimming="CharacterEllipsis" />
-                      <TextBlock Classes="stamp" Text="{Binding Meta}" TextTrimming="CharacterEllipsis" />
+            <TextBlock DockPanel.Dock="Top" Classes="label" Text="SETS" Margin="20,18,20,8" />
+            <ListBox ItemsSource="{Binding Sets}" SelectedItem="{Binding SelectedSet}" Background="Transparent" BorderThickness="0" Padding="0">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:SetGroup">
+                  <Grid ColumnDefinitions="*,Auto" Margin="20,10,16,10">
+                    <StackPanel Spacing="3">
+                      <TextBlock Classes="display" Text="{Binding Name}" FontSize="14" />
+                      <TextBlock Classes="stamp" Text="{Binding Summary}" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" MinWidth="170">
-                      <TextBlock Classes="mono" Text="{Binding VersionLine}" />
-                      <TextBlock Classes="stamp" Text="{Binding Status}" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                      <Button Classes="ghost" Content="Remove" Command="{Binding UninstallCommand}" IsVisible="{Binding CanUninstall}" />
-                      <Button Classes="primary" Content="{Binding ActionLabel}" Command="{Binding ActCommand}" MinWidth="92" HorizontalContentAlignment="Center" />
-                    </StackPanel>
+                    <Border Grid.Column="1" IsVisible="{Binding HasUpdates}" Background="{StaticResource AmberBrush}" CornerRadius="9" MinWidth="18" Height="18" VerticalAlignment="Center" Padding="6,0">
+                      <TextBlock Text="{Binding UpdateCount}" FontFamily="{StaticResource MonoFont}" FontSize="11" Foreground="{StaticResource InkBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Border>
                   </Grid>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-          <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" />
-        </StackPanel>
-      </ScrollViewer>
-    </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+        </Border>
 
-    <!-- Footer: one line of status; details on demand -->
+        <ScrollViewer Grid.Column="1" Padding="32,26,32,20" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel DataContext="{Binding SelectedSet}" x:DataType="vm:SetGroup">
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel Spacing="6" VerticalAlignment="Center">
+                <TextBlock Classes="display" Text="{Binding Name}" FontSize="30" />
+                <TextBlock Classes="stamp" Text="{Binding Summary}" />
+              </StackPanel>
+              <Button Grid.Column="1" Classes="ghost" Content="Install set" Command="{Binding InstallSetCommand}" IsEnabled="{Binding CanInstallSet}" VerticalAlignment="Center" />
+            </Grid>
+
+            <ItemsControl ItemsSource="{Binding Plugins}" Margin="0,22,0,0">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:PluginRow">
+                  <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,14,0,14">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="20">
+                      <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Classes="display" Text="{Binding Id}" FontSize="15" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="stamp" Text="{Binding Meta}" TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" MinWidth="170">
+                        <TextBlock Classes="mono" Text="{Binding VersionLine}" />
+                        <TextBlock Classes="stamp" Text="{Binding Status}" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Classes="ghost" Content="Remove" Command="{Binding UninstallCommand}" IsVisible="{Binding CanUninstall}" />
+                        <Button Classes="primary" Content="{Binding ActionLabel}" Command="{Binding ActCommand}" MinWidth="92" HorizontalContentAlignment="Center" />
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" />
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+
+      <!-- Settings: a scrim and a panel. Click the scrim to leave. -->
+      <Border IsVisible="{Binding ShowSettings}" Background="#B30A0A0B" PointerPressed="Scrim_PointerPressed" />
+      <Border IsVisible="{Binding ShowSettings}" HorizontalAlignment="Right" Width="400"
+              Background="{StaticResource PlateBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1,0,0,0">
+        <ScrollViewer>
+          <StackPanel Spacing="26" Margin="28,22,28,28">
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Classes="link" Content="Close" Command="{Binding ToggleSettingsCommand}" />
+              <TextBlock Classes="label" Text="SETTINGS" VerticalAlignment="Center" />
+            </DockPanel>
+
+            <StackPanel Spacing="12">
+              <TextBlock Classes="label" Text="CHANNEL" />
+              <RadioButton GroupName="channel" IsChecked="{Binding IsStable, Mode=TwoWay}">
+                <StackPanel Spacing="3">
+                  <TextBlock Classes="display" Text="Stable" FontSize="14" />
+                  <TextBlock Classes="stamp" Text="Tagged releases of the plugins and the hub. What most people should run." TextWrapping="Wrap" />
+                </StackPanel>
+              </RadioButton>
+              <RadioButton GroupName="channel" IsChecked="{Binding IsNightly, Mode=TwoWay}">
+                <StackPanel Spacing="3">
+                  <TextBlock Classes="display" Text="Nightly" FontSize="14" />
+                  <TextBlock Classes="stamp" Text="Whatever is newest, including builds made from the day's work. Newer and less tested; a stable release published later takes over." TextWrapping="Wrap" />
+                </StackPanel>
+              </RadioButton>
+            </StackPanel>
+
+            <StackPanel Spacing="10">
+              <TextBlock Classes="label" Text="THIS HUB" />
+              <TextBlock Classes="mono" Text="{Binding HubVersion}" />
+              <TextBlock Classes="stamp" Text="{Binding InstallLocation}" TextWrapping="Wrap" />
+              <CheckBox IsChecked="{Binding CheckForUpdates, Mode=TwoWay}">
+                <TextBlock Classes="stamp" Text="Look for a newer hub at start" Foreground="{StaticResource BoneBrush}" />
+              </CheckBox>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="ghost" Content="Check now" Command="{Binding CheckHubUpdateCommand}" />
+                <Button Classes="primary" Content="{Binding HubUpdateAction}" Command="{Binding ApplyHubUpdateCommand}" IsVisible="{Binding HasHubUpdate}" />
+              </StackPanel>
+              <TextBlock Classes="stamp" Text="{Binding HubUpdateLine}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <StackPanel Spacing="10">
+              <TextBlock Classes="label" Text="BACKGROUND" />
+              <CheckBox IsChecked="{Binding RunInBackground, Mode=TwoWay}">
+                <TextBlock Classes="stamp" Text="Keep running in the tray when the window closes" Foreground="{StaticResource BoneBrush}" TextWrapping="Wrap" />
+              </CheckBox>
+              <CheckBox IsChecked="{Binding StartWithWindows, Mode=TwoWay}" IsEnabled="{Binding CanAutostart}">
+                <TextBlock Classes="stamp" Text="Start with Windows, in the tray" Foreground="{StaticResource BoneBrush}" />
+              </CheckBox>
+              <CheckBox IsChecked="{Binding NotifyOnUpdates, Mode=TwoWay}">
+                <TextBlock Classes="stamp" Text="Notify me when updates appear" Foreground="{StaticResource BoneBrush}" />
+              </CheckBox>
+              <TextBlock Classes="stamp" Text="{Binding WatchLine}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <StackPanel Spacing="10">
+              <TextBlock Classes="label" Text="DATA" />
+              <TextBlock Classes="stamp" Text="Receipts, settings and the download cache." />
+              <TextBlock Classes="mono" Text="{Binding DataDir}" TextWrapping="Wrap" FontSize="12" />
+              <Button Classes="ghost" Content="Open folder" Command="{Binding OpenDataFolderCommand}" HorizontalAlignment="Left" />
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Panel>
+
+    <!-- Footer: one line of status; details on demand; the hub's own update when there is one -->
     <Border Grid.Row="3" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Background="{StaticResource PlateBrush}">
       <StackPanel>
         <Border IsVisible="{Binding ShowDetails}" MaxHeight="220" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="28,10,28,10">
@@ -146,11 +215,12 @@
             </ItemsControl>
           </ScrollViewer>
         </Border>
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="28,9,20,9">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="28,9,20,9">
           <ProgressBar Grid.Column="0" IsIndeterminate="True" IsVisible="{Binding Busy}" Width="64" Height="2" Margin="0,0,14,0" Foreground="{StaticResource AmberBrush}" Background="{StaticResource LineBrush}" VerticalAlignment="Center" />
           <TextBlock Grid.Column="1" Classes="stamp" Text="{Binding Status}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-          <TextBlock Grid.Column="2" Classes="stamp" Text="{Binding InstalledCount, StringFormat='{}{0} installed'}" Margin="0,0,18,0" VerticalAlignment="Center" />
-          <Button Grid.Column="3" Classes="link" Content="Details" Command="{Binding ToggleDetailsCommand}" />
+          <Button Grid.Column="2" Classes="link amber" Content="{Binding HubUpdateLabel}" Command="{Binding ApplyHubUpdateCommand}" IsVisible="{Binding HasHubUpdate}" Margin="0,0,10,0" />
+          <TextBlock Grid.Column="3" Classes="stamp" Text="{Binding InstalledCount, StringFormat='{}{0} installed'}" Margin="0,0,18,0" VerticalAlignment="Center" />
+          <Button Grid.Column="4" Classes="link" Content="Details" Command="{Binding ToggleDetailsCommand}" />
         </Grid>
       </StackPanel>
     </Border>

@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Forge.Hub.ViewModels;
 
 namespace Forge.Hub.Views;
 
@@ -27,6 +28,12 @@ public partial class MainWindow : Window
     {
         if (e.ClickCount == 2) { ToggleMaximize(); return; }
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e);
+    }
+
+    private void Scrim_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm) vm.ShowSettings = false;
+        e.Handled = true;
     }
 
     private void Minimize_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

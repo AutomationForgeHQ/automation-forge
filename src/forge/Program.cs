@@ -13,15 +13,16 @@ using Forge.Core.Projects;
 // the Pro backend and unlocks paid ones.
 
 var http = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
-http.DefaultRequestHeaders.UserAgent.ParseAdd("forge-cli/0.1");
+http.DefaultRequestHeaders.UserAgent.ParseAdd(AppInfo.UserAgent("cli"));
 var manifestClient = new ManifestClient(http);
 var state = new InstallState();
+var settings = Settings.Load();
 IEntitlementProvider entitlements = new AnonymousEntitlements();
 var installer = new Installer(http, state, entitlements, line => Console.WriteLine($"  {line}"));
 
 var engineOpt = new Option<string?>("--engine", "-e") { Description = "Engine version (5.8), full version, or path. Default: the newest found." };
 var projectOpt = new Option<string?>("--project", "-p") { Description = "Install into this project's Plugins folder instead of an engine." };
-var channelOpt = new Option<string>("--channel") { Description = "stable or nightly.", DefaultValueFactory = _ => "stable" };
+var channelOpt = new Option<string>("--channel") { Description = "stable or nightly. Default: the channel chosen in settings (see `forge channel`).", DefaultValueFactory = _ => settings.Channel };
 var offlineOpt = new Option<bool>("--offline") { Description = "Use the cached manifest only." };
 var forceOpt = new Option<bool>("--force") { Description = "Reinstall even if the same version is present." };
 var noElevate = new Option<bool>(Elevation.NoElevateFlag) { Hidden = true, Recursive = true };
@@ -186,6 +187,22 @@ foreach (var (verb, enabled) in new[] { ("enable", true), ("disable", false) })
     });
     root.Subcommands.Add(cmd);
 }
+
+// ── channel ───────────────────────────────────────────────────────────────
+var channelArg = new Argument<string?>("channel") { Description = "stable or nightly. Omit to show the current choice.", Arity = ArgumentArity.ZeroOrOne };
+var channelCmd = new Command("channel", "Show or set the release channel the hub and the CLI follow by default.");
+channelCmd.Arguments.Add(channelArg);
+channelCmd.SetAction(parse =>
+{
+    var wanted = parse.GetValue(channelArg);
+    if (wanted is null) { Console.WriteLine(settings.Channel); return 0; }
+    if (wanted is not (Settings.Stable or Settings.Nightly)) { Console.Error.WriteLine("The channel is stable or nightly."); return 2; }
+    settings.Channel = wanted;
+    settings.Save();
+    Console.WriteLine($"  channel: {wanted}  ({Settings.FilePath})");
+    return 0;
+});
+root.Subcommands.Add(channelCmd);
 
 // ── login ─────────────────────────────────────────────────────────────────
 var login = new Command("login", "Sign in to your Automation Forge account (unlocks paid plugins).");

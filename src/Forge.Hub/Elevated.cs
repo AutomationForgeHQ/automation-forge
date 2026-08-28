@@ -25,7 +25,7 @@ public static class Elevated
         {
             var verb = args.Length > 0 ? args[0] : "";
             var ids = new List<string>();
-            string? engine = null; var channel = "stable";
+            string? engine = null; var channel = Settings.Stable;
             for (var i = 1; i < args.Length; i++)
             {
                 if (args[i] == "--engine" && i + 1 < args.Length) engine = args[++i];
@@ -36,7 +36,7 @@ public static class Elevated
             var target = InstallTarget.Engine(e);
 
             using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("forge-hub/0.1 (elevated)");
+            http.DefaultRequestHeaders.UserAgent.ParseAdd(AppInfo.UserAgent("hub-elevated"));
             var state = new InstallState();
             var installer = new Installer(http, state, new AnonymousEntitlements(), Say);
 
