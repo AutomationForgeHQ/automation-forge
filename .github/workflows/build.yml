@@ -40,7 +40,8 @@ jobs:
         run: |
           $v = (& dist/cli/forge.exe --version | Out-String).Trim()
           if ($v -ne '${{ inputs.version }}') { throw "forge --version printed '$v', expected '${{ inputs.version }}'" }
-          & dist/hub/AutomationForgeHub.exe --version
+          # A windowed exe returns to the shell at once; wait for it, then read what it wrote.
+          Start-Process -FilePath dist/hub/AutomationForgeHub.exe -ArgumentList '--version' -Wait -NoNewWindow
           $h = (Get-Content hub-version.txt -Raw).Trim()
           if ($h -ne '${{ inputs.version }}') { throw "hub --version wrote '$h', expected '${{ inputs.version }}'" }
           Get-Content dist/SHA256SUMS.txt

@@ -32,7 +32,8 @@ public sealed class GitHubJsonCache
             if (cached is not null && File.Exists(_cacheEtag))
                 req.Headers.TryAddWithoutValidation("If-None-Match", await File.ReadAllTextAsync(_cacheEtag, ct));
             using var resp = await _http.SendAsync(req, ct);
-            if (resp.StatusCode == HttpStatusCode.NotModified && cached is not null) return (cached, true);
+            // 304 is the network confirming the copy is current — not "offline".
+            if (resp.StatusCode == HttpStatusCode.NotModified && cached is not null) return (cached, false);
             resp.EnsureSuccessStatusCode();
             var json = await resp.Content.ReadAsStringAsync(ct);
             Directory.CreateDirectory(Path.GetDirectoryName(_cacheJson)!);
