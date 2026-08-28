@@ -45,3 +45,25 @@ Shape, abridged:
 ```
 
 Versions are newest first per engine. A `fab` or `paid` plugin's package carries binaries and public headers only; an `open` plugin's carries its source. Until the product domain exists the manifest is served from this repository's raw URL.
+
+## The CLI and the hub
+
+Both live in this repository and share `src/Forge.Core` — manifest, release
+discovery, engines, installs, receipts, project descriptors.
+
+```
+forge engines                       the Unreal installations on this machine
+forge list [--engine 5.8]           every set and plugin, with what is installed
+forge install montageforge          a set, or a plugin, dependencies first
+forge install MotionForge --project C:\Games\MyGame   into a project instead
+forge update                        everything on a target to its latest
+forge uninstall MontageForge
+forge enable MontageForge --project C:\Games\MyGame   the .uproject edit
+```
+
+Free plugins need no account. A target under Program Files makes the CLI
+relaunch itself elevated once. The hub (`src/Forge.Hub`, Avalonia) is the same
+core with a window: sets, one action per plugin, engine picker, update counts;
+it relaunches itself headless and elevated for engine installs. Run either with
+`dotnet run --project src/forge -- …` or `dotnet run --project src/Forge.Hub`
+until published builds exist.
