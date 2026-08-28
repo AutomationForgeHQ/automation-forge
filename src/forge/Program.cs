@@ -208,14 +208,17 @@ channelCmd.SetAction(parse =>
 root.Subcommands.Add(channelCmd);
 
 // ── login / logout / whoami ───────────────────────────────────────────────
+var noBrowser = new Option<bool>("--no-browser") { Description = "Print the sign-in link instead of opening the browser (remote sessions)." };
 var login = new Command("login", "Sign in to your Automation Forge account in the browser; the session is kept on this machine.");
+login.Options.Add(noBrowser);
 login.SetAction(async (parse, ct) =>
 {
     if (!CloudConfig.Configured) { Console.Error.WriteLine("Accounts are not configured in this build."); return 2; }
     if (entitlements.IsSignedIn) { Console.WriteLine($"  already signed in as {entitlements.AccountLabel}. Run `forge logout` first to switch."); return 0; }
-    Console.WriteLine("  Opening your browser. Say yes there, and this window finishes by itself.");
+    var openBrowser = !parse.GetValue(noBrowser);
+    Console.WriteLine(openBrowser ? "  Opening your browser. Say yes there, and this window finishes by itself." : "  Open this link, say yes there, and this window finishes by itself:");
     var account = await Handshake.SignInAsync(
-        url => { Console.WriteLine($"  {url}"); System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); },
+        url => { Console.WriteLine($"  {url}"); if (openBrowser) System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); },
         TimeSpan.FromMinutes(5), ct);
     if (account is null) { Console.Error.WriteLine("  Nothing arrived in five minutes; nothing changed."); return 3; }
     entitlements.SignIn(account);

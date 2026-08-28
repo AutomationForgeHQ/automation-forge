@@ -46,24 +46,16 @@ public static class Handshake
                 }
                 if (method == "POST" && path.StartsWith("/connect", StringComparison.Ordinal))
                 {
-                    StoredAccount? account = null;
-                    try
+                    // The page submits a form (a top-level navigation, which browsers allow to the
+                    // loopback without a local-network prompt); a JSON body is accepted as well.
+                    var account = Parse(body, state);
+                    if (account is null)
                     {
-                        using var doc = JsonDocument.Parse(body);
-                        var root = doc.RootElement;
-                        if (root.TryGetProperty("state", out var s) && s.GetString() == state)
-                            account = new StoredAccount(
-                                root.GetProperty("uid").GetString() ?? "",
-                                root.TryGetProperty("email", out var e) ? e.GetString() ?? "" : "",
-                                root.GetProperty("refreshToken").GetString() ?? "");
-                    }
-                    catch (JsonException) { }
-                    if (account is null || account.Uid.Length == 0 || account.RefreshToken.Length == 0)
-                    {
-                        await WriteAsync(stream, "400 Bad Request", cors + "Content-Type: application/json\r\n", "{\"ok\":false}", cts.Token);
+                        await WriteAsync(stream, "400 Bad Request", cors + "Content-Type: text/plain\r\n", "That sign-in did not match what this hub asked for. Start again from the hub.", cts.Token);
                         continue;
                     }
-                    await WriteAsync(stream, "200 OK", cors + "Content-Type: application/json\r\n", "{\"ok\":true}", cts.Token);
+                    var back = $"{CloudConfig.AppUrl.TrimEnd('/')}/connect/?done=1";
+                    await WriteAsync(stream, "303 See Other", cors + $"Location: {back}\r\nContent-Type: text/plain\r\n", "Connected. You can close this tab.", cts.Token);
                     return account;
                 }
                 await WriteAsync(stream, "404 Not Found", cors + "Content-Type: text/plain\r\n", "Automation Forge hub is listening for its sign-in.", cts.Token);
@@ -77,6 +69,30 @@ public static class Handshake
         {
             listener.Stop();
         }
+    }
+
+    /// <summary>A form body or a JSON body, checked against the one-time state.</summary>
+    private static StoredAccount? Parse(string body, string state)
+    {
+        string? s, uid, email, token;
+        if (body.TrimStart().StartsWith('{'))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+                string? Get(string n) => root.TryGetProperty(n, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+                (s, uid, email, token) = (Get("state"), Get("uid"), Get("email"), Get("refreshToken"));
+            }
+            catch (JsonException) { return null; }
+        }
+        else
+        {
+            var form = System.Web.HttpUtility.ParseQueryString(body);
+            (s, uid, email, token) = (form["state"], form["uid"], form["email"], form["refreshToken"]);
+        }
+        if (s != state || string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(token)) return null;
+        return new StoredAccount(uid, email ?? "", token);
     }
 
     private static async Task<(string? method, string path, string body)> ReadRequestAsync(NetworkStream stream, CancellationToken ct)
