@@ -30,7 +30,7 @@ public sealed class FirebaseAuth(HttpClient http)
         return _idToken;
     }
 
-    public sealed record AccountInfo(string Uid, string Email, IReadOnlyList<string> Providers);
+    public sealed record AccountInfo(string Uid, string Email, IReadOnlyList<string> Providers, string? DisplayName, string? PhotoUrl);
 
     public async Task<AccountInfo?> LookupAsync(string idToken, CancellationToken ct = default)
     {
@@ -44,7 +44,8 @@ public sealed class FirebaseAuth(HttpClient http)
         if (u.TryGetProperty("providerUserInfo", out var infos))
             foreach (var i in infos.EnumerateArray())
                 if (i.TryGetProperty("providerId", out var id) && id.GetString() is { } p) providers.Add(p);
-        return new AccountInfo(u.GetProperty("localId").GetString() ?? "", u.TryGetProperty("email", out var e) ? e.GetString() ?? "" : "", providers);
+        string? Str(string name) => u.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(v.GetString()) ? v.GetString() : null;
+        return new AccountInfo(Str("localId") ?? "", Str("email") ?? "", providers, Str("displayName"), Str("photoUrl"));
     }
 
     public void Forget() { _idToken = null; }

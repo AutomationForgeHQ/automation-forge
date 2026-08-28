@@ -4,11 +4,19 @@ using System.Text.Json.Serialization;
 
 namespace Forge.Core.Cloud;
 
-/// <summary>What the hub keeps of a sign-in: who, and the token that renews the session.</summary>
+/// <summary>What the hub keeps of a sign-in: who, the token that renews the session, and the profile as last seen.</summary>
 public sealed record StoredAccount(
     [property: JsonPropertyName("uid")] string Uid,
     [property: JsonPropertyName("email")] string Email,
-    [property: JsonPropertyName("refreshToken")] string RefreshToken);
+    [property: JsonPropertyName("refreshToken")] string RefreshToken)
+{
+    [JsonPropertyName("displayName")] public string? DisplayName { get; init; }
+    [JsonPropertyName("photoUrl")] public string? PhotoUrl { get; init; }
+    [JsonPropertyName("providers")] public List<string> Providers { get; init; } = [];
+
+    /// <summary>A name to greet with: the display name, else the part of the email before the @.</summary>
+    [JsonIgnore] public string Name => !string.IsNullOrWhiteSpace(DisplayName) ? DisplayName : Email.Split('@')[0];
+}
 
 /// <summary>
 /// %LOCALAPPDATA%\AutomationForge\account.bin — the stored sign-in, protected

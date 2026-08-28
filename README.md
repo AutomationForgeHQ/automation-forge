@@ -74,7 +74,9 @@ forge login · logout · whoami       one account for the site, the hub and the 
 
 Free plugins need no account. Signing in opens the account site in the
 browser; when you say yes there, the session is handed to this machine over
-the loopback and kept under DPAPI — no password passes through the desktop. A target under Program Files makes the CLI
+the loopback and kept under DPAPI — no password passes through the desktop.
+Creating an account, signing the hub in, and how it all works:
+[docs/ACCOUNTS.md](docs/ACCOUNTS.md). A target under Program Files makes the CLI
 relaunch itself elevated once. The hub (`src/Forge.Hub`, Avalonia) is the same
 core with a window: sets, one action per plugin, engine picker, update counts;
 it relaunches itself headless and elevated for engine installs. It is resident:

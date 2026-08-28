@@ -125,6 +125,39 @@
       <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
     </Style>
 
+    <!-- The avatar button: no chrome of its own, the circle is the whole control. -->
+    <Style Selector="Button.avatar">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="17" />
+    </Style>
+    <Style Selector="Button.avatar:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <!-- Hover: the ring warms, like every other button's edge. -->
+    <Style Selector="Button.avatar:pointerover Ellipse.ring">
+      <Setter Property="Stroke" Value="{StaticResource AmberBrush}" />
+      <Setter Property="StrokeThickness" Value="1.5" />
+    </Style>
+    <Style Selector="Button.avatar:pointerover Path">
+      <Setter Property="Stroke" Value="{StaticResource BoneBrush}" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter">
+      <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="4" />
+    </Style>
+    <Style Selector="MenuFlyoutPresenter MenuItem">
+      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+      <Setter Property="Padding" Value="14,8" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+
     <!-- Choices in the settings panel: quiet controls, our type inside them. -->
     <Style Selector="RadioButton">
       <Setter Property="Padding" Value="10,0,0,0" />

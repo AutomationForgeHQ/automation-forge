@@ -46,6 +46,31 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
         AuthState.Clear();
     }
 
+    /// <summary>Ask Firebase who this session is now — name, photo, providers — and remember it. Null when signed out or unreachable.</summary>
+    public async Task<StoredAccount?> RefreshProfileAsync(CancellationToken ct = default)
+    {
+        if (_account is null) return null;
+        try
+        {
+            var token = await _auth.IdTokenAsync(_account.RefreshToken, ct);
+            var info = await _auth.LookupAsync(token, ct);
+            if (info is null) return _account;
+            _account = _account with
+            {
+                Email = info.Email.Length > 0 ? info.Email : _account.Email,
+                DisplayName = info.DisplayName ?? _account.DisplayName,
+                PhotoUrl = info.PhotoUrl ?? _account.PhotoUrl,
+                Providers = info.Providers.ToList(),
+            };
+            AuthState.Save(_account);
+            return _account;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return _account; // offline: what we remembered stands
+        }
+    }
+
     /// <summary>Plugin ids this account owns, from its record. Empty when signed out or nothing is recorded.</summary>
     public async Task<IReadOnlySet<string>> OwnedAsync(CancellationToken ct = default)
     {

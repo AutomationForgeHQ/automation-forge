@@ -48,7 +48,14 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _showSettings;
     [ObservableProperty] private int _updatesCount;
     [ObservableProperty] private int _installedCount;
-    [ObservableProperty] private string _accountLabel = "Sign in";
+    [ObservableProperty] private bool _showAccount;
+    [ObservableProperty] private Avalonia.Media.Imaging.Bitmap? _avatar;
+    [ObservableProperty] private string _accountName = "";
+    [ObservableProperty] private string _accountEmail = "";
+    [ObservableProperty] private string _accountProviders = "";
+    [ObservableProperty] private string _accountUid = "";
+    [ObservableProperty] private string _ownedLine = "";
+    public ObservableCollection<string> Owned { get; } = [];
     [ObservableProperty] private bool _isNightly;
     [ObservableProperty] private bool _checkForUpdates;
     [ObservableProperty] private bool _runInBackground;
@@ -94,7 +101,7 @@ public partial class MainViewModel : ViewModelBase
         _releases = new ReleaseDiscovery(_http);
         _hubReleases = new HubReleases(_http);
         _entitlements = new FirebaseEntitlements(_http);
-        _accountLabel = _entitlements.AccountLabel ?? "Sign in";
+        if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
         _isNightly = _settings.IsNightly;
         _checkForUpdates = _settings.CheckForUpdates;
         _runInBackground = _settings.RunInBackground;
@@ -177,14 +184,46 @@ public partial class MainViewModel : ViewModelBase
     }
 
     public bool IsSignedIn => _entitlements.IsSignedIn;
-    public string AccountLine => _entitlements.IsSignedIn ? $"Signed in as {_entitlements.AccountLabel}" : "Not signed in. Free sets need no account.";
+    public bool HasAvatar => Avatar is not null;
+    public bool ShowAnyPanel => ShowSettings || ShowAccount;
 
-    /// <summary>The header button: sign in when out; the account section when in.</summary>
-    [RelayCommand]
-    private async Task LoginAsync()
+    partial void OnAvatarChanged(Avalonia.Media.Imaging.Bitmap? value) => OnPropertyChanged(nameof(HasAvatar));
+    partial void OnShowSettingsChanged(bool value) { if (value) ShowAccount = false; OnPropertyChanged(nameof(ShowAnyPanel)); }
+    partial void OnShowAccountChanged(bool value) { if (value) ShowSettings = false; OnPropertyChanged(nameof(ShowAnyPanel)); }
+
+    [RelayCommand] private void OpenAccount() => ShowAccount = true;
+    [RelayCommand] private void CloseAccount() => ShowAccount = false;
+    public void ClosePanels() { ShowSettings = false; ShowAccount = false; }
+
+    /// <summary>The profile as Firebase knows it now, the photo, and what the account owns.</summary>
+    private async Task LoadProfileAsync()
     {
-        if (_entitlements.IsSignedIn) { ShowSettings = true; return; }
-        await SignInAsync();
+        var account = await _entitlements.RefreshProfileAsync() ?? _entitlements.Account;
+        if (account is null) return;
+        AccountName = account.Name;
+        AccountEmail = account.Email;
+        AccountUid = account.Uid;
+        AccountProviders = account.Providers.Count == 0 ? "email" : string.Join(", ", account.Providers.Select(p => p.Replace(".com", "")));
+        if (account.PhotoUrl is { } url)
+        {
+            try
+            {
+                var bytes = await _http.GetByteArrayAsync(url);
+                Avatar = new Avalonia.Media.Imaging.Bitmap(new MemoryStream(bytes));
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or ArgumentException) { Avatar = null; }
+        }
+        try
+        {
+            var owned = await _entitlements.OwnedAsync();
+            Owned.Clear();
+            foreach (var id in owned.OrderBy(x => x)) Owned.Add(id);
+            OwnedLine = owned.Count == 0 ? "Nothing paid yet. Every free set installs without an account." : $"{owned.Count} paid plugin{(owned.Count == 1 ? "" : "s")} on this account.";
+        }
+        catch (Exception ex) when (ex is EntitlementException or HttpRequestException)
+        {
+            OwnedLine = ex.Message;
+        }
     }
 
     [RelayCommand]
@@ -213,6 +252,7 @@ public partial class MainViewModel : ViewModelBase
         if (!_entitlements.IsSignedIn) return;
         var who = _entitlements.AccountLabel;
         _entitlements.SignOut();
+        ShowAccount = false;
         Say($"Signed out {who}.");
         AccountChanged();
     }
@@ -222,9 +262,9 @@ public partial class MainViewModel : ViewModelBase
 
     private void AccountChanged()
     {
-        AccountLabel = _entitlements.AccountLabel ?? "Sign in";
         OnPropertyChanged(nameof(IsSignedIn));
-        OnPropertyChanged(nameof(AccountLine));
+        if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
+        else { Avatar = null; AccountName = AccountEmail = AccountUid = AccountProviders = OwnedLine = ""; Owned.Clear(); }
         Rebuild();
     }
 

@@ -74,25 +74,33 @@ public static class Handshake
     /// <summary>A form body or a JSON body, checked against the one-time state.</summary>
     private static StoredAccount? Parse(string body, string state)
     {
-        string? s, uid, email, token;
-        if (body.TrimStart().StartsWith('{'))
+        Func<string, string?> get;
+        JsonDocument? doc = null;
+        try
         {
-            try
+            if (body.TrimStart().StartsWith('{'))
             {
-                using var doc = JsonDocument.Parse(body);
+                doc = JsonDocument.Parse(body);
                 var root = doc.RootElement;
-                string? Get(string n) => root.TryGetProperty(n, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
-                (s, uid, email, token) = (Get("state"), Get("uid"), Get("email"), Get("refreshToken"));
+                get = n => root.TryGetProperty(n, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
             }
-            catch (JsonException) { return null; }
+            else
+            {
+                var form = System.Web.HttpUtility.ParseQueryString(body);
+                get = n => form[n];
+            }
+            var (s, uid, email, token) = (get("state"), get("uid"), get("email"), get("refreshToken"));
+            if (s != state || string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(token)) return null;
+            return new StoredAccount(uid, email ?? "", token)
+            {
+                DisplayName = Blank(get("displayName")),
+                PhotoUrl = Blank(get("photoUrl")),
+            };
         }
-        else
-        {
-            var form = System.Web.HttpUtility.ParseQueryString(body);
-            (s, uid, email, token) = (form["state"], form["uid"], form["email"], form["refreshToken"]);
-        }
-        if (s != state || string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(token)) return null;
-        return new StoredAccount(uid, email ?? "", token);
+        catch (JsonException) { return null; }
+        finally { doc?.Dispose(); }
+
+        static string? Blank(string? v) => string.IsNullOrWhiteSpace(v) ? null : v;
     }
 
     private static async Task<(string? method, string path, string body)> ReadRequestAsync(NetworkStream stream, CancellationToken ct)

@@ -61,7 +61,25 @@
           </ComboBox>
           <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshCommand}" />
           <Button Classes="ghost" Content="Settings" Command="{Binding ToggleSettingsCommand}" />
-          <Button Classes="primary" Content="{Binding AccountLabel}" Command="{Binding LoginCommand}" />
+          <Button Classes="primary" Content="Sign in" Command="{Binding SignInCommand}" IsVisible="{Binding !IsSignedIn}" />
+          <!-- Signed in: the avatar, and a small menu under it. -->
+          <Button Classes="avatar" IsVisible="{Binding IsSignedIn}" ToolTip.Tip="{Binding AccountEmail}" AutomationProperties.Name="Account menu">
+            <Button.Flyout>
+              <MenuFlyout Placement="BottomEdgeAlignedRight">
+                <MenuItem Header="Account" Command="{Binding OpenAccountCommand}" />
+                <MenuItem Header="Sign out" Command="{Binding SignOutCommand}" />
+              </MenuFlyout>
+            </Button.Flyout>
+            <Panel Width="34" Height="34">
+              <Ellipse Classes="ring" Fill="{StaticResource PlateBrush}" Stroke="{StaticResource LineStrongBrush}" StrokeThickness="1" />
+              <Ellipse IsVisible="{Binding HasAvatar}">
+                <Ellipse.Fill>
+                  <ImageBrush Source="{Binding Avatar}" Stretch="UniformToFill" />
+                </Ellipse.Fill>
+              </Ellipse>
+              <Path IsVisible="{Binding !HasAvatar}" Data="M 7.5 8.5 A 4.5 4.5 0 1 1 16.5 8.5 A 4.5 4.5 0 1 1 7.5 8.5 M 3.5 23 C 3.5 18.5 7.3 15.5 12 15.5 C 16.7 15.5 20.5 18.5 20.5 23" Stroke="{StaticResource MuteBrush}" StrokeThickness="1.4" Fill="Transparent" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Panel>
+          </Button>
         </WrapPanel>
         <Panel />
       </DockPanel>
@@ -135,8 +153,64 @@
         </ScrollViewer>
       </Grid>
 
-      <!-- Settings: a scrim and a panel. Click the scrim to leave. -->
-      <Border IsVisible="{Binding ShowSettings}" Background="#B30A0A0B" PointerPressed="Scrim_PointerPressed" />
+      <!-- Panels slide over from the right, behind one scrim. Click the scrim to leave. -->
+      <Border IsVisible="{Binding ShowAnyPanel}" Background="#B30A0A0B" PointerPressed="Scrim_PointerPressed" />
+
+      <!-- The account: who, how, and what is theirs. -->
+      <Border IsVisible="{Binding ShowAccount}" HorizontalAlignment="Right" Width="400"
+              Background="{StaticResource PlateBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1,0,0,0">
+        <ScrollViewer>
+          <StackPanel Spacing="26" Margin="28,22,28,28">
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Classes="link" Content="Close" Command="{Binding CloseAccountCommand}" />
+              <TextBlock Classes="label" Text="ACCOUNT" VerticalAlignment="Center" />
+            </DockPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="16">
+              <Panel Width="64" Height="64">
+                <Ellipse Fill="{StaticResource InkBrush}" Stroke="{StaticResource LineStrongBrush}" StrokeThickness="1" />
+                <Ellipse IsVisible="{Binding HasAvatar}">
+                  <Ellipse.Fill>
+                    <ImageBrush Source="{Binding Avatar}" Stretch="UniformToFill" />
+                  </Ellipse.Fill>
+                </Ellipse>
+                <Path IsVisible="{Binding !HasAvatar}" Data="M 7.5 8.5 A 4.5 4.5 0 1 1 16.5 8.5 A 4.5 4.5 0 1 1 7.5 8.5 M 3.5 23 C 3.5 18.5 7.3 15.5 12 15.5 C 16.7 15.5 20.5 18.5 20.5 23" Stroke="{StaticResource MuteBrush}" StrokeThickness="1.2" Fill="Transparent" Width="24" Height="24" Stretch="Uniform" Margin="16" />
+              </Panel>
+              <StackPanel Spacing="4" VerticalAlignment="Center">
+                <TextBlock Classes="display" Text="{Binding AccountName}" FontSize="20" />
+                <TextBlock Classes="stamp" Text="{Binding AccountEmail}" />
+              </StackPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="8">
+              <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto" RowSpacing="8">
+                <TextBlock Classes="stamp" Text="Signs in with" />
+                <TextBlock Grid.Column="1" Classes="mono" FontSize="12" Text="{Binding AccountProviders}" />
+                <TextBlock Grid.Row="1" Classes="stamp" Text="Account id" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Classes="stamp" Text="{Binding AccountUid}" TextTrimming="CharacterEllipsis" />
+              </Grid>
+            </StackPanel>
+
+            <StackPanel Spacing="10">
+              <TextBlock Classes="label" Text="YOURS" />
+              <TextBlock Classes="stamp" Text="{Binding OwnedLine}" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding Owned}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Classes="mono" FontSize="13" Text="{Binding}" Margin="0,2" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Classes="ghost" Content="Manage on the web" Command="{Binding OpenAccountPageCommand}" />
+              <Button Classes="ghost" Content="Sign out" Command="{Binding SignOutCommand}" />
+            </StackPanel>
+            <TextBlock Classes="stamp" Text="One account for the site, the hub and the command line." TextWrapping="Wrap" />
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
       <Border IsVisible="{Binding ShowSettings}" HorizontalAlignment="Right" Width="400"
               Background="{StaticResource PlateBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1,0,0,0">
         <ScrollViewer>
@@ -145,17 +219,6 @@
               <Button DockPanel.Dock="Right" Classes="link" Content="Close" Command="{Binding ToggleSettingsCommand}" />
               <TextBlock Classes="label" Text="SETTINGS" VerticalAlignment="Center" />
             </DockPanel>
-
-            <StackPanel Spacing="10">
-              <TextBlock Classes="label" Text="ACCOUNT" />
-              <TextBlock Classes="stamp" Text="{Binding AccountLine}" Foreground="{StaticResource BoneBrush}" TextWrapping="Wrap" />
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <Button Classes="primary" Content="Sign in" Command="{Binding SignInCommand}" IsVisible="{Binding !IsSignedIn}" />
-                <Button Classes="ghost" Content="Sign out" Command="{Binding SignOutCommand}" IsVisible="{Binding IsSignedIn}" />
-                <Button Classes="ghost" Content="Account page" Command="{Binding OpenAccountPageCommand}" />
-              </StackPanel>
-              <TextBlock Classes="stamp" Text="One account for the site, the hub and the command line. Signing in opens the browser for a moment." TextWrapping="Wrap" />
-            </StackPanel>
 
             <StackPanel Spacing="12">
               <TextBlock Classes="label" Text="CHANNEL" />

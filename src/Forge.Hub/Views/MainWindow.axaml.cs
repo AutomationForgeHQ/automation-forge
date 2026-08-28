@@ -32,7 +32,7 @@ public partial class MainWindow : Window
 
     private void Scrim_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (DataContext is MainViewModel vm) vm.ShowSettings = false;
+        if (DataContext is MainViewModel vm) vm.ClosePanels();
         e.Handled = true;
     }
 
