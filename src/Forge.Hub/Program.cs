@@ -34,6 +34,13 @@ sealed class Program
             return 0;
         }
 
+        // The installer, before it replaces the files: ask the running hub to quit and wait for it.
+        if (args.Contains("--quit"))
+        {
+            SingleInstance.SignalQuit();
+            return SingleInstance.WaitForExit(TimeSpan.FromSeconds(10)) ? 0 : 1;
+        }
+
         // One hub per session: a second launch raises the first one's window and leaves.
         using var mutex = new Mutex(true, SingleInstance.MutexName, out var first);
         if (!first)

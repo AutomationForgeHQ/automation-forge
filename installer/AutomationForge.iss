@@ -55,7 +55,9 @@ WizardStyle=modern
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
-CloseApplications=yes
+; A hub in the tray has no window to close, so the Restart Manager cannot ask it;
+; PrepareToInstall below asks it ourselves (--quit) and stops it if it will not.
+CloseApplications=no
 RestartApplications=no
 ChangesEnvironment=yes
 
@@ -114,6 +116,38 @@ function IsUpgrade: Boolean;
 begin
   Result := RegKeyExists(HKEY_CURRENT_USER,
     'Software\Microsoft\Windows\CurrentVersion\Uninstall\{' + '{#AppGuid}' + '}_is1');
+end;
+
+function IsHubRunning: Boolean;
+var
+  ResultCode: Integer;
+begin
+  { find exits 0 when tasklist listed the image. }
+  Result := Exec('cmd.exe', '/c tasklist /FI "IMAGENAME eq {#HubExe}" | find /I "{#HubExe}" >nul',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0);
+end;
+
+{ The running hub may be in the tray with no window; ask it to quit, then insist. }
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Exe: string;
+  ResultCode, I: Integer;
+begin
+  Result := '';
+  if not IsHubRunning then exit;
+  Exe := ExpandConstant('{app}\{#HubExe}');
+  if FileExists(Exe) then
+    Exec(Exe, '--quit', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  for I := 1 to 20 do
+  begin
+    if not IsHubRunning then break;
+    Sleep(500);
+  end;
+  if IsHubRunning then
+  begin
+    Exec('taskkill.exe', '/F /IM {#HubExe}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Sleep(1000);
+  end;
 end;
 
 procedure RemoveFromPath(Dir: string);

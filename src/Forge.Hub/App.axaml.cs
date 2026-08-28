@@ -45,6 +45,7 @@ public partial class App : Application
 
             SetupTray();
             SingleInstance.ListenForShow(() => Dispatcher.UIThread.Post(ShowWindow));
+            SingleInstance.ListenForQuit(() => Dispatcher.UIThread.Post(Quit));
             Toasts.OnActivated(() => Dispatcher.UIThread.Post(ShowWindow));
 
             if (!(StartHidden && _settings.RunInBackground)) ShowWindow();
@@ -74,7 +75,8 @@ public partial class App : Application
 
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
-        if (_quitting || e.CloseReason == WindowCloseReason.ApplicationShutdown || !_settings.RunInBackground) return;
+        // Our own X hides to the tray; the application, the OS or an installer closing us is a real close.
+        if (_quitting || e.CloseReason is WindowCloseReason.ApplicationShutdown or WindowCloseReason.OSShutdown || !_settings.RunInBackground) return;
         e.Cancel = true;
         _window?.Hide();
     }
