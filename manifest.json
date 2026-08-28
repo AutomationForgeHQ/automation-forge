@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-28T10:38:37Z",
+  "generatedAt": "2026-08-28T11:09:02Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -70,7 +70,20 @@
       "distribution": "fab",
       "dependencies": [],
       "source": null,
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforge-v0.1.0/AutomationForge-0.1.0-UE5.8-Win64.zip",
+          "size": 202332,
+          "sha256": "cbc11184f0fdeffa4911bf2118b54ed25884aa6eb7e83920b568adbaf10683e0",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforge-v0.1.0/AutomationForge-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T11:01:34Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforge-v0.1.0"
+        }
+      ]
     },
     {
       "id": "AutomationForgePipelines",
@@ -81,7 +94,20 @@
         "AutomationForge"
       ],
       "source": null,
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgepipelines-v0.1.0/AutomationForgePipelines-0.1.0-UE5.8-Win64.zip",
+          "size": 776713,
+          "sha256": "3cab4c3fcf403bc685817cd33658387708ffdcda7b67efe2498ee2f4ed7f69d9",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgepipelines-v0.1.0/AutomationForgePipelines-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:51:28Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgepipelines-v0.1.0"
+        }
+      ]
     },
     {
       "id": "AutomationForgeToolset",
@@ -92,8 +118,21 @@
         "AutomationForge",
         "AutomationForgePipelines"
       ],
-      "source": "https://github.com/AutomationForgeHQ/AutomationForgeToolset",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgetoolset-v0.1.0/AutomationForgeToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 135868,
+          "sha256": "100f8c2bb8a735a18383357ea53822c4344ba7a71ce03e564b830080bb85bb4e",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgetoolset-v0.1.0/AutomationForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:40:33Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgetoolset-v0.1.0"
+        }
+      ]
     },
     {
       "id": "FaceForge",
@@ -101,7 +140,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": "https://github.com/AutomationForgeHQ/FaceForge",
+      "source": null,
       "versions": [
         {
           "version": "0.1.0",
@@ -125,8 +164,21 @@
       "dependencies": [
         "FaceForge"
       ],
-      "source": "https://github.com/AutomationForgeHQ/FaceForgeMetaHuman",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgemetahuman-v0.1.0/FaceForgeMetaHuman-0.1.0-UE5.8-Win64.zip",
+          "size": 83556,
+          "sha256": "4fdd2ba50f2e4d728c276899d552fbf2e12d10ac8a5c4e0c137ee0726589b936",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgemetahuman-v0.1.0/FaceForgeMetaHuman-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:44:46Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgemetahuman-v0.1.0"
+        }
+      ]
     },
     {
       "id": "FaceForgeToolset",
@@ -136,8 +188,21 @@
       "dependencies": [
         "FaceForge"
       ],
-      "source": "https://github.com/AutomationForgeHQ/FaceForgeToolset",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgetoolset-v0.1.0/FaceForgeToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 116958,
+          "sha256": "b4178bbb8269cbe5fdbcb88532417319a2c36103b2bcb706c4ee2eb61d702f6c",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgetoolset-v0.1.0/FaceForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:59:27Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgetoolset-v0.1.0"
+        }
+      ]
     },
     {
       "id": "MeshWeightRemap",
@@ -146,7 +211,20 @@
       "distribution": "fab",
       "dependencies": [],
       "source": null,
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshweightremap-v0.1.0/MeshWeightRemap-0.1.0-UE5.8-Win64.zip",
+          "size": 149587,
+          "sha256": "1faa2ecf495131f24259e11aad1505c00deeef077a0363d364d0fa16d852a5f2",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshweightremap-v0.1.0/MeshWeightRemap-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T11:03:40Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshweightremap-v0.1.0"
+        }
+      ]
     },
     {
       "id": "MeshWeightRemapToolset",
@@ -156,8 +234,21 @@
       "dependencies": [
         "MeshWeightRemap"
       ],
-      "source": "https://github.com/AutomationForgeHQ/MeshWeightRemapToolset",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshweightremaptoolset-v0.1.0/MeshWeightRemapToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 69129,
+          "sha256": "7ef9a44e9bafa2ef76bc82644c190221f9d4148160e271f2ab0cd6ac27e494f7",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshweightremaptoolset-v0.1.0/MeshWeightRemapToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:42:40Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshweightremaptoolset-v0.1.0"
+        }
+      ]
     },
     {
       "id": "MontageForge",
@@ -165,7 +256,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": "https://github.com/AutomationForgeHQ/MontageForge",
+      "source": null,
       "versions": [
         {
           "version": "0.1.0",
@@ -189,8 +280,21 @@
       "dependencies": [
         "MontageForge"
       ],
-      "source": "https://github.com/AutomationForgeHQ/MontageForgeToolset",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforgetoolset-v0.1.0/MontageForgeToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 67442,
+          "sha256": "1efb3abcca38a4d6b72ae03fa12827036fe7a1f9f9392b3a1fecc5662c92e93f",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforgetoolset-v0.1.0/MontageForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:55:41Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/montageforgetoolset-v0.1.0"
+        }
+      ]
     },
     {
       "id": "MotionForge",
@@ -198,7 +302,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": "https://github.com/AutomationForgeHQ/MotionForge",
+      "source": null,
       "versions": [
         {
           "version": "0.1.0",
@@ -223,7 +327,20 @@
         "MotionForge"
       ],
       "source": null,
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgekimodo-v0.1.0/MotionForgeKimodo-0.1.0-UE5.8-Win64.zip",
+          "size": 464640,
+          "sha256": "708883ff0e9acd20bc8078d3b47248da5bb905f76dcc77ca57fb75b467a29919",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgekimodo-v0.1.0/MotionForgeKimodo-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T11:06:05Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgekimodo-v0.1.0"
+        }
+      ]
     },
     {
       "id": "MotionForgeKimodoToolset",
@@ -233,8 +350,21 @@
       "dependencies": [
         "MotionForgeKimodo"
       ],
-      "source": "https://github.com/AutomationForgeHQ/MotionForgeKimodoToolset",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgekimodotoolset-v0.1.0/MotionForgeKimodoToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 111696,
+          "sha256": "4056fd67e7b1608f005a027f59e38c3960aafd28b26a53ea28edd2b1d38a1351",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgekimodotoolset-v0.1.0/MotionForgeKimodoToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:53:36Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgekimodotoolset-v0.1.0"
+        }
+      ]
     },
     {
       "id": "MotionForgeQuality",
@@ -245,7 +375,20 @@
         "MotionForge"
       ],
       "source": null,
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequality-v0.1.0/MotionForgeQuality-0.1.0-UE5.8-Win64.zip",
+          "size": 158584,
+          "sha256": "3ab29b271519fb45dfe270be6fc14ac5bcca00d445909d259dde1f747998ce27",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequality-v0.1.0/MotionForgeQuality-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T11:08:26Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgequality-v0.1.0"
+        }
+      ]
     },
     {
       "id": "MotionForgeQualityToolset",
@@ -255,8 +398,21 @@
       "dependencies": [
         "MotionForgeQuality"
       ],
-      "source": "https://github.com/AutomationForgeHQ/MotionForgeQualityToolset",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequalitytoolset-v0.1.0/MotionForgeQualityToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 60096,
+          "sha256": "4d22b1a5748b2b98be91c280278ecd9852c9517801a27d2809034b66dd03fada",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequalitytoolset-v0.1.0/MotionForgeQualityToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:58:00Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgequalitytoolset-v0.1.0"
+        }
+      ]
     },
     {
       "id": "MotionForgeToolset",
@@ -266,8 +422,21 @@
       "dependencies": [
         "MotionForge"
       ],
-      "source": "https://github.com/AutomationForgeHQ/MotionForgeToolset",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgetoolset-v0.1.0/MotionForgeToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 139897,
+          "sha256": "0285a8956d627dcedd51d50bdff555d88fc8abbaa51e029f071948bb28af50d8",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgetoolset-v0.1.0/MotionForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:47:03Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgetoolset-v0.1.0"
+        }
+      ]
     },
     {
       "id": "SpeechForge",
@@ -275,7 +444,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": "https://github.com/AutomationForgeHQ/SpeechForge",
+      "source": null,
       "versions": [
         {
           "version": "0.1.0",
@@ -299,8 +468,21 @@
       "dependencies": [
         "SpeechForge"
       ],
-      "source": "https://github.com/AutomationForgeHQ/SpeechForgeToolset",
-      "versions": []
+      "source": null,
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgetoolset-v0.1.0/SpeechForgeToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 121016,
+          "sha256": "9cbd0263fbbbd13c3fa25be900dccfdd0e6ca136205849aa81b5f4b5283d70d5",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgetoolset-v0.1.0/SpeechForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-28T10:49:12Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgetoolset-v0.1.0"
+        }
+      ]
     }
   ]
 }
