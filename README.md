@@ -8,7 +8,7 @@ Built by Blackcode SA. Documentation ships with the first public release.
 
 ## The manifest
 
-[`manifest.json`](manifest.json) is the one document the hub, the `forge` CLI and the website read to know what exists and where to get it. It is generated, never edited by hand:
+[`manifest.json`](manifest.json) is the one document the hub, the `forge` CLI and the website read to know what exists and where to get it. It is generated, never edited by hand — every plugin release regenerates it from CI, and by hand it is:
 
 ```
 python tools/build_manifest.py --forge <path to the forge monorepo>
