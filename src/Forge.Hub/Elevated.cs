@@ -49,7 +49,7 @@ public static class Elevated
             var (manifest, _) = new ManifestClient(http).GetAsync().GetAwaiter().GetResult();
             new ReleaseDiscovery(http).MergeIntoAsync(manifest).GetAwaiter().GetResult();
             var failures = 0;
-            foreach (var id in ids)
+            foreach (var id in manifest.WithHubPlugin(ids, target.Kind))
             {
                 var p = manifest.Plugin(id);
                 if (p is null) { Say($"unknown plugin: {id}"); failures++; continue; }

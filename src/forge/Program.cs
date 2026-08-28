@@ -92,6 +92,8 @@ install.SetAction(async (parse, ct) =>
         else { Console.Error.WriteLine($"Unknown plugin or set: {name}"); return 2; }
     }
     var order = wanted.SelectMany(manifest.Closure).DistinctBy(p => p.Id, StringComparer.OrdinalIgnoreCase).ToList();
+    // An engine install carries the editor plugin (menu, update badge) whenever the manifest has it.
+    order = manifest.WithHubPlugin(order.Select(p => p.Id), target.target.Kind).Select(id => manifest.Plugin(id)!).ToList();
 
     if (!Installer.IsWritable(target.target.Root) && !parse.GetValue(noElevate) && !Elevation.IsElevated())
     {

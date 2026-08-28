@@ -20,6 +20,22 @@ public sealed class Manifest
         Sets.FirstOrDefault(s => string.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase)
                               || string.Equals(s.Name, id, StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>The editor plugin that ships with every engine install: the menu, the update badge, the Fab bridge.</summary>
+    public const string HubPlugin = "AutomationForgeHub";
+
+    /// <summary>
+    /// An engine install always carries the editor plugin, first, when the
+    /// manifest knows it. A project install does not: the project's owner
+    /// decides what goes into the project.
+    /// </summary>
+    public IReadOnlyList<string> WithHubPlugin(IEnumerable<string> ids, string targetKind)
+    {
+        var list = ids.ToList();
+        if (targetKind == "engine" && Plugin(HubPlugin) is not null && !list.Contains(HubPlugin, StringComparer.OrdinalIgnoreCase))
+            list.Insert(0, HubPlugin);
+        return list;
+    }
+
     /// <summary>The plugin plus everything it depends on, dependencies first, no duplicates.</summary>
     public IReadOnlyList<PluginInfo> Closure(PluginInfo plugin)
     {

@@ -281,6 +281,7 @@ public partial class MainViewModel : ViewModelBase
     private async Task RunAsync(string[] ids, bool uninstall = false)
     {
         if (_manifest is null || Target is null || SelectedEngine is null) return;
+        if (!uninstall) ids = _manifest.WithHubPlugin(ids, Target.Kind).ToArray();
         Busy = true;
         try
         {
