@@ -1,0 +1,107 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Forge.Hub.App"
+             xmlns:local="using:Forge.Hub"
+             RequestedThemeVariant="Dark">
+
+  <Application.DataTemplates>
+    <local:ViewLocator />
+  </Application.DataTemplates>
+
+  <!-- The website's tokens, verbatim (website/app/globals.css). -->
+  <Application.Resources>
+    <Color x:Key="Ink">#0a0a0b</Color>
+    <Color x:Key="Plate">#131317</Color>
+    <Color x:Key="Line">#26262b</Color>
+    <Color x:Key="LineStrong">#3a3a42</Color>
+    <Color x:Key="Bone">#edede9</Color>
+    <Color x:Key="Mute">#8a8a93</Color>
+    <Color x:Key="Dim">#7e7e87</Color>
+    <Color x:Key="Amber">#e39a2b</Color>
+    <Color x:Key="AmberDim">#8a6320</Color>
+
+    <SolidColorBrush x:Key="InkBrush" Color="{StaticResource Ink}" />
+    <SolidColorBrush x:Key="PlateBrush" Color="{StaticResource Plate}" />
+    <SolidColorBrush x:Key="LineBrush" Color="{StaticResource Line}" />
+    <SolidColorBrush x:Key="LineStrongBrush" Color="{StaticResource LineStrong}" />
+    <SolidColorBrush x:Key="BoneBrush" Color="{StaticResource Bone}" />
+    <SolidColorBrush x:Key="MuteBrush" Color="{StaticResource Mute}" />
+    <SolidColorBrush x:Key="DimBrush" Color="{StaticResource Dim}" />
+    <SolidColorBrush x:Key="AmberBrush" Color="{StaticResource Amber}" />
+
+    <!-- Archivo and IBM Plex Mono once the font files are embedded; the fallbacks keep the proportions honest. -->
+    <FontFamily x:Key="DisplayFont">Archivo, Segoe UI, Inter, sans-serif</FontFamily>
+    <FontFamily x:Key="MonoFont">IBM Plex Mono, Cascadia Mono, Consolas, monospace</FontFamily>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+
+    <Style Selector="Window">
+      <Setter Property="Background" Value="{StaticResource InkBrush}" />
+      <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
+    </Style>
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+    </Style>
+    <Style Selector="TextBlock.display">
+      <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="LetterSpacing" Value="-0.3" />
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+      <Setter Property="FontSize" Value="10.5" />
+      <Setter Property="LetterSpacing" Value="1.4" />
+      <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
+    </Style>
+    <Style Selector="TextBlock.stamp">
+      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+      <Setter Property="FontSize" Value="11.5" />
+      <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
+    </Style>
+    <Style Selector="TextBlock.mono">
+      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="Button">
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="16,9" />
+      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+      <Setter Property="FontSize" Value="11.5" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource BoneBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource BoneBrush}" />
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AmberBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
+    </Style>
+    <Style Selector="Button.primary:disabled /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
+    </Style>
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    </Style>
+    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+    </Style>
+
+    <Style Selector="ComboBox">
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+    </Style>
+  </Application.Styles>
+</Application>

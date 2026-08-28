@@ -1,0 +1,114 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Forge.Hub.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="760"
+        x:Class="Forge.Hub.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Width="1100" Height="760" MinWidth="820" MinHeight="520"
+        Background="{StaticResource InkBrush}"
+        Title="Automation Forge">
+
+  <Design.DataContext>
+    <vm:MainViewModel />
+  </Design.DataContext>
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="0">
+
+    <!-- Header: wordmark, engine, manifest stamp, account -->
+    <Border Grid.Row="0" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="32,22,32,18">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <Path Data="M 10 0 L 20 18 L 0 18 Z" Stroke="{StaticResource AmberBrush}" StrokeThickness="1.5" Fill="Transparent" Width="20" Height="18" />
+          <TextBlock Classes="display" Text="Automation Forge" FontSize="18" VerticalAlignment="Center" />
+          <TextBlock Classes="stamp" Text="{Binding ManifestStamp}" VerticalAlignment="Center" Margin="12,0,0,0" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="0,0,20,0">
+          <TextBlock Classes="label" Text="Engine" VerticalAlignment="Center" />
+          <ComboBox ItemsSource="{Binding Engines}" SelectedItem="{Binding SelectedEngine}" MinWidth="300">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" FontFamily="{StaticResource MonoFont}" FontSize="12" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+
+        <Button Grid.Column="3" Classes="ghost" Content="Refresh" Command="{Binding RefreshCommand}" Margin="0,0,10,0" />
+        <Button Grid.Column="4" Classes="primary" Content="{Binding AccountLabel}" Command="{Binding LoginCommand}" />
+      </Grid>
+    </Border>
+
+    <!-- Sets and plugins -->
+    <ScrollViewer Grid.Row="1" Padding="32,8,32,8">
+      <StackPanel>
+        <TextBlock Classes="stamp" Margin="0,16,0,0"
+                   Text="Free on your own hardware. Open where it counts. Sign in only to download what you have bought." />
+
+        <ItemsControl ItemsSource="{Binding Sets}" Margin="0,18,0,0">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:SetGroup">
+              <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,22,0,26">
+                <StackPanel>
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="display" Text="{Binding Name}" FontSize="26" />
+                    <Button Grid.Column="1" Classes="ghost" Content="Install set" Command="{Binding InstallSetCommand}" VerticalAlignment="Center" />
+                  </Grid>
+
+                  <ItemsControl ItemsSource="{Binding Plugins}" Margin="0,14,0,0">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:PluginRow">
+                        <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,12">
+                          <Grid ColumnDefinitions="3*,2*,2*,Auto,Auto" VerticalAlignment="Center">
+                            <StackPanel Grid.Column="0" Spacing="3">
+                              <TextBlock Classes="display" Text="{Binding Id}" FontSize="15" />
+                              <TextBlock Classes="stamp" Text="{Binding Meta}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                              <TextBlock Classes="label" Text="Latest" />
+                              <TextBlock Classes="mono" Text="{Binding LatestLabel}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="3" VerticalAlignment="Center">
+                              <TextBlock Classes="label" Text="Installed" />
+                              <TextBlock Classes="mono" Text="{Binding InstalledLabel}" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="3" Classes="stamp" Text="{Binding Status}" VerticalAlignment="Center" Margin="0,0,18,0" />
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                              <Button Classes="ghost" Content="Remove" Command="{Binding UninstallCommand}" IsVisible="{Binding CanUninstall}" />
+                              <Button Classes="primary" Content="{Binding ActionLabel}" Command="{Binding ActCommand}" MinWidth="96" />
+                            </StackPanel>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- Log -->
+    <Border Grid.Row="2" Background="{StaticResource PlateBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="32,12,32,14" Height="150">
+      <Grid RowDefinitions="Auto,*">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Classes="label" Text="Log" />
+          <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding Busy}" Width="120" Height="3" Foreground="{StaticResource AmberBrush}" Background="{StaticResource LineBrush}" />
+        </Grid>
+        <ScrollViewer Grid.Row="1" Margin="0,8,0,0">
+          <ItemsControl ItemsSource="{Binding Log}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="x:String">
+                <TextBlock Classes="mono" Text="{Binding}" FontSize="12" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>
