@@ -8,7 +8,7 @@
     <local:ViewLocator />
   </Application.DataTemplates>
 
-  <!-- The website's tokens, verbatim (website/app/globals.css). -->
+  <!-- The website's tokens, verbatim (website/app/globals.css), and its two typefaces, embedded. -->
   <Application.Resources>
     <Color x:Key="Ink">#0a0a0b</Color>
     <Color x:Key="Plate">#131317</Color>
@@ -29,9 +29,8 @@
     <SolidColorBrush x:Key="DimBrush" Color="{StaticResource Dim}" />
     <SolidColorBrush x:Key="AmberBrush" Color="{StaticResource Amber}" />
 
-    <!-- Archivo and IBM Plex Mono once the font files are embedded; the fallbacks keep the proportions honest. -->
-    <FontFamily x:Key="DisplayFont">Archivo, Segoe UI, Inter, sans-serif</FontFamily>
-    <FontFamily x:Key="MonoFont">IBM Plex Mono, Cascadia Mono, Consolas, monospace</FontFamily>
+    <FontFamily x:Key="DisplayFont">avares://Forge.Hub/Assets/Fonts#Archivo</FontFamily>
+    <FontFamily x:Key="MonoFont">avares://Forge.Hub/Assets/Fonts#IBM Plex Mono</FontFamily>
   </Application.Resources>
 
   <Application.Styles>
@@ -43,16 +42,16 @@
     </Style>
     <Style Selector="TextBlock">
       <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+      <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
     </Style>
     <Style Selector="TextBlock.display">
-      <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
       <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="LetterSpacing" Value="-0.3" />
+      <Setter Property="LetterSpacing" Value="-0.4" />
     </Style>
     <Style Selector="TextBlock.label">
       <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
       <Setter Property="FontSize" Value="10.5" />
-      <Setter Property="LetterSpacing" Value="1.4" />
+      <Setter Property="LetterSpacing" Value="1.6" />
       <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
     </Style>
     <Style Selector="TextBlock.stamp">
@@ -65,9 +64,10 @@
       <Setter Property="FontSize" Value="13" />
     </Style>
 
+    <!-- Buttons: hairline rectangles, mono labels, amber on hover. -->
     <Style Selector="Button">
       <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Padding" Value="16,9" />
+      <Setter Property="Padding" Value="14,8" />
       <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
       <Setter Property="FontSize" Value="11.5" />
       <Setter Property="BorderThickness" Value="1" />
@@ -80,28 +80,65 @@
     <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="{StaticResource AmberBrush}" />
       <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
     </Style>
     <Style Selector="Button.primary:disabled /template/ ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+      <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
       <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
     </Style>
     <Style Selector="Button.ghost">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
     </Style>
     <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
       <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
+    </Style>
+    <Style Selector="Button.ghost:disabled /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
+    </Style>
+    <Style Selector="Button.link">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
+      <Setter Property="Padding" Value="8,4" />
+    </Style>
+    <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
       <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+    </Style>
+
+    <!-- The set list: quiet rows, an amber edge on the selected one. -->
+    <Style Selector="ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="2,0,0,0" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource InkBrush}" />
+    </Style>
+    <Style Selector="ListBoxItem:selected">
+      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource InkBrush}" />
     </Style>
 
     <Style Selector="ComboBox">
       <Setter Property="CornerRadius" Value="0" />
       <Setter Property="Background" Value="{StaticResource PlateBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
       <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+    </Style>
+    <Style Selector="ScrollBar">
+      <Setter Property="Background" Value="Transparent" />
     </Style>
   </Application.Styles>
 </Application>
