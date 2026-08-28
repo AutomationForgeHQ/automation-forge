@@ -146,6 +146,17 @@
               <TextBlock Classes="label" Text="SETTINGS" VerticalAlignment="Center" />
             </DockPanel>
 
+            <StackPanel Spacing="10">
+              <TextBlock Classes="label" Text="ACCOUNT" />
+              <TextBlock Classes="stamp" Text="{Binding AccountLine}" Foreground="{StaticResource BoneBrush}" TextWrapping="Wrap" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="primary" Content="Sign in" Command="{Binding SignInCommand}" IsVisible="{Binding !IsSignedIn}" />
+                <Button Classes="ghost" Content="Sign out" Command="{Binding SignOutCommand}" IsVisible="{Binding IsSignedIn}" />
+                <Button Classes="ghost" Content="Account page" Command="{Binding OpenAccountPageCommand}" />
+              </StackPanel>
+              <TextBlock Classes="stamp" Text="One account for the site, the hub and the command line. Signing in opens the browser for a moment." TextWrapping="Wrap" />
+            </StackPanel>
+
             <StackPanel Spacing="12">
               <TextBlock Classes="label" Text="CHANNEL" />
               <RadioButton GroupName="channel" IsChecked="{Binding IsStable, Mode=TwoWay}">

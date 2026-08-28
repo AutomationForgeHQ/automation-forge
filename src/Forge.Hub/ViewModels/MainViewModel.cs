@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Forge.Core;
+using Forge.Core.Cloud;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
 using Forge.Core.Installs;
@@ -28,7 +29,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly ReleaseDiscovery _releases;
     private readonly HubReleases _hubReleases;
     private readonly InstallState _state = new();
-    private readonly IEntitlementProvider _entitlements = new AnonymousEntitlements();
+    private readonly FirebaseEntitlements _entitlements;
     private readonly Settings _settings;
     private readonly UpdateWatcher? _watcher;
     private Manifest? _manifest;
@@ -92,6 +93,8 @@ public partial class MainViewModel : ViewModelBase
         _manifestClient = new ManifestClient(_http);
         _releases = new ReleaseDiscovery(_http);
         _hubReleases = new HubReleases(_http);
+        _entitlements = new FirebaseEntitlements(_http);
+        _accountLabel = _entitlements.AccountLabel ?? "Sign in";
         _isNightly = _settings.IsNightly;
         _checkForUpdates = _settings.CheckForUpdates;
         _runInBackground = _settings.RunInBackground;
@@ -173,8 +176,57 @@ public partial class MainViewModel : ViewModelBase
         finally { Busy = false; }
     }
 
+    public bool IsSignedIn => _entitlements.IsSignedIn;
+    public string AccountLine => _entitlements.IsSignedIn ? $"Signed in as {_entitlements.AccountLabel}" : "Not signed in. Free sets need no account.";
+
+    /// <summary>The header button: sign in when out; the account section when in.</summary>
     [RelayCommand]
-    private void Login() => Say("Accounts arrive with the Pro backend. Every free set installs without one.");
+    private async Task LoginAsync()
+    {
+        if (_entitlements.IsSignedIn) { ShowSettings = true; return; }
+        await SignInAsync();
+    }
+
+    [RelayCommand]
+    private async Task SignInAsync()
+    {
+        if (!CloudConfig.Configured) { Say("Accounts are not configured in this build."); return; }
+        if (_entitlements.IsSignedIn) return;
+        Say("Opening your browser to sign in — say yes there.");
+        try
+        {
+            var account = await Handshake.SignInAsync(HubUpdater.OpenInBrowser, TimeSpan.FromMinutes(5));
+            if (account is null) { Say("Nothing arrived from the browser in five minutes; nothing changed."); return; }
+            _entitlements.SignIn(account);
+            Say($"Signed in as {account.Email}.");
+        }
+        catch (Exception ex) when (ex is IOException or InvalidOperationException or System.Net.Sockets.SocketException)
+        {
+            Say($"Could not sign in: {ex.Message}");
+        }
+        AccountChanged();
+    }
+
+    [RelayCommand]
+    private void SignOut()
+    {
+        if (!_entitlements.IsSignedIn) return;
+        var who = _entitlements.AccountLabel;
+        _entitlements.SignOut();
+        Say($"Signed out {who}.");
+        AccountChanged();
+    }
+
+    [RelayCommand]
+    private void OpenAccountPage() => HubUpdater.OpenInBrowser(CloudConfig.AppUrl);
+
+    private void AccountChanged()
+    {
+        AccountLabel = _entitlements.AccountLabel ?? "Sign in";
+        OnPropertyChanged(nameof(IsSignedIn));
+        OnPropertyChanged(nameof(AccountLine));
+        Rebuild();
+    }
 
     [RelayCommand]
     private void ToggleDetails() => ShowDetails = !ShowDetails;

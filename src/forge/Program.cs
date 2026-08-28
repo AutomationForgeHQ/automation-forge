@@ -1,5 +1,6 @@
 using System.CommandLine;
 using Forge.Core;
+using Forge.Core.Cloud;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
 using Forge.Core.Installs;
@@ -17,7 +18,7 @@ http.DefaultRequestHeaders.UserAgent.ParseAdd(AppInfo.UserAgent("cli"));
 var manifestClient = new ManifestClient(http);
 var state = new InstallState();
 var settings = Settings.Load();
-IEntitlementProvider entitlements = new AnonymousEntitlements();
+var entitlements = new FirebaseEntitlements(http);
 var installer = new Installer(http, state, entitlements, line => Console.WriteLine($"  {line}"));
 
 var engineOpt = new Option<string?>("--engine", "-e") { Description = "Engine version (5.8), full version, or path. Default: the newest found." };
@@ -206,14 +207,52 @@ channelCmd.SetAction(parse =>
 });
 root.Subcommands.Add(channelCmd);
 
-// ── login ─────────────────────────────────────────────────────────────────
-var login = new Command("login", "Sign in to your Automation Forge account (unlocks paid plugins).");
-login.SetAction(_ =>
+// ── login / logout / whoami ───────────────────────────────────────────────
+var login = new Command("login", "Sign in to your Automation Forge account in the browser; the session is kept on this machine.");
+login.SetAction(async (parse, ct) =>
 {
-    Console.WriteLine("Accounts arrive with the Pro backend. Free plugins need no sign-in — every set installs today.");
+    if (!CloudConfig.Configured) { Console.Error.WriteLine("Accounts are not configured in this build."); return 2; }
+    if (entitlements.IsSignedIn) { Console.WriteLine($"  already signed in as {entitlements.AccountLabel}. Run `forge logout` first to switch."); return 0; }
+    Console.WriteLine("  Opening your browser. Say yes there, and this window finishes by itself.");
+    var account = await Handshake.SignInAsync(
+        url => { Console.WriteLine($"  {url}"); System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); },
+        TimeSpan.FromMinutes(5), ct);
+    if (account is null) { Console.Error.WriteLine("  Nothing arrived in five minutes; nothing changed."); return 3; }
+    entitlements.SignIn(account);
+    Console.WriteLine($"  signed in as {account.Email}");
     return 0;
 });
 root.Subcommands.Add(login);
+
+var logout = new Command("logout", "Forget the sign-in kept on this machine.");
+logout.SetAction(_ =>
+{
+    if (!entitlements.IsSignedIn) { Console.WriteLine("  not signed in"); return 0; }
+    var who = entitlements.AccountLabel;
+    entitlements.SignOut();
+    Console.WriteLine($"  signed out {who}");
+    return 0;
+});
+root.Subcommands.Add(logout);
+
+var whoami = new Command("whoami", "Who this machine is signed in as, and what the account owns.");
+whoami.SetAction(async (parse, ct) =>
+{
+    if (!entitlements.IsSignedIn) { Console.WriteLine("  not signed in — `forge login`"); return 0; }
+    Console.WriteLine($"  {entitlements.AccountLabel}  ({entitlements.Account!.Uid})");
+    try
+    {
+        var owned = await entitlements.OwnedAsync(ct);
+        Console.WriteLine(owned.Count == 0 ? "  owns: nothing paid yet" : $"  owns: {string.Join(", ", owned)}");
+    }
+    catch (Exception ex) when (ex is EntitlementException or HttpRequestException)
+    {
+        Console.Error.WriteLine($"  {ex.Message}");
+        return 1;
+    }
+    return 0;
+});
+root.Subcommands.Add(whoami);
 
 return await root.Parse(args).InvokeAsync();
 
