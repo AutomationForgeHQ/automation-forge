@@ -69,9 +69,12 @@ forge update                        everything on a target to its latest
 forge uninstall MontageForge
 forge enable MontageForge --project C:\Games\MyGame   the .uproject edit
 forge channel [stable|nightly]      the channel both surfaces follow
+forge login · logout · whoami       one account for the site, the hub and the CLI
 ```
 
-Free plugins need no account. A target under Program Files makes the CLI
+Free plugins need no account. Signing in opens the account site in the
+browser; when you say yes there, the session is handed to this machine over
+the loopback and kept under DPAPI — no password passes through the desktop. A target under Program Files makes the CLI
 relaunch itself elevated once. The hub (`src/Forge.Hub`, Avalonia) is the same
 core with a window: sets, one action per plugin, engine picker, update counts;
 it relaunches itself headless and elevated for engine installs. It is resident:
