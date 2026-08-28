@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import urllib.error
@@ -33,11 +34,22 @@ ASSET = re.compile(r"^(?P<plugin>[A-Za-z0-9]+)-(?P<version>[0-9][^-]*(?:-[^-]+)*
 TAG = re.compile(r"^(?P<plugin>[a-z0-9]+)-v(?P<version>.+)$")
 
 
+def headers() -> dict[str, str]:
+    """Anonymous by default; with GH_TOKEN or GITHUB_TOKEN set, authenticated —
+    the anonymous limit is sixty calls an hour per address, and a build machine
+    shares its address with everything else running there."""
+    h = {"Accept": "application/vnd.github+json", "User-Agent": "automation-forge-manifest"}
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if token:
+        h["Authorization"] = f"Bearer {token}"
+    return h
+
+
 def fetch_releases() -> list[dict]:
     releases: list[dict] = []
     url: str | None = API
     while url:
-        req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "automation-forge-manifest"})
+        req = urllib.request.Request(url, headers=headers())
         with urllib.request.urlopen(req) as resp:
             releases.extend(json.load(resp))
             link = resp.headers.get("Link", "")
@@ -52,7 +64,7 @@ def read_register(forge: Path) -> dict:
 
 def repo_exists(full_name: str) -> bool:
     """A mirror is listed only once it exists — the manifest never carries a dead link."""
-    req = urllib.request.Request(f"https://api.github.com/repos/{full_name}", headers={"User-Agent": "automation-forge-manifest"})
+    req = urllib.request.Request(f"https://api.github.com/repos/{full_name}", headers=headers())
     try:
         with urllib.request.urlopen(req) as resp:
             return resp.status == 200
