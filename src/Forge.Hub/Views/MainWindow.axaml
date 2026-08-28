@@ -8,23 +8,46 @@
         x:DataType="vm:MainViewModel"
         Width="1180" Height="760" MinWidth="760" MinHeight="480"
         Background="{StaticResource InkBrush}"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly"
+        ExtendClientAreaTitleBarHeightHint="-1"
         Title="Automation Forge">
 
   <Design.DataContext>
     <vm:MainViewModel />
   </Design.DataContext>
 
-  <Grid RowDefinitions="Auto,*,Auto">
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+    <!-- Our chrome: the drag strip and the caption buttons -->
+    <Border Grid.Row="0" Background="{StaticResource PlateBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1"
+            PointerPressed="TitleBar_PointerPressed">
+      <Grid ColumnDefinitions="*,Auto" Height="38">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9" Margin="16,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+          <Path Data="M 6.5 0 L 13 11.5 L 0 11.5 Z" Stroke="{StaticResource AmberBrush}" StrokeThickness="1.3" Fill="Transparent" Width="13" Height="12" VerticalAlignment="Center" />
+          <TextBlock Classes="stamp" Text="Automation Forge" Foreground="{StaticResource BoneBrush}" VerticalAlignment="Center" />
+          <TextBlock Classes="stamp" Text="hub 0.1" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal">
+          <Button Classes="caption" Click="Minimize_Click" ToolTip.Tip="Minimise">
+            <Path Data="M 0 5 H 10" Stroke="{StaticResource BoneBrush}" Opacity="0.75" StrokeThickness="1" Width="10" Height="10" />
+          </Button>
+          <Button Classes="caption" Click="Maximize_Click" ToolTip.Tip="Maximise">
+            <Path Data="M 0.5 0.5 H 9.5 V 9.5 H 0.5 Z" Stroke="{StaticResource BoneBrush}" Opacity="0.75" StrokeThickness="1" Fill="Transparent" Width="10" Height="10" />
+          </Button>
+          <Button Classes="caption close" Click="Close_Click" ToolTip.Tip="Close">
+            <Path Data="M 0 0 L 10 10 M 10 0 L 0 10" Stroke="{StaticResource BoneBrush}" Opacity="0.75" StrokeThickness="1" Width="10" Height="10" />
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
 
     <!-- Header -->
-    <Border Grid.Row="0" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="28,18,28,16">
+    <Border Grid.Row="1" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="28,18,28,16">
       <DockPanel>
         <StackPanel DockPanel.Dock="Left" Spacing="4" VerticalAlignment="Center">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <Path Data="M 9 0 L 18 16 L 0 16 Z" Stroke="{StaticResource AmberBrush}" StrokeThickness="1.4" Fill="Transparent" Width="18" Height="16" VerticalAlignment="Center" />
-            <TextBlock Classes="display" Text="Automation Forge" FontSize="17" VerticalAlignment="Center" />
-          </StackPanel>
-          <TextBlock Classes="stamp" Text="{Binding SourceStamp}" />
+          <TextBlock Classes="label" Text="CATALOGUE" />
+          <TextBlock Classes="stamp" Text="{Binding SourceStamp}" Foreground="{StaticResource BoneBrush}" />
         </StackPanel>
 
         <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" ItemSpacing="10" LineSpacing="8">
@@ -43,7 +66,7 @@
     </Border>
 
     <!-- Body: sets on the left, the selected set on the right -->
-    <Grid Grid.Row="1" ColumnDefinitions="248,*">
+    <Grid Grid.Row="2" ColumnDefinitions="248,*">
 
       <Border Grid.Column="0" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,1,0" Background="{StaticResource PlateBrush}">
         <DockPanel>
@@ -110,7 +133,7 @@
     </Grid>
 
     <!-- Footer: one line of status; details on demand -->
-    <Border Grid.Row="2" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Background="{StaticResource PlateBrush}">
+    <Border Grid.Row="3" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Background="{StaticResource PlateBrush}">
       <StackPanel>
         <Border IsVisible="{Binding ShowDetails}" MaxHeight="220" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="28,10,28,10">
           <ScrollViewer>
