@@ -106,6 +106,16 @@
       <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
       <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
     </Style>
+    <!-- A ghost button that is the page you are on. Amber, like the rule under a chosen tab. -->
+    <Style Selector="Button.ghost.selected">
+      <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
+    </Style>
+    <Style Selector="Button.ghost.selected /template/ ContentPresenter">
+      <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
+    </Style>
+
     <Style Selector="Button.ghost:disabled /template/ ContentPresenter">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />

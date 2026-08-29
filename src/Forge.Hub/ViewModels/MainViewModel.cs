@@ -128,6 +128,15 @@ public partial class MainViewModel : ViewModelBase
         _ = RefreshRentedAsync();
     }
 
+    /// <summary>
+    /// Leave the Keys page for the tab you came from.
+    ///
+    /// Keys sits over the tabs rather than beside them, so the tab strip keeps its place while you
+    /// are there - going to Keys from Runners and coming back to Plugins would be the window
+    /// deciding where you were.
+    /// </summary>
+    [RelayCommand] private void CloseKeys() => IsKeysPage = false;
+
     [RelayCommand]
     private void ShowKeys()
     {

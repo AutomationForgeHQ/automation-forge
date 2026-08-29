@@ -49,7 +49,7 @@
         <StackPanel DockPanel.Dock="Left" Spacing="8" VerticalAlignment="Center">
           <StackPanel Orientation="Horizontal" Spacing="22">
             <Button Classes="tab" Classes.selected="{Binding IsPluginsTab}" Content="Plugins" Command="{Binding ShowPluginsCommand}" />
-            <Button Classes="tab" Classes.selected="{Binding IsRunnersTab}" Content="Runners" Command="{Binding ShowRunnersCommand}" />
+            <Button Classes="tab" Classes.selected="{Binding IsRunnersShown}" Content="Runners" Command="{Binding ShowRunnersCommand}" />
           </StackPanel>
           <TextBlock Classes="stamp" Text="{Binding SourceStamp}" Foreground="{StaticResource BoneBrush}" IsVisible="{Binding IsPluginsTab}" />
           <TextBlock Classes="stamp" Text="What this machine can run, and what it is doing" IsVisible="{Binding IsRunnersShown}" />
@@ -66,7 +66,7 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
           <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshCommand}" />
-          <Button Classes="ghost" Content="Keys" Command="{Binding ShowKeysCommand}" />
+          <Button Classes="ghost" Classes.selected="{Binding IsKeysPage}" Content="Keys" Command="{Binding ShowKeysCommand}" />
           <Button Classes="ghost" Content="Settings" Command="{Binding ToggleSettingsCommand}" />
           <Button Classes="primary" Content="Sign in" Command="{Binding SignInCommand}" IsVisible="{Binding !IsSignedIn}" />
           <!-- Signed in: the avatar, and a small menu under it. -->
@@ -295,7 +295,7 @@
         <StackPanel Spacing="18" MaxWidth="860" HorizontalAlignment="Left">
 
           <DockPanel>
-            <Button DockPanel.Dock="Right" Classes="link" Content="Close" Command="{Binding ShowPluginsCommand}" />
+            <Button DockPanel.Dock="Right" Classes="link" Content="Close" Command="{Binding CloseKeysCommand}" />
             <StackPanel Spacing="4">
               <TextBlock Classes="display" Text="Keys" FontSize="30" />
               <TextBlock Classes="stamp" TextWrapping="Wrap"
