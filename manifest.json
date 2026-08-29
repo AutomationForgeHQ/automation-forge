@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-28T18:59:08Z",
+  "generatedAt": "2026-08-29T10:44:34Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -92,7 +92,7 @@
       "role": "hub",
       "distribution": "open",
       "dependencies": [],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/AutomationForgeHub",
       "versions": [
         {
           "version": "0.1.1",
@@ -153,7 +153,7 @@
         "AutomationForge",
         "AutomationForgePipelines"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/AutomationForgeToolset",
       "versions": [
         {
           "version": "0.1.0",
@@ -175,7 +175,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/FaceForge",
       "versions": [
         {
           "version": "0.1.0",
@@ -199,7 +199,7 @@
       "dependencies": [
         "FaceForge"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/FaceForgeMetaHuman",
       "versions": [
         {
           "version": "0.1.0",
@@ -223,7 +223,7 @@
       "dependencies": [
         "FaceForge"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/FaceForgeToolset",
       "versions": [
         {
           "version": "0.1.0",
@@ -269,7 +269,7 @@
       "dependencies": [
         "MeshWeightRemap"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MeshWeightRemapToolset",
       "versions": [
         {
           "version": "0.1.0",
@@ -291,7 +291,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MontageForge",
       "versions": [
         {
           "version": "0.1.0",
@@ -315,8 +315,20 @@
       "dependencies": [
         "MontageForge"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MontageForgeToolset",
       "versions": [
+        {
+          "version": "0.1.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforgetoolset-v0.1.1/MontageForgeToolset-0.1.1-UE5.8-Win64.zip",
+          "size": 71522,
+          "sha256": "9367d8d60e671e33473f738e218dff104431b37b79bef5b24d41ba26bc278c45",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforgetoolset-v0.1.1/MontageForgeToolset-0.1.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-29T10:39:36Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/montageforgetoolset-v0.1.1"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
@@ -337,7 +349,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MotionForge",
       "versions": [
         {
           "version": "0.1.0",
@@ -385,7 +397,7 @@
       "dependencies": [
         "MotionForgeKimodo"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MotionForgeKimodoToolset",
       "versions": [
         {
           "version": "0.1.0",
@@ -433,7 +445,7 @@
       "dependencies": [
         "MotionForgeQuality"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MotionForgeQualityToolset",
       "versions": [
         {
           "version": "0.1.0",
@@ -457,7 +469,7 @@
       "dependencies": [
         "MotionForge"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MotionForgeToolset",
       "versions": [
         {
           "version": "0.1.0",
@@ -479,7 +491,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/SpeechForge",
       "versions": [
         {
           "version": "0.1.0",
@@ -503,7 +515,7 @@
       "dependencies": [
         "SpeechForge"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/SpeechForgeToolset",
       "versions": [
         {
           "version": "0.1.0",
