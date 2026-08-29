@@ -21,16 +21,15 @@ public sealed record Volume(string Id, string Name, int SizeGb, string DataCente
 }
 
 /// <summary>
-/// Runpod, from the hub.
+/// Rented machines, as the hub needs them: what exists, what it costs, and how to stop paying.
 ///
-/// **Reads and releases; it does not rent.** Renting well means walking a list of cards that have
-/// stock in the volume's region, under a price ceiling, retrying past host-level refusals — logic
-/// that exists in the Kimodo plugin and was repaired there today. A second copy in this application
-/// would be a second copy of the code that spends money, and the two would drift the way any two
-/// implementations of one thing do. Provisioning stays in the editor until that walk can be shared.
+/// **The split is by where the knowledge is, not by what is easy.** Choosing a machine — which card,
+/// in which region, under what price ceiling — is a decision made against what a model needs, and
+/// those facts live in the plugin that knows the model. So the editor rents.
 ///
-/// What the hub does offer is the half somebody actually wants from a tray application: seeing that
-/// a pod is running and billing, and releasing it without opening Unreal.
+/// What the hub is for is the other half, and it is the half you want at four in the afternoon: is
+/// anything running, what is it costing, and stop it. That needs no model knowledge at all, and it
+/// is worth having without opening an engine to get at it.
 /// </summary>
 public sealed class RunpodClient(HttpClient http)
 {
@@ -99,20 +98,30 @@ public sealed class RunpodClient(HttpClient http)
         }
     }
 
+    /// <summary>Free the GPU and keep the machine. Its disk keeps billing at a few cents an hour.</summary>
+    public Task<(bool Ok, string Error)> StopAsync(string apiKey, string podId) => ActionAsync(apiKey, podId, "stop");
+
+    /// <summary>Take the same machine back. Nothing is downloaded; the disk was kept.</summary>
+    public Task<(bool Ok, string Error)> StartAsync(string apiKey, string podId) => ActionAsync(apiKey, podId, "start");
+
     /// <summary>
-    /// Release the pod. The GPU stops billing entirely; the volume keeps its weights and its cost.
+    /// Destroy the pod. GPU and disk both stop billing; a network volume, if there is one, stays.
     ///
-    /// Terminate rather than pause, deliberately, and this matches what the plugin does: a paused
-    /// pod holds a host's GPU slot and cannot be resumed once that host fills up, which strands the
-    /// disk attached to it. Everything expensive to rebuild is on the network volume instead.
+    /// This is what the Kimodo plugin does when it is finished with a machine, and for a good
+    /// reason: a merely stopped pod holds a host's GPU slot and cannot be resumed once that host
+    /// fills up, which strands the disk attached to it. Anything expensive to rebuild lives on the
+    /// network volume instead, so destroying the pod costs a couple of minutes, not a download.
     /// </summary>
-    public async Task<(bool Ok, string Error)> ReleaseAsync(string apiKey, string podId)
+    public Task<(bool Ok, string Error)> ReleaseAsync(string apiKey, string podId) =>
+        ActionAsync(apiKey, podId, "terminate");
+
+    private async Task<(bool Ok, string Error)> ActionAsync(string apiKey, string podId, string action)
     {
-        var body = JsonSerializer.Serialize(new { action = "terminate" });
+        var body = JsonSerializer.Serialize(new { action });
         var (ok, _, error) = await SendAsync(HttpMethod.Post, $"/pods/{podId}/action", apiKey, body);
 
-        // 409 means it is already in the state being asked for, which is a success as far as
-        // anybody who pressed "release it" is concerned.
+        // 409 is Runpod saying it is already in the state you asked for, which is a success to
+        // anybody who pressed the button.
         if (!ok && error.Contains("409")) return (true, "");
 
         return (ok, error);

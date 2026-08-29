@@ -166,6 +166,8 @@
       <ScrollViewer IsVisible="{Binding IsRunnersShown}" Padding="32,26,32,20" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="20">
 
+          <TextBlock Classes="label" Text="THIS MACHINE" IsVisible="{Binding HasRunners}" />
+
           <StackPanel Spacing="6" IsVisible="{Binding !HasRunners}">
             <TextBlock Classes="display" Text="Nothing to run" FontSize="22" />
             <TextBlock Classes="stamp" TextWrapping="Wrap"
@@ -217,6 +219,54 @@
 
           <TextBlock Classes="stamp" IsVisible="{Binding HasRunners}" TextWrapping="Wrap"
                      Text="The editor can drive the same containers, and either can start or stop one while the other is watching — so both ask Docker rather than trusting what they last did." />
+
+          <!-- Rented machines. Read and stop: which card, in which region, under what price ceiling
+               is a decision made against what a model needs, so the editor makes it. This is where
+               you see what came of it. -->
+          <StackPanel Spacing="14" IsVisible="{Binding CanRent}" Margin="0,22,0,0">
+
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="A RENTED GPU" />
+              <TextBlock Classes="stamp" Text="{Binding RentedLine}" Foreground="{StaticResource BoneBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <ItemsControl ItemsSource="{Binding Rented}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:RentedRow">
+                  <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Background="{StaticResource PlateBrush}" Padding="22,18" Margin="0,0,0,10">
+                    <StackPanel Spacing="12">
+
+                      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Ellipse Grid.Column="0" Width="9" Height="9" VerticalAlignment="Center" Fill="{StaticResource MuteBrush}" />
+                        <Ellipse Grid.Column="0" Width="9" Height="9" VerticalAlignment="Center" IsVisible="{Binding IsRunning}" Fill="#4CC76F" />
+
+                        <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                          <TextBlock Classes="display" Text="{Binding Title}" FontSize="17" />
+                          <TextBlock Classes="stamp" Text="{Binding StateLine}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                          <Button Classes="ghost" Content="Start" Command="{Binding StartCommand}" IsVisible="{Binding CanStart}" />
+                          <Button Classes="ghost" Content="Stop" Command="{Binding StopCommand}" IsVisible="{Binding CanStop}" />
+                          <Button Classes="primary" Content="Release" Command="{Binding ReleaseCommand}" MinWidth="86" HorizontalContentAlignment="Center" />
+                        </StackPanel>
+                      </Grid>
+
+                      <TextBlock Classes="stamp" Text="{Binding CostLine}" TextWrapping="Wrap"
+                                 Foreground="{StaticResource AmberBrush}" />
+
+                      <TextBlock Classes="stamp" Text="{Binding Message}" TextWrapping="Wrap"
+                                 IsVisible="{Binding Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                 Foreground="{StaticResource BoneBrush}" />
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Classes="stamp" TextWrapping="Wrap"
+                       Text="Renting one is done in the editor, where the card, the region and the price ceiling are chosen against what the model needs. Stopping and releasing need none of that, so they are here." />
+          </StackPanel>
         </StackPanel>
       </ScrollViewer>
 

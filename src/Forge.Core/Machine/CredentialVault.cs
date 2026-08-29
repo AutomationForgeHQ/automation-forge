@@ -140,6 +140,43 @@ public static class CredentialVault
         return true;
     }
 
+    /// <summary>
+    /// The secret itself, for the one thing that needs it: calling the API it pays for.
+    ///
+    /// Never shown, never logged, never written anywhere else. The vault first, then the
+    /// environment variable, in the order the plugins use.
+    /// </summary>
+    public static bool TryRead(DeclaredKey key, out string secret)
+    {
+        secret = "";
+
+        if (IsSupported && !string.IsNullOrWhiteSpace(key.VaultEntry)
+            && CredReadW(key.VaultEntry, GenericCredential, 0, out var handle))
+        {
+            try
+            {
+                var credential = Marshal.PtrToStructure<CREDENTIAL>(handle);
+                if (credential.CredentialBlobSize > 0 && credential.CredentialBlob != IntPtr.Zero)
+                {
+                    secret = Marshal.PtrToStringUni(credential.CredentialBlob, credential.CredentialBlobSize / 2) ?? "";
+                }
+            }
+            finally
+            {
+                CredFree(handle);
+            }
+
+            if (!string.IsNullOrEmpty(secret)) return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(key.EnvironmentVariable))
+        {
+            secret = Environment.GetEnvironmentVariable(key.EnvironmentVariable) ?? "";
+        }
+
+        return !string.IsNullOrEmpty(secret);
+    }
+
     private static bool Exists(string target)
     {
         if (string.IsNullOrWhiteSpace(target)) return false;

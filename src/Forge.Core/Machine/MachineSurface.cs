@@ -50,6 +50,27 @@ public sealed record DeclaredRunner
     [JsonPropertyName("image")] public string Image { get; init; } = "";
     [JsonPropertyName("signatureLabel")] public string? SignatureLabel { get; init; }
     [JsonPropertyName("health")] public string? Health { get; init; }
+
+    /// <summary>Set when this runner can also be rented rather than run locally.</summary>
+    [JsonPropertyName("cloud")] public DeclaredCloud? Cloud { get; init; }
+}
+
+/// <summary>
+/// Where a runner can be rented, and which key pays for it.
+///
+/// Enough for the hub to show what is running and stop it. **Choosing** a machine is not here on
+/// purpose: which card, in which region, under what price ceiling, is a decision made against what
+/// the model needs, and it is made in the editor where those facts live.
+/// </summary>
+public sealed record DeclaredCloud
+{
+    [JsonPropertyName("provider")] public string Provider { get; init; } = "";
+
+    /// <summary>The id of a key declared above - the account this rents on.</summary>
+    [JsonPropertyName("keyId")] public string KeyId { get; init; } = "";
+
+    /// <summary>What the editor names the pods it creates, so ours can be told from anything else.</summary>
+    [JsonPropertyName("podName")] public string PodName { get; init; } = "";
 }
 
 /// <summary>The file itself: Config/ForgeMachine.json inside a plugin.</summary>

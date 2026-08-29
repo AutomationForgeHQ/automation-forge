@@ -35,6 +35,9 @@ public partial class MainViewModel : ViewModelBase
     private readonly UpdateWatcher? _watcher;
     private Manifest? _manifest;
     private HubRelease? _hubUpdate;
+    private readonly RunpodClient _runpod;
+    private DeclaredRunner? _cloudRunner;
+    private DeclaredKey? _cloudKey;
 
     public ObservableCollection<EngineInstall> Engines { get; } = [];
     public ObservableCollection<SetGroup> Sets { get; } = [];
@@ -45,6 +48,9 @@ public partial class MainViewModel : ViewModelBase
 
     /// <summary>Runners the installed plugins declare - things this machine can start and stop.</summary>
     public ObservableCollection<RunnerRow> Runners { get; } = [];
+
+    /// <summary>Machines rented on the account behind whichever runner declares a cloud.</summary>
+    public ObservableCollection<RentedRow> Rented { get; } = [];
 
     [ObservableProperty] private EngineInstall? _selectedEngine;
     [ObservableProperty] private SetGroup? _selectedSet;
@@ -86,6 +92,8 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _keysLine = "";
     [ObservableProperty] private int _keysMissing;
     [ObservableProperty] private string _extraPluginRoot = "";
+    [ObservableProperty] private string _rentedLine = "";
+    [ObservableProperty] private bool _rentedKnown;
 
     public bool CanAutostart => Autostart.Supported;
     public string WatchLine => _watcher?.Last is { } last
@@ -111,7 +119,13 @@ public partial class MainViewModel : ViewModelBase
     }
 
     [RelayCommand] private void ShowPlugins() { IsKeysPage = false; IsRunnersTab = false; }
-    [RelayCommand] private void ShowRunners() { IsKeysPage = false; IsRunnersTab = true; }
+    [RelayCommand]
+    private void ShowRunners()
+    {
+        IsKeysPage = false;
+        IsRunnersTab = true;
+        _ = RefreshRentedAsync();
+    }
 
     [RelayCommand]
     private void ShowKeys()
@@ -125,6 +139,10 @@ public partial class MainViewModel : ViewModelBase
 
     public bool HasKeys => KeyGroups.Count > 0;
     public bool HasRunners => Runners.Count > 0;
+    public bool HasRented => Rented.Count > 0;
+
+    /// <summary>True once a runner declares somewhere to rent - otherwise the section is not drawn.</summary>
+    public bool CanRent => _cloudRunner is not null;
     public bool HasKeysMissing => KeysMissing > 0;
 
     partial void OnKeysMissingChanged(int value) => OnPropertyChanged(nameof(HasKeysMissing));
@@ -161,6 +179,7 @@ public partial class MainViewModel : ViewModelBase
         _releases = new ReleaseDiscovery(_http);
         _hubReleases = new HubReleases(_http);
         _entitlements = new FirebaseEntitlements(_http);
+        _runpod = new RunpodClient(_http);
         if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
         _isNightly = _settings.IsNightly;
         _checkForUpdates = _settings.CheckForUpdates;
@@ -377,8 +396,19 @@ public partial class MainViewModel : ViewModelBase
         KeyGroups.Clear();
         Runners.Clear();
 
+        _cloudRunner = null;
+        _cloudKey = null;
+
         foreach (var surface in surfaces)
         {
+            // The first runner that says where it can be rented, and the key it names. One is
+            // enough today and the shape holds for more.
+            if (_cloudRunner is null && surface.Runners.FirstOrDefault(r => r.Cloud is not null) is { } withCloud)
+            {
+                _cloudRunner = withCloud;
+                _cloudKey = surface.Keys.FirstOrDefault(k => k.Id == withCloud.Cloud!.KeyId);
+            }
+
             if (surface.Keys.Count > 0)
             {
                 KeyGroups.Add(new KeyGroup(surface.Plugin,
@@ -394,6 +424,68 @@ public partial class MainViewModel : ViewModelBase
         CountKeys();
         OnPropertyChanged(nameof(HasKeys));
         OnPropertyChanged(nameof(HasRunners));
+        OnPropertyChanged(nameof(CanRent));
+
+        _ = RefreshRentedAsync();
+    }
+
+    /// <summary>
+    /// Ask Runpod what is on the account.
+    ///
+    /// Read and stop, nothing more. Which card, in which region, under what price ceiling is a
+    /// decision made against what a model needs, so the editor makes it - the hub is where you see
+    /// what came of it and turn it off.
+    /// </summary>
+    public async Task RefreshRentedAsync()
+    {
+        Rented.Clear();
+        RentedKnown = false;
+
+        if (_cloudRunner is not { } runner || _cloudKey is not { } key)
+        {
+            RentedLine = "";
+            OnPropertyChanged(nameof(HasRented));
+            OnPropertyChanged(nameof(CanRent));
+            return;
+        }
+
+        if (!CredentialVault.TryRead(key, out var apiKey))
+        {
+            RentedLine = $"No {key.DisplayName} key stored, so the account cannot be read. Set one on the Keys page.";
+            OnPropertyChanged(nameof(HasRented));
+            return;
+        }
+
+        var (ok, pods, error) = await _runpod.ListPodsAsync(apiKey);
+
+        if (!ok)
+        {
+            RentedLine = error;
+            OnPropertyChanged(nameof(HasRented));
+            return;
+        }
+
+        RentedKnown = true;
+
+        foreach (var pod in pods)
+        {
+            var ours = !string.IsNullOrWhiteSpace(runner.Cloud!.PodName)
+                       && pod.Name.StartsWith(runner.Cloud.PodName, StringComparison.OrdinalIgnoreCase);
+
+            Rented.Add(new RentedRow(pod, ours, _runpod, () =>
+                CredentialVault.TryRead(key, out var k) ? k : "", RefreshRentedAsync));
+        }
+
+        var running = pods.Count(p => p.IsRunning);
+        var cost = pods.Where(p => p.IsRunning).Sum(p => p.HourlyPrice);
+
+        RentedLine = pods.Count == 0
+            ? "Nothing rented. Renting happens in the editor, where the card and the price ceiling are chosen."
+            : running == 0
+                ? $"{pods.Count} rented, none running."
+                : $"{running} running, about ${cost:0.00} an hour.";
+
+        OnPropertyChanged(nameof(HasRented));
     }
 
     private void CountKeys()
