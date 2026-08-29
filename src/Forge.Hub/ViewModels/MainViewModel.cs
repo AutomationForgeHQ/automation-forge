@@ -10,6 +10,7 @@ using Forge.Core.Cloud;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
 using Forge.Core.Installs;
+using Forge.Core.Machine;
 using Forge.Core.Manifest;
 using Forge.Core.Releases;
 
@@ -39,6 +40,12 @@ public partial class MainViewModel : ViewModelBase
     public ObservableCollection<SetGroup> Sets { get; } = [];
     public ObservableCollection<string> Details { get; } = [];
 
+    /// <summary>Keys the installed plugins declare, grouped by the plugin that wants them.</summary>
+    public ObservableCollection<KeyGroup> KeyGroups { get; } = [];
+
+    /// <summary>Runners the installed plugins declare - things this machine can start and stop.</summary>
+    public ObservableCollection<RunnerRow> Runners { get; } = [];
+
     [ObservableProperty] private EngineInstall? _selectedEngine;
     [ObservableProperty] private SetGroup? _selectedSet;
     [ObservableProperty] private string _sourceStamp = "";
@@ -64,10 +71,29 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _hubUpdateLine = "";
     [ObservableProperty] private bool _hasHubUpdate;
 
+    /// <summary>Which tab is on screen. Two of them, so a bool is the honest shape.</summary>
+    [ObservableProperty] private bool _isRunnersTab;
+
+    [ObservableProperty] private string _keysLine = "";
+    [ObservableProperty] private int _keysMissing;
+
     public bool CanAutostart => Autostart.Supported;
     public string WatchLine => _watcher?.Last is { } last
         ? $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Last look {last.CheckedAt:HH:mm}. Nothing installs by itself."
         : $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Nothing installs by itself.";
+
+    public bool IsPluginsTab => !IsRunnersTab;
+
+    partial void OnIsRunnersTabChanged(bool value) => OnPropertyChanged(nameof(IsPluginsTab));
+
+    [RelayCommand] private void ShowPlugins() => IsRunnersTab = false;
+    [RelayCommand] private void ShowRunners() => IsRunnersTab = true;
+
+    public bool HasKeys => KeyGroups.Count > 0;
+    public bool HasRunners => Runners.Count > 0;
+    public bool HasKeysMissing => KeysMissing > 0;
+
+    partial void OnKeysMissingChanged(int value) => OnPropertyChanged(nameof(HasKeysMissing));
 
     public bool HasUpdates => UpdatesCount > 0;
     public string UpdatesLabel => UpdatesCount == 1 ? "1 update available" : $"{UpdatesCount} updates available";
@@ -111,6 +137,7 @@ public partial class MainViewModel : ViewModelBase
         var preferred = App.PreferredEngine is { } spec ? EngineLocator.Resolve(spec) : null;
         SelectedEngine = Engines.FirstOrDefault(e => preferred is not null && string.Equals(e.Path.TrimEnd('\\', '/'), preferred.Path.TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase))
                          ?? Engines.FirstOrDefault();
+        RefreshMachineSurface();
         _ = RefreshAsync();
         if (_settings.CheckForUpdates) _ = CheckHubUpdateAsync(quiet: true);
     }
@@ -274,7 +301,61 @@ public partial class MainViewModel : ViewModelBase
     private void ToggleDetails() => ShowDetails = !ShowDetails;
 
     [RelayCommand]
-    private void ToggleSettings() => ShowSettings = !ShowSettings;
+    private void ToggleSettings()
+    {
+        // Re-read on the way in. A key can be set in the editor, by a console command, or in
+        // Windows' own credential manager while this window sits open, and a settings page that
+        // shows what was true when the hub started is a settings page that lies.
+        if (!ShowSettings) RefreshMachineSurface();
+        ShowSettings = !ShowSettings;
+    }
+
+    /// <summary>
+    /// Re-read what the installed plugins declare, and what this machine currently holds.
+    ///
+    /// **Only what is installed into an engine.** That is the whole of what the hub can see, and
+    /// the surfaces built on it say so where somebody would otherwise wait for a plugin to appear.
+    /// </summary>
+    public void RefreshMachineSurface()
+    {
+        var roots = Engines.Select(e => e.PluginRoot).ToList();
+        var surfaces = MachineSurface.Discover(roots);
+
+        KeyGroups.Clear();
+        Runners.Clear();
+
+        foreach (var surface in surfaces)
+        {
+            if (surface.Keys.Count > 0)
+            {
+                KeyGroups.Add(new KeyGroup(surface.Plugin,
+                    surface.Keys.Select(k => new KeyRow(k, CountKeys))));
+            }
+
+            foreach (var runner in surface.Runners)
+            {
+                Runners.Add(new RunnerRow(surface.Plugin, surface.PluginDir, runner));
+            }
+        }
+
+        CountKeys();
+        OnPropertyChanged(nameof(HasKeys));
+        OnPropertyChanged(nameof(HasRunners));
+    }
+
+    private void CountKeys()
+    {
+        var rows = KeyGroups.SelectMany(g => g.Keys).ToList();
+        var set = rows.Count(r => r.IsSet);
+
+        KeysMissing = rows.Count(r => r.IsMissing);
+
+        KeysLine = rows.Count == 0
+            ? "No installed plugin asks for a key."
+            : KeysMissing == 0
+                ? $"{set} of {rows.Count} set. Machine-wide - the editor reads the same entries."
+                : $"{set} of {rows.Count} set, {KeysMissing} still needed.";
+    }
 
     [RelayCommand]
     private void OpenDataFolder()

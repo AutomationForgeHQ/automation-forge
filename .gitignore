@@ -6,3 +6,7 @@ obj/
 publish/
 dist/
 hub-version.txt
+
+# Python bytecode from tools/
+__pycache__/
+*.pyc
