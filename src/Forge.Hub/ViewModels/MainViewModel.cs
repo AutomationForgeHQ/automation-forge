@@ -82,13 +82,14 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _isRunnersTab;
 
     /// <summary>
-    /// Keys have their own page rather than a corner of Settings.
+    /// Keys, in a drawer of their own.
     ///
-    /// Not a tab: setting a key is a thing you do once, and it does not deserve to sit beside the
-    /// two things you come back to. But there are more of them than a settings panel can hold
-    /// without becoming a list you scroll past everything else to reach.
+    /// Not a tab - setting a key is a thing you do once, and it does not belong beside the two
+    /// things you come back to. Not a corner of Settings either: there are more of them than that
+    /// would hold. Its own drawer, opened the same way Settings and the account are, because three
+    /// ways to show a panel in one window is two too many.
     /// </summary>
-    [ObservableProperty] private bool _isKeysPage;
+    [ObservableProperty] private bool _showKeysPanel;
 
     [ObservableProperty] private string _keysLine = "";
     [ObservableProperty] private int _keysMissing;
@@ -102,10 +103,10 @@ public partial class MainViewModel : ViewModelBase
         : $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Nothing installs by itself.";
 
     /// <summary>The catalogue, which is what the window opens on.</summary>
-    public bool IsPluginsTab => !IsRunnersTab && !IsKeysPage;
+    public bool IsPluginsTab => !IsRunnersTab;
 
-    /// <summary>Runners, which is a tab. Keys take the body over instead.</summary>
-    public bool IsRunnersShown => IsRunnersTab && !IsKeysPage;
+    /// <summary>Kept as its own name because the drawer opens over a tab rather than replacing it.</summary>
+    public bool IsRunnersShown => IsRunnersTab;
 
     partial void OnIsRunnersTabChanged(bool value)
     {
@@ -113,38 +114,42 @@ public partial class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsRunnersShown));
     }
 
-    partial void OnIsKeysPageChanged(bool value)
+    partial void OnShowKeysPanelChanged(bool value)
     {
-        OnPropertyChanged(nameof(IsPluginsTab));
-        OnPropertyChanged(nameof(IsRunnersShown));
+        // One drawer at a time, the same rule Settings and the account already follow.
+        if (value)
+        {
+            ShowSettings = false;
+            ShowAccount = false;
+        }
+
+        OnPropertyChanged(nameof(ShowAnyPanel));
     }
 
-    [RelayCommand] private void ShowPlugins() { IsKeysPage = false; IsRunnersTab = false; }
+    [RelayCommand] private void ShowPlugins() { IsRunnersTab = false; }
     [RelayCommand]
     private void ShowRunners()
     {
-        IsKeysPage = false;
         IsRunnersTab = true;
         _ = RefreshRentedAsync();
     }
 
-    /// <summary>
-    /// Leave the Keys page for the tab you came from.
-    ///
-    /// Keys sits over the tabs rather than beside them, so the tab strip keeps its place while you
-    /// are there - going to Keys from Runners and coming back to Plugins would be the window
-    /// deciding where you were.
-    /// </summary>
-    [RelayCommand] private void CloseKeys() => IsKeysPage = false;
+    [RelayCommand] private void CloseKeys() => ShowKeysPanel = false;
 
     [RelayCommand]
     private void ShowKeys()
     {
+        if (ShowKeysPanel)
+        {
+            ShowKeysPanel = false;
+            return;
+        }
+
         // Re-read on the way in. A key can be set in the editor, by a console command, or in
-        // Windows' own credential manager while this window sits open, and a page that shows what
-        // was true when the hub started is a page that lies.
+        // Windows' own credential manager while this window sits open, and a drawer that shows what
+        // was true when the hub started is a drawer that lies.
         RefreshMachineSurface();
-        IsKeysPage = true;
+        ShowKeysPanel = true;
     }
 
     public bool HasKeys => KeyGroups.Count > 0;
@@ -312,15 +317,16 @@ public partial class MainViewModel : ViewModelBase
 
     public bool IsSignedIn => _entitlements.IsSignedIn;
     public bool HasAvatar => Avatar is not null;
-    public bool ShowAnyPanel => ShowSettings || ShowAccount;
+    public bool ShowAnyPanel => ShowSettings || ShowAccount || ShowKeysPanel;
 
     partial void OnAvatarChanged(Avalonia.Media.Imaging.Bitmap? value) => OnPropertyChanged(nameof(HasAvatar));
-    partial void OnShowSettingsChanged(bool value) { if (value) ShowAccount = false; OnPropertyChanged(nameof(ShowAnyPanel)); }
-    partial void OnShowAccountChanged(bool value) { if (value) ShowSettings = false; OnPropertyChanged(nameof(ShowAnyPanel)); }
+    partial void OnShowSettingsChanged(bool value) { if (value) { ShowAccount = false; ShowKeysPanel = false; } OnPropertyChanged(nameof(ShowAnyPanel)); }
+    partial void OnShowAccountChanged(bool value) { if (value) { ShowSettings = false; ShowKeysPanel = false; } OnPropertyChanged(nameof(ShowAnyPanel)); }
 
     [RelayCommand] private void OpenAccount() => ShowAccount = true;
     [RelayCommand] private void CloseAccount() => ShowAccount = false;
-    public void ClosePanels() { ShowSettings = false; ShowAccount = false; }
+    /// <summary>What clicking the scrim does. Every drawer, or the one it missed stays open behind it.</summary>
+    public void ClosePanels() { ShowSettings = false; ShowAccount = false; ShowKeysPanel = false; }
 
     /// <summary>The profile as Firebase knows it now, the photo, and what the account owns.</summary>
     private async Task LoadProfileAsync()
