@@ -410,6 +410,14 @@
             </StackPanel>
 
             <StackPanel Spacing="10">
+              <TextBlock Classes="label" Text="WHERE IT LOOKS" />
+              <TextBlock Classes="stamp" TextWrapping="Wrap"
+                         Text="Keys and runners are read from the plugins installed into your engines, and anywhere else the hub has installed. Add one more folder if you are developing a plugin - a working tree is not a release, so nothing it declares can appear here otherwise." />
+              <TextBox Text="{Binding ExtraPluginRoot, Mode=TwoWay}" FontSize="12"
+                       Watermark="A folder of plugins, e.g. C:\Project\Plugins\Forge" />
+            </StackPanel>
+
+            <StackPanel Spacing="10">
               <TextBlock Classes="label" Text="DATA" />
               <TextBlock Classes="stamp" Text="Receipts, settings and the download cache." />
               <TextBlock Classes="mono" Text="{Binding DataDir}" TextWrapping="Wrap" FontSize="12" />

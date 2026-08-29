@@ -85,6 +85,7 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty] private string _keysLine = "";
     [ObservableProperty] private int _keysMissing;
+    [ObservableProperty] private string _extraPluginRoot = "";
 
     public bool CanAutostart => Autostart.Supported;
     public string WatchLine => _watcher?.Last is { } last
@@ -166,6 +167,7 @@ public partial class MainViewModel : ViewModelBase
         _runInBackground = _settings.RunInBackground;
         _notifyOnUpdates = _settings.NotifyOnUpdates;
         _startWithWindows = Autostart.Enabled;
+        _extraPluginRoot = _settings.ExtraPluginRoot;
         foreach (var e in EngineLocator.Find()) Engines.Add(e);
         var preferred = App.PreferredEngine is { } spec ? EngineLocator.Resolve(spec) : null;
         SelectedEngine = Engines.FirstOrDefault(e => preferred is not null && string.Equals(e.Path.TrimEnd('\\', '/'), preferred.Path.TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase))
@@ -173,6 +175,16 @@ public partial class MainViewModel : ViewModelBase
         RefreshMachineSurface();
         _ = RefreshAsync();
         if (_settings.CheckForUpdates) _ = CheckHubUpdateAsync(quiet: true);
+    }
+
+    partial void OnExtraPluginRootChanged(string value)
+    {
+        var trimmed = (value ?? "").Trim().Trim('"');
+        if (_settings.ExtraPluginRoot == trimmed) return;
+
+        _settings.ExtraPluginRoot = trimmed;
+        _settings.Save();
+        RefreshMachineSurface();
     }
 
     partial void OnRunInBackgroundChanged(bool value) { if (_settings.RunInBackground != value) { _settings.RunInBackground = value; _settings.Save(); } }
@@ -345,6 +357,21 @@ public partial class MainViewModel : ViewModelBase
     public void RefreshMachineSurface()
     {
         var roots = Engines.Select(e => e.PluginRoot).ToList();
+
+        // Everywhere the hub has ever installed, not only the engines. It already installs into
+        // projects on request, and a plugin it put there declares the same keys as one in an
+        // engine - the vault is machine-wide either way.
+        roots.AddRange(_state.Items
+            .Where(i => !string.IsNullOrWhiteSpace(i.TargetRoot))
+            .Select(i => i.TargetRoot));
+
+        // And the working tree, for whoever is writing the plugin. Their copy is not a release and
+        // never will be one, so nothing they declare can reach this window without it.
+        if (!string.IsNullOrWhiteSpace(_settings.ExtraPluginRoot))
+        {
+            roots.Add(_settings.ExtraPluginRoot);
+        }
+
         var surfaces = MachineSurface.Discover(roots);
 
         KeyGroups.Clear();

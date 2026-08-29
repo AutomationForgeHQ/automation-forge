@@ -27,6 +27,18 @@ public sealed class Settings
     /// <summary>Raise a system notification when the watcher finds something new.</summary>
     [JsonPropertyName("notifyOnUpdates")] public bool NotifyOnUpdates { get; set; } = true;
 
+    /// <summary>
+    /// One more folder of plugins to look at for keys and runners, beside the engines.
+    ///
+    /// The hub sees what it installed: plugins under an engine's Plugins/AutomationForge, downloaded
+    /// from a release. That is right for everybody who uses it and wrong for whoever is *writing*
+    /// the plugin, whose copy lives in a working tree and whose declarations therefore cannot appear
+    /// here until they ship. This is the way in - point it at that tree.
+    ///
+    /// Empty for everyone else, and it changes nothing when it is.
+    /// </summary>
+    [JsonPropertyName("extraPluginRoot")] public string ExtraPluginRoot { get; set; } = "";
+
     [JsonIgnore] public bool IsNightly => Channel == Nightly;
 
     public static string FilePath => Path.Combine(Paths.DataDir, "settings.json");
