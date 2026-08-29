@@ -479,8 +479,10 @@ public partial class MainViewModel : ViewModelBase
         var running = pods.Count(p => p.IsRunning);
         var cost = pods.Where(p => p.IsRunning).Sum(p => p.HourlyPrice);
 
+        // Just the fact. Where renting happens is said once, in the line under the section - saying
+        // it here as well put the same sentence on screen twice.
         RentedLine = pods.Count == 0
-            ? "Nothing rented. Renting happens in the editor, where the card and the price ceiling are chosen."
+            ? "Nothing rented."
             : running == 0
                 ? $"{pods.Count} rented, none running."
                 : $"{running} running, about ${cost:0.00} an hour.";

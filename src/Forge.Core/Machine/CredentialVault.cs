@@ -79,7 +79,11 @@ public static class CredentialVault
             return false;
         }
 
-        var blob = Encoding.Unicode.GetBytes(secret);
+        // **UTF-8, and no null terminator.** This is not a free choice: the plugins write the blob
+        // with FTCHARToUTF8 and read it back with FUTF8ToTCHAR, sized by exactly the byte count.
+        // Writing UTF-16 here would produce an entry the editor decodes as mojibake - which is the
+        // same row, addressed correctly, holding something neither side can use.
+        var blob = Encoding.UTF8.GetBytes(secret);
         var blobPtr = Marshal.AllocHGlobal(blob.Length);
 
         try
@@ -158,7 +162,10 @@ public static class CredentialVault
                 var credential = Marshal.PtrToStructure<CREDENTIAL>(handle);
                 if (credential.CredentialBlobSize > 0 && credential.CredentialBlob != IntPtr.Zero)
                 {
-                    secret = Marshal.PtrToStringUni(credential.CredentialBlob, credential.CredentialBlobSize / 2) ?? "";
+                    // Raw bytes, UTF-8, not null terminated - the size is the whole of it.
+                    var bytes = new byte[credential.CredentialBlobSize];
+                    Marshal.Copy(credential.CredentialBlob, bytes, 0, bytes.Length);
+                    secret = Encoding.UTF8.GetString(bytes);
                 }
             }
             finally
