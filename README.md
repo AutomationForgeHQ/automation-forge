@@ -78,13 +78,93 @@ the loopback and kept under DPAPI — no password passes through the desktop.
 Creating an account, signing the hub in, and how it all works:
 [docs/ACCOUNTS.md](docs/ACCOUNTS.md). A target under Program Files makes the CLI
 relaunch itself elevated once. The hub (`src/Forge.Hub`, Avalonia) is the same
-core with a window: sets, one action per plugin, engine picker, update counts;
-it relaunches itself headless and elevated for engine installs. It is resident:
-an icon by the clock, a check every four hours over every engine and project it
-installed into, a Windows notification when something new appears, and it
-replaces itself through the installer when a newer hub is released. Settings
+core with a window, and it is resident: an icon by the clock, a check every four
+hours over every engine and project it installed into, a Windows notification
+when something new appears, and it replaces itself through the installer when a
+newer hub is released. Settings
 (`%LOCALAPPDATA%\AutomationForge\settings.json`): channel, start with Windows,
-keep running in the tray, notifications.
+keep running in the tray, notifications, and one extra folder of plugins to look
+at.
+
+## What the hub does for a machine
+
+Two tabs and three drawers, added in 0.3.0.
+
+**Plugins** is the catalogue: sets, one action per plugin, engine picker, update
+counts. It relaunches itself headless and elevated for engine installs.
+
+**Runners** is what this machine can run. Today that is a Docker container and a
+GPU rented by the hour, both belonging to MotionForge Kimodo. Docker state and
+container state are read from Docker itself, and Start and Stop act on it — the
+point being that starting a runner is something you do *before* opening an
+editor, or after one has failed to start.
+
+**Keys**, **Settings** and the account are drawers over one scrim; opening any
+closes the others. Keys reach the Windows Credential Manager directly, at exactly
+the entries the plugins use, so a key set in either place is set for both.
+
+### How it knows any of that: `Config/ForgeMachine.json`
+
+**The hub cannot ask a plugin anything.** It is a separate process that may run
+with no editor open at all. So a plugin *declares* what it needs from the machine
+in `Config/ForgeMachine.json`, and the hub reads it — nothing here is hard-coded,
+and a plugin written next year needs no change to this application.
+
+```jsonc
+{
+  "keys": [ {
+    "id": "MotionForge.Uthana",
+    "displayName": "Uthana",
+    "owner": "MotionForge",
+    "purpose": "Motion generation through Uthana. Without it this provider cannot be used.",
+    "optional": false,
+    "helpUrl": "https://www.uthana.com",
+    "vaultEntry": "MotionForge/Uthana",              // the Credential Manager target
+    "environmentVariable": "MOTIONFORGE_UTHANA_KEY"  // consulted when the vault has nothing
+  } ],
+  "runners": [ {
+    "id": "Kimodo",
+    "displayName": "Kimodo",
+    "compose": "Runner/docker-compose.yml",   // the editor uses it; the hub only reports it
+    "composeProject": "runner",               // how the hub finds the container, by label
+    "service": "runner",
+    "image": "motionforge/kimodo-runner:1.0",
+    "signatureLabel": "com.blackcode.motionforge.runner",
+    "health": "http://127.0.0.1:8757/health",
+    "cloud": { "provider": "runpod", "keyId": "Kimodo.Runpod", "podName": "motionforge-kimodo" }
+  } ]
+}
+```
+
+The keys block is exactly the static half of the editor's own `FForgeKeyProvider`.
+The other half is closures over the plugin's credential store, which cannot cross
+a process boundary — so the hub reads the metadata from the file and performs the
+operations itself, against the same vault entry.
+
+**The blob is UTF-8 and not null-terminated.** The plugins write it with
+`FTCHARToUTF8` and read it with `FUTF8ToTCHAR`, sized by the exact byte count;
+anything else touching that row must match, or it writes an entry the editor
+decodes as mojibake.
+
+### Where it looks, and what it deliberately does not do
+
+Three roots: **every engine's** `Plugins/AutomationForge`, **everywhere the hub
+has installed** (from its own receipts, which covers project installs), and **one
+folder named in Settings** — for whoever is writing a plugin, whose working tree
+is not a release and never will be one.
+
+Three things stay in the editor, and the reason is the same each time: they need
+knowledge the hub does not have.
+
+- **Creating a container.** The compose file interpolates a model cache, a token
+  and a signature that only the plugin knows. The hub finds containers by the
+  labels compose stamps on them, and starts and stops them by id, which needs
+  none of that.
+- **Renting a GPU.** Which card, in which region, under what price ceiling is a
+  decision made against what a model needs. The hub lists what is rented, says
+  what it costs, and stops or releases it.
+- **Testing a key.** One authenticated call in the provider's own shape. Offering
+  it here would mean a second copy of every provider's authentication.
 
 ### Versions, channels, releases
 
