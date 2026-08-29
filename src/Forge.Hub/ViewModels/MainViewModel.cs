@@ -440,6 +440,11 @@ public partial class MainViewModel : ViewModelBase
         _cloudKey = null;
         _cloudPlugin = "";
 
+        // Keyed by id, because the same account asked for twice is one row. Which plugins want it and
+        // what each of them needs granted are accumulated rather than overwritten - with two plugins
+        // installed, taking the first declaration would let one plugin's gated model speak for both.
+        var general = new Dictionary<string, MergedKey>(StringComparer.OrdinalIgnoreCase);
+
         foreach (var surface in surfaces)
         {
             // The first runner that says where it can be rented, and the key it names. One is
@@ -451,16 +456,35 @@ public partial class MainViewModel : ViewModelBase
                 _cloudPlugin = surface.Plugin;
             }
 
-            if (surface.Keys.Count > 0)
+            // General keys are set aside and merged below; the rest belong to their plugin.
+            foreach (var key in surface.Keys.Where(k => k.IsGeneral))
             {
-                KeyGroups.Add(new KeyGroup(surface.Plugin,
-                    surface.Keys.Select(k => new KeyRow(k, CountKeys))));
+                if (!general.TryGetValue(key.Id, out var merged))
+                {
+                    general[key.Id] = merged = new MergedKey(key);
+                }
+
+                merged.Absorb(key, surface.Plugin);
+            }
+
+            var own = surface.Keys.Where(k => !k.IsGeneral).ToList();
+            if (own.Count > 0)
+            {
+                KeyGroups.Add(new KeyGroup(surface.Plugin, own.Select(k => new KeyRow(k, CountKeys))));
             }
 
             foreach (var runner in surface.Runners)
             {
                 Runners.Add(new RunnerRow(surface.Plugin, surface.PluginDir, runner));
             }
+        }
+
+        // General first. It is where somebody with two plugins installed has one thing to fill in
+        // rather than the same thing twice.
+        if (general.Count > 0)
+        {
+            KeyGroups.Insert(0, new KeyGroup("General",
+                general.Values.Select(m => new KeyRow(m.Key, CountKeys, m.Consumers, m.Access))));
         }
 
         CountKeys();

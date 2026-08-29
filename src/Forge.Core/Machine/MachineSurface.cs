@@ -27,6 +27,44 @@ public sealed record DeclaredKey
 
     /// <summary>Consulted when the vault has nothing, exactly as the plugin does.</summary>
     [JsonPropertyName("environmentVariable")] public string? EnvironmentVariable { get; init; }
+
+    /// <summary>
+    /// "general" for a key that belongs to a person rather than to a plugin.
+    ///
+    /// A Runpod key and a Hugging Face token are accounts somebody has. Two plugins asking for the
+    /// same one are asking the same question twice, and answering it twice leaves two copies to keep
+    /// in step. General keys are shown once, under General, with the plugins that use them named.
+    /// </summary>
+    [JsonPropertyName("scope")] public string Scope { get; init; } = "";
+
+    /// <summary>Which plugin declared this. Accumulated across declarations for a general key.</summary>
+    [JsonPropertyName("consumedBy")] public string ConsumedBy { get; init; } = "";
+
+    /// <summary>
+    /// A gated resource this key must additionally be granted access to, or null.
+    ///
+    /// A token is not access. A valid token whose account has not accepted a model's terms installs
+    /// perfectly and fails at the point of use, nowhere near the key that looked correct.
+    /// </summary>
+    [JsonPropertyName("requiresAccess")] public DeclaredAccess? RequiresAccess { get; init; }
+
+    public bool IsGeneral => string.Equals(Scope, "general", StringComparison.OrdinalIgnoreCase);
+}
+
+/// <summary>What a key must be granted access to, beyond existing.</summary>
+public sealed record DeclaredAccess
+{
+    /// <summary>The gated resource, e.g. "meta-llama/Meta-Llama-3-8B-Instruct".</summary>
+    [JsonPropertyName("model")] public string Model { get; init; } = "";
+
+    [JsonPropertyName("url")] public string Url { get; init; } = "";
+
+    /// <summary>"manual" when a human reviews it - worth starting early - or "automatic".</summary>
+    [JsonPropertyName("review")] public string Review { get; init; } = "";
+
+    [JsonPropertyName("note")] public string Note { get; init; } = "";
+
+    public bool IsReviewedByHand => string.Equals(Review, "manual", StringComparison.OrdinalIgnoreCase);
 }
 
 /// <summary>Something a plugin can start and stop on this machine. Read by the Runners tab.</summary>

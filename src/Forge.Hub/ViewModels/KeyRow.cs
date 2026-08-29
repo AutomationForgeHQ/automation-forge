@@ -19,12 +19,26 @@ public partial class KeyRow : ViewModelBase
     private readonly DeclaredKey _key;
     private readonly Action _changed;
 
-    public KeyRow(DeclaredKey key, Action changed)
+    public KeyRow(DeclaredKey key, Action changed,
+        IReadOnlyList<string>? consumers = null, IReadOnlyList<DeclaredAccess>? access = null)
     {
         _key = key;
         _changed = changed;
+        Consumers = consumers ?? [];
+        Access = (access ?? []).Select(a => new AccessRow(a)).ToList();
         Reread();
     }
+
+    /// <summary>Which installed plugins use this key. Only meaningful for a general one.</summary>
+    public IReadOnlyList<string> Consumers { get; }
+
+    public string ConsumersLine => Consumers.Count == 0 ? "" : $"Used by {string.Join(", ", Consumers)}";
+    public bool HasConsumers => Consumers.Count > 0;
+
+    /// <summary>What this key must additionally be granted, per plugin that needs a grant.</summary>
+    public IReadOnlyList<AccessRow> Access { get; }
+
+    public bool HasAccess => Access.Count > 0;
 
     public string Title => string.IsNullOrWhiteSpace(_key.DisplayName) ? _key.Id : _key.DisplayName;
     public string Purpose => _key.Purpose;
@@ -102,4 +116,62 @@ public sealed class KeyGroup(string plugin, IEnumerable<KeyRow> rows) : ViewMode
 {
     public string Plugin { get; } = plugin;
     public ObservableCollection<KeyRow> Keys { get; } = new(rows);
+}
+
+/// <summary>
+/// One general key as several plugins declared it.
+///
+/// The first declaration supplies the row - id, vault entry, where to get one. What every
+/// declaration adds is who wants it and what must additionally be granted, because a shared token can
+/// front two entirely unrelated approvals: Meta review Llama 3 by hand and take days, NVIDIA's terms
+/// are one click. Showing only the first plugin's would leave the other invisible.
+///
+/// Required beats optional. A key one plugin can live without and another cannot is a key this
+/// machine needs, and drawing it as optional tells half the truth to whichever half of the user is
+/// about to be stuck.
+/// </summary>
+public sealed class MergedKey(DeclaredKey first)
+{
+    public DeclaredKey Key { get; private set; } = first;
+    public List<string> Consumers { get; } = [];
+    public List<DeclaredAccess> Access { get; } = [];
+
+    public void Absorb(DeclaredKey key, string plugin)
+    {
+        var who = string.IsNullOrWhiteSpace(key.ConsumedBy) ? plugin : key.ConsumedBy;
+        if (!Consumers.Contains(who)) Consumers.Add(who);
+
+        if (key.RequiresAccess is { } grant && !Access.Any(a => a.Url == grant.Url))
+        {
+            Access.Add(grant);
+        }
+
+        if (!key.Optional && Key.Optional)
+        {
+            Key = Key with { Optional = false };
+        }
+    }
+}
+
+/// <summary>One gated resource a key must be granted access to, as the card draws it.</summary>
+public sealed partial class AccessRow(DeclaredAccess access) : ViewModelBase
+{
+    public string What => string.IsNullOrWhiteSpace(access.Model) ? access.Url : access.Model;
+    public string Note => access.Note;
+    public bool HasNote => !string.IsNullOrWhiteSpace(access.Note);
+
+    /// <summary>Reviewed by a human, so it is worth starting before anything else.</summary>
+    public bool ByHand => access.IsReviewedByHand;
+
+    public string ActionLabel => ByHand ? "Request access" : "Accept the terms";
+    public string Timing => ByHand ? "reviewed by a person - start it early" : "granted immediately";
+
+    [RelayCommand]
+    private void Open()
+    {
+        if (!string.IsNullOrWhiteSpace(access.Url))
+        {
+            Process.Start(new ProcessStartInfo(access.Url) { UseShellExecute = true });
+        }
+    }
 }
