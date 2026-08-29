@@ -38,6 +38,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly RunpodClient _runpod;
     private DeclaredRunner? _cloudRunner;
     private DeclaredKey? _cloudKey;
+    private string _cloudPlugin = "";
 
     public ObservableCollection<EngineInstall> Engines { get; } = [];
     public ObservableCollection<SetGroup> Sets { get; } = [];
@@ -141,8 +142,32 @@ public partial class MainViewModel : ViewModelBase
     public bool HasRunners => Runners.Count > 0;
     public bool HasRented => Rented.Count > 0;
 
-    /// <summary>True once a runner declares somewhere to rent - otherwise the section is not drawn.</summary>
+    /// <summary>
+    /// A runner that declares somewhere to rent - which means the plugin offering it is installed.
+    ///
+    /// Nothing about renting appears otherwise. Somebody who has not installed Kimodo has no reason
+    /// to read about GPUs, and a section that exists for a plugin you do not have is an
+    /// advertisement wearing a control's clothes.
+    /// </summary>
     public bool CanRent => _cloudRunner is not null;
+
+    /// <summary>Whether the account can be read at all: a key is stored, and it worked.</summary>
+    public bool HasCloudKey => _cloudKey is not null && CredentialVault.Find(_cloudKey) != KeySource.None;
+
+    /// <summary>
+    /// The list of machines, shown only once the account has actually answered.
+    ///
+    /// A key that is present and a key that works are different facts. Drawing an empty list from a
+    /// call that failed would say "nothing rented" about an account nobody managed to ask.
+    /// </summary>
+    public bool ShowRented => CanRent && RentedKnown;
+
+    /// <summary>The invitation, or the reason the account could not be read.</summary>
+    public bool ShowRentInvitation => CanRent && !RentedKnown;
+
+    public string CloudKeyName => _cloudKey?.DisplayName ?? "";
+    public string CloudRunnerName => _cloudRunner?.DisplayName ?? "";
+    public string CloudPluginName => _cloudPlugin;
     public bool HasKeysMissing => KeysMissing > 0;
 
     partial void OnKeysMissingChanged(int value) => OnPropertyChanged(nameof(HasKeysMissing));
@@ -398,6 +423,7 @@ public partial class MainViewModel : ViewModelBase
 
         _cloudRunner = null;
         _cloudKey = null;
+        _cloudPlugin = "";
 
         foreach (var surface in surfaces)
         {
@@ -407,6 +433,7 @@ public partial class MainViewModel : ViewModelBase
             {
                 _cloudRunner = withCloud;
                 _cloudKey = surface.Keys.FirstOrDefault(k => k.Id == withCloud.Cloud!.KeyId);
+                _cloudPlugin = surface.Plugin;
             }
 
             if (surface.Keys.Count > 0)
@@ -436,6 +463,7 @@ public partial class MainViewModel : ViewModelBase
     /// decision made against what a model needs, so the editor makes it - the hub is where you see
     /// what came of it and turn it off.
     /// </summary>
+    [RelayCommand]
     public async Task RefreshRentedAsync()
     {
         Rented.Clear();
@@ -444,15 +472,16 @@ public partial class MainViewModel : ViewModelBase
         if (_cloudRunner is not { } runner || _cloudKey is not { } key)
         {
             RentedLine = "";
-            OnPropertyChanged(nameof(HasRented));
-            OnPropertyChanged(nameof(CanRent));
+            Announce();
             return;
         }
 
+        // No key is not a failure, and must not read like one: it is a thing this machine could do
+        // and has not been set up for. The invitation says so and offers the one step.
         if (!CredentialVault.TryRead(key, out var apiKey))
         {
-            RentedLine = $"No {key.DisplayName} key stored, so the account cannot be read. Set one on the Keys page.";
-            OnPropertyChanged(nameof(HasRented));
+            RentedLine = "";
+            Announce();
             return;
         }
 
@@ -460,8 +489,10 @@ public partial class MainViewModel : ViewModelBase
 
         if (!ok)
         {
+            // A stored key that does not work is worth saying out loud, and is not the same as no
+            // key at all - the step out of it is different.
             RentedLine = error;
-            OnPropertyChanged(nameof(HasRented));
+            Announce();
             return;
         }
 
@@ -487,8 +518,34 @@ public partial class MainViewModel : ViewModelBase
                 ? $"{pods.Count} rented, none running."
                 : $"{running} running, about ${cost:0.00} an hour.";
 
-        OnPropertyChanged(nameof(HasRented));
+        Announce();
     }
+
+    private void Announce()
+    {
+        OnPropertyChanged(nameof(HasRented));
+        OnPropertyChanged(nameof(CanRent));
+        OnPropertyChanged(nameof(HasCloudKey));
+        OnPropertyChanged(nameof(ShowRented));
+        OnPropertyChanged(nameof(ShowRentInvitation));
+        OnPropertyChanged(nameof(CloudKeyName));
+        OnPropertyChanged(nameof(CloudRunnerName));
+        OnPropertyChanged(nameof(CloudPluginName));
+        OnPropertyChanged(nameof(RentInvitationLine));
+    }
+
+    /// <summary>
+    /// Why the account cannot be read, in the words that fit the case.
+    ///
+    /// Two situations that look alike from a distance and want different sentences and different
+    /// buttons: never set up, and set up but not working.
+    /// </summary>
+    public string RentInvitationLine => !HasCloudKey
+        ? $"{CloudRunnerName} can also run on a GPU rented by the hour, instead of on this machine. "
+          + $"That needs a {CloudKeyName} key."
+        : string.IsNullOrEmpty(RentedLine)
+            ? $"The {CloudKeyName} account could not be read."
+            : RentedLine;
 
     private void CountKeys()
     {

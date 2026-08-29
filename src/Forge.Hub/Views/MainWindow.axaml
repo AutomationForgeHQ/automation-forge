@@ -225,12 +225,27 @@
                you see what came of it. -->
           <StackPanel Spacing="14" IsVisible="{Binding CanRent}" Margin="0,22,0,0">
 
-            <StackPanel Spacing="6">
-              <TextBlock Classes="label" Text="A RENTED GPU" />
-              <TextBlock Classes="stamp" Text="{Binding RentedLine}" Foreground="{StaticResource BoneBrush}" TextWrapping="Wrap" />
-            </StackPanel>
+            <TextBlock Classes="label" Text="A RENTED GPU" />
 
-            <ItemsControl ItemsSource="{Binding Rented}">
+            <!-- Never set up, or set up and not answering. Neither is a list of machines, and
+                 drawing an empty one would say "nothing rented" about an account nobody asked. -->
+            <Border IsVisible="{Binding ShowRentInvitation}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1"
+                    Background="{StaticResource PlateBrush}" Padding="22,18">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="stamp" Text="{Binding RentInvitationLine}" TextWrapping="Wrap"
+                           Foreground="{StaticResource BoneBrush}" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Classes="primary" Content="{Binding CloudKeyName, StringFormat='Set the {0} key'}"
+                          Command="{Binding ShowKeysCommand}" IsVisible="{Binding !HasCloudKey}" />
+                  <Button Classes="ghost" Content="Try again" Command="{Binding RefreshRentedCommand}" IsVisible="{Binding HasCloudKey}" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <TextBlock Classes="stamp" Text="{Binding RentedLine}" Foreground="{StaticResource BoneBrush}"
+                       TextWrapping="Wrap" IsVisible="{Binding ShowRented}" />
+
+            <ItemsControl ItemsSource="{Binding Rented}" IsVisible="{Binding ShowRented}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:RentedRow">
                   <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Background="{StaticResource PlateBrush}" Padding="22,18" Margin="0,0,0,10">
@@ -266,6 +281,8 @@
 
             <TextBlock Classes="stamp" TextWrapping="Wrap"
                        Text="Renting one is done in the editor, where the card, the region and the price ceiling are chosen against what the model needs. Stopping and releasing need none of that, so they are here." />
+            <TextBlock Classes="stamp" TextWrapping="Wrap" IsVisible="{Binding ShowRentInvitation}"
+                       Text="{Binding CloudPluginName, StringFormat='This is here because {0} is installed. It is the plugin that can rent one.'}" />
           </StackPanel>
         </StackPanel>
       </ScrollViewer>
