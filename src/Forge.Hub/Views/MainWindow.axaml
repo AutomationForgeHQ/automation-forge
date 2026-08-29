@@ -52,7 +52,8 @@
             <Button Classes="tab" Classes.selected="{Binding IsRunnersTab}" Content="Runners" Command="{Binding ShowRunnersCommand}" />
           </StackPanel>
           <TextBlock Classes="stamp" Text="{Binding SourceStamp}" Foreground="{StaticResource BoneBrush}" IsVisible="{Binding IsPluginsTab}" />
-          <TextBlock Classes="stamp" Text="What this machine can run, and what it is doing" IsVisible="{Binding IsRunnersTab}" />
+          <TextBlock Classes="stamp" Text="What this machine can run, and what it is doing" IsVisible="{Binding IsRunnersShown}" />
+          <TextBlock Classes="stamp" Text="{Binding KeysLine}" IsVisible="{Binding IsKeysPage}" />
         </StackPanel>
 
         <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" ItemSpacing="10" LineSpacing="8">
@@ -65,6 +66,7 @@
             </ComboBox.ItemTemplate>
           </ComboBox>
           <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshCommand}" />
+          <Button Classes="ghost" Content="Keys" Command="{Binding ShowKeysCommand}" />
           <Button Classes="ghost" Content="Settings" Command="{Binding ToggleSettingsCommand}" />
           <Button Classes="primary" Content="Sign in" Command="{Binding SignInCommand}" IsVisible="{Binding !IsSignedIn}" />
           <!-- Signed in: the avatar, and a small menu under it. -->
@@ -161,7 +163,7 @@
       <!-- Runners: what this machine can run. Docker and a rented GPU are outside Unreal, so the
            hub can see and drive them without an editor open — which is the point, since starting the
            runner is a thing you do before opening one. -->
-      <ScrollViewer IsVisible="{Binding IsRunnersTab}" Padding="32,26,32,20" HorizontalScrollBarVisibility="Disabled">
+      <ScrollViewer IsVisible="{Binding IsRunnersShown}" Padding="32,26,32,20" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Spacing="20">
 
           <StackPanel Spacing="6" IsVisible="{Binding !HasRunners}">
@@ -215,6 +217,84 @@
 
           <TextBlock Classes="stamp" IsVisible="{Binding HasRunners}" TextWrapping="Wrap"
                      Text="The editor can drive the same containers, and either can start or stop one while the other is watching — so both ask Docker rather than trusting what they last did." />
+        </StackPanel>
+      </ScrollViewer>
+
+
+      <!-- Keys: its own page, opened from the header. Machine-wide and plugin-dependent, which is
+           why the hub holds them at all - but setting one is a thing you do once, so it does not
+           get a tab beside the two things you come back to. -->
+      <ScrollViewer IsVisible="{Binding IsKeysPage}" Padding="32,26,32,20" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="18" MaxWidth="860" HorizontalAlignment="Left">
+
+          <DockPanel>
+            <Button DockPanel.Dock="Right" Classes="link" Content="Close" Command="{Binding ShowPluginsCommand}" />
+            <StackPanel Spacing="4">
+              <TextBlock Classes="display" Text="Keys" FontSize="30" />
+              <TextBlock Classes="stamp" TextWrapping="Wrap"
+                         Text="One vault, shared with the editor. A key set here is set for every project on this machine." />
+            </StackPanel>
+          </DockPanel>
+
+          <StackPanel Spacing="8" IsVisible="{Binding !HasKeys}">
+            <TextBlock Classes="stamp" TextWrapping="Wrap"
+                       Text="No installed plugin is asking for a key." />
+            <TextBlock Classes="stamp" TextWrapping="Wrap"
+                       Text="Only plugins installed into an engine appear here, and only once they ship a declaration of what they need. A plugin added to a single project is set up inside that project's editor." />
+          </StackPanel>
+
+          <ItemsControl ItemsSource="{Binding KeyGroups}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:KeyGroup">
+                <StackPanel Spacing="10" Margin="0,10,0,18">
+                  <TextBlock Classes="label" Text="{Binding Plugin}" Foreground="{StaticResource AmberBrush}" />
+
+                  <ItemsControl ItemsSource="{Binding Keys}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:KeyRow">
+                        <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Background="{StaticResource PlateBrush}" Padding="20,16" Margin="0,0,0,10">
+                          <StackPanel Spacing="10">
+
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                              <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center" Fill="{StaticResource LineStrongBrush}" />
+                              <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center" IsVisible="{Binding IsSet}" Fill="#4CC76F" />
+                              <Ellipse Grid.Column="0" Width="8" Height="8" VerticalAlignment="Center" IsVisible="{Binding IsMissing}" Fill="{StaticResource AmberBrush}" />
+
+                              <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
+                                <TextBlock Classes="display" FontSize="16" Text="{Binding Title}" />
+                                <TextBlock Classes="stamp" Text="{Binding StatusLine}" Foreground="{StaticResource BoneBrush}" />
+                              </StackPanel>
+
+                              <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Classes="link" Content="Where to get one" Command="{Binding HelpCommand}" IsVisible="{Binding HasHelp}" />
+                                <Button Classes="ghost" Content="Remove" Command="{Binding ClearCommand}" IsVisible="{Binding CanClear}" />
+                              </StackPanel>
+                            </Grid>
+
+                            <TextBlock Classes="stamp" Text="{Binding Purpose}" TextWrapping="Wrap" />
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                              <TextBox Grid.Column="0" Text="{Binding Secret, Mode=TwoWay}" PasswordChar="&#x2022;"
+                                       Watermark="Paste a key to set or replace it" FontSize="12" />
+                              <Button Grid.Column="1" Classes="primary" Content="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding CanSave}" MinWidth="80" HorizontalContentAlignment="Center" />
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="14">
+                              <TextBlock Classes="stamp" Text="{Binding VaultEntry}" />
+                              <TextBlock Classes="stamp" Text="{Binding Message}" Foreground="{StaticResource AmberBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                          </StackPanel>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <TextBlock Classes="stamp" IsVisible="{Binding HasKeys}" TextWrapping="Wrap"
+                     Text="Testing a key happens in the editor, on its Keys page. A test is one call in the provider's own shape, and offering it here would mean a second copy of every provider's authentication living in the hub." />
         </StackPanel>
       </ScrollViewer>
 
@@ -299,64 +379,6 @@
                   <TextBlock Classes="stamp" Text="Whatever is newest, including builds made from the day's work. Newer and less tested; a stable release published later takes over." TextWrapping="Wrap" />
                 </StackPanel>
               </RadioButton>
-            </StackPanel>
-
-            <!-- Keys. Machine-wide and plugin-dependent, which is why they belong to the hub at
-                 all; not prominent, because setting one is a thing you do once. -->
-            <StackPanel Spacing="12">
-              <TextBlock Classes="label" Text="KEYS" />
-              <TextBlock Classes="stamp" Text="{Binding KeysLine}" TextWrapping="Wrap"
-                         Foreground="{StaticResource BoneBrush}" />
-
-              <ItemsControl ItemsSource="{Binding KeyGroups}">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate x:DataType="vm:KeyGroup">
-                    <StackPanel Spacing="10" Margin="0,6,0,10">
-                      <TextBlock Classes="stamp" Text="{Binding Plugin}" Foreground="{StaticResource AmberBrush}" />
-
-                      <ItemsControl ItemsSource="{Binding Keys}">
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate x:DataType="vm:KeyRow">
-                            <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,10,0,10">
-                              <StackPanel Spacing="7">
-
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="9">
-                                  <Ellipse Grid.Column="0" Width="7" Height="7" VerticalAlignment="Center" Fill="{StaticResource LineStrongBrush}" />
-                                  <Ellipse Grid.Column="0" Width="7" Height="7" VerticalAlignment="Center" IsVisible="{Binding IsSet}" Fill="#4CC76F" />
-                                  <Ellipse Grid.Column="0" Width="7" Height="7" VerticalAlignment="Center" IsVisible="{Binding IsMissing}" Fill="{StaticResource AmberBrush}" />
-
-                                  <TextBlock Grid.Column="1" Classes="display" FontSize="14" Text="{Binding Title}" VerticalAlignment="Center" />
-                                  <Button Grid.Column="2" Classes="link" Content="Where from" Command="{Binding HelpCommand}" IsVisible="{Binding HasHelp}" />
-                                </Grid>
-
-                                <TextBlock Classes="stamp" Text="{Binding Purpose}" TextWrapping="Wrap" />
-                                <TextBlock Classes="stamp" Text="{Binding StatusLine}" Foreground="{StaticResource BoneBrush}" TextWrapping="Wrap" />
-
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                  <TextBox Grid.Column="0" Text="{Binding Secret, Mode=TwoWay}" PasswordChar="•"
-                                           Watermark="Paste a key to set or replace it" FontSize="12" />
-                                  <Button Grid.Column="1" Classes="primary" Content="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding CanSave}" />
-                                </Grid>
-
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                  <Button Classes="ghost" Content="Remove" Command="{Binding ClearCommand}" IsVisible="{Binding CanClear}" />
-                                  <TextBlock Classes="stamp" Text="{Binding Message}" VerticalAlignment="Center"
-                                             Foreground="{StaticResource AmberBrush}" TextWrapping="Wrap" />
-                                </StackPanel>
-                              </StackPanel>
-                            </Border>
-                          </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
-                    </StackPanel>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
-
-              <TextBlock Classes="stamp" IsVisible="{Binding HasKeys}" TextWrapping="Wrap"
-                         Text="Testing a key happens in the editor, on its Keys page — a test is one call in the provider's own shape, and the hub would have to reimplement every provider to offer it here." />
-              <TextBlock Classes="stamp" IsVisible="{Binding !HasKeys}" TextWrapping="Wrap"
-                         Text="Only plugins installed into an engine appear here. A plugin added to a single project is set up inside that project's editor." />
             </StackPanel>
 
             <StackPanel Spacing="10">

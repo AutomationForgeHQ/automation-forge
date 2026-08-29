@@ -74,6 +74,15 @@ public partial class MainViewModel : ViewModelBase
     /// <summary>Which tab is on screen. Two of them, so a bool is the honest shape.</summary>
     [ObservableProperty] private bool _isRunnersTab;
 
+    /// <summary>
+    /// Keys have their own page rather than a corner of Settings.
+    ///
+    /// Not a tab: setting a key is a thing you do once, and it does not deserve to sit beside the
+    /// two things you come back to. But there are more of them than a settings panel can hold
+    /// without becoming a list you scroll past everything else to reach.
+    /// </summary>
+    [ObservableProperty] private bool _isKeysPage;
+
     [ObservableProperty] private string _keysLine = "";
     [ObservableProperty] private int _keysMissing;
 
@@ -82,12 +91,36 @@ public partial class MainViewModel : ViewModelBase
         ? $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Last look {last.CheckedAt:HH:mm}. Nothing installs by itself."
         : $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Nothing installs by itself.";
 
-    public bool IsPluginsTab => !IsRunnersTab;
+    /// <summary>The catalogue, which is what the window opens on.</summary>
+    public bool IsPluginsTab => !IsRunnersTab && !IsKeysPage;
 
-    partial void OnIsRunnersTabChanged(bool value) => OnPropertyChanged(nameof(IsPluginsTab));
+    /// <summary>Runners, which is a tab. Keys take the body over instead.</summary>
+    public bool IsRunnersShown => IsRunnersTab && !IsKeysPage;
 
-    [RelayCommand] private void ShowPlugins() => IsRunnersTab = false;
-    [RelayCommand] private void ShowRunners() => IsRunnersTab = true;
+    partial void OnIsRunnersTabChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsPluginsTab));
+        OnPropertyChanged(nameof(IsRunnersShown));
+    }
+
+    partial void OnIsKeysPageChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsPluginsTab));
+        OnPropertyChanged(nameof(IsRunnersShown));
+    }
+
+    [RelayCommand] private void ShowPlugins() { IsKeysPage = false; IsRunnersTab = false; }
+    [RelayCommand] private void ShowRunners() { IsKeysPage = false; IsRunnersTab = true; }
+
+    [RelayCommand]
+    private void ShowKeys()
+    {
+        // Re-read on the way in. A key can be set in the editor, by a console command, or in
+        // Windows' own credential manager while this window sits open, and a page that shows what
+        // was true when the hub started is a page that lies.
+        RefreshMachineSurface();
+        IsKeysPage = true;
+    }
 
     public bool HasKeys => KeyGroups.Count > 0;
     public bool HasRunners => Runners.Count > 0;
@@ -301,14 +334,7 @@ public partial class MainViewModel : ViewModelBase
     private void ToggleDetails() => ShowDetails = !ShowDetails;
 
     [RelayCommand]
-    private void ToggleSettings()
-    {
-        // Re-read on the way in. A key can be set in the editor, by a console command, or in
-        // Windows' own credential manager while this window sits open, and a settings page that
-        // shows what was true when the hub started is a settings page that lies.
-        if (!ShowSettings) RefreshMachineSurface();
-        ShowSettings = !ShowSettings;
-    }
+    private void ToggleSettings() => ShowSettings = !ShowSettings;
 
     /// <summary>
     /// Re-read what the installed plugins declare, and what this machine currently holds.
