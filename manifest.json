@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-29T19:24:49Z",
+  "generatedAt": "2026-08-30T00:12:23Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -42,6 +42,8 @@
       "name": "FaceForge",
       "members": [
         "FaceForge",
+        "FaceForgeACE",
+        "FaceForgeACEToolset",
         "FaceForgeMetaHuman",
         "FaceForgeToolset"
       ]
@@ -94,6 +96,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/AutomationForgeHub",
       "versions": [
+        {
+          "version": "0.2.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgehub-v0.2.1/AutomationForgeHub-0.2.1-UE5.8-Win64.zip",
+          "size": 1033449,
+          "sha256": "549530795b8b9a81724f34e84a32c4fc2c4285fb1276a46d37868516f0740bfe",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgehub-v0.2.1/AutomationForgeHub-0.2.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-08-30T00:12:04Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgehub-v0.2.1"
+        },
         {
           "version": "0.2.0",
           "engine": "5.8",
@@ -202,6 +216,28 @@
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforge-v0.1.0"
         }
       ]
+    },
+    {
+      "id": "FaceForgeACE",
+      "set": "faceforge",
+      "role": "provider",
+      "distribution": "fab",
+      "dependencies": [
+        "FaceForge"
+      ],
+      "source": null,
+      "versions": []
+    },
+    {
+      "id": "FaceForgeACEToolset",
+      "set": "faceforge",
+      "role": "toolset",
+      "distribution": "open",
+      "dependencies": [
+        "FaceForgeACE"
+      ],
+      "source": null,
+      "versions": []
     },
     {
       "id": "FaceForgeMetaHuman",
