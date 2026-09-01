@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-01T02:20:54Z",
+  "generatedAt": "2026-09-01T02:23:05Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -250,6 +250,18 @@
       ],
       "source": null,
       "versions": [
+        {
+          "version": "0.2.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgeace-v0.2.0/FaceForgeACE-0.2.0-UE5.8-Win64.zip",
+          "size": 438542,
+          "sha256": "77867adac900cd47bd18b273f846d862ec36637eade947b1e6c198f094f2b2aa",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgeace-v0.2.0/FaceForgeACE-0.2.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-01T02:22:56Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgeace-v0.2.0"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
