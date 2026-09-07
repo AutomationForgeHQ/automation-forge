@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T14:48:55Z",
+  "generatedAt": "2026-09-07T14:51:35Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -670,6 +670,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/MotionForge",
       "versions": [
+        {
+          "version": "0.3.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforge-v0.3.0/MotionForge-0.3.0-UE5.8-Win64.zip",
+          "size": 1252050,
+          "sha256": "f2c138df2cc2c247621985e4c1188ae61dd146577b603694d62ac74d0f0cb6bd",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforge-v0.3.0/MotionForge-0.3.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T14:51:16Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforge-v0.3.0"
+        },
         {
           "version": "0.2.2",
           "engine": "5.8",
