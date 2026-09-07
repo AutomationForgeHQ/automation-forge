@@ -109,6 +109,12 @@ to link to.
 working but not yet released — the one member of this set still without a
 public build.
 
+**Open question, not yet decided:** `MeshForge` (core) is open while its
+own `MeshForgeToolset` is Fab. Every other set with both a core and a
+toolset — MotionForge, SpeechForge, FaceForge, MontageForge — keeps the two
+on the same tier. Noted here for Bojan to decide on; not changed
+unilaterally.
+
 ### SurfaceForge
 
 | Plugin | Role | Distribution | Repo |
@@ -116,7 +122,7 @@ public build.
 | SurfaceForge | core | Open | [SurfaceForge](https://github.com/AutomationForgeHQ/SurfaceForge) |
 | SurfaceForgeLocal | provider | Fab | — |
 | SurfaceForgePatina | provider | Fab | — |
-| SurfaceForgeToolset | toolset | Open (mirror pending) | — |
+| SurfaceForgeToolset | toolset | Open | [SurfaceForgeToolset](https://github.com/AutomationForgeHQ/SurfaceForgeToolset) |
 
 ### PerformanceForge
 
@@ -136,8 +142,12 @@ surface is the point even when the implementation behind it is sold.
 
 | Plugin | Role | Distribution | Repo |
 |---|---|---|---|
-| MeshWeightRemap | core | Fab | — |
+| MeshWeightRemap | core | Open | [MeshWeightRemap](https://github.com/AutomationForgeHQ/MeshWeightRemap) |
 | MeshWeightRemapToolset | toolset | Open | [MeshWeightRemapToolset](https://github.com/AutomationForgeHQ/MeshWeightRemapToolset) |
+
+`MeshWeightRemap` moved from Fab to Open on 2026-09-07 (0.1.1) — a
+distribution-only change, no code behind it: standalone, no vendor keys and
+no paid runner, the same shape its toolset has been in all along.
 
 ## Reading a "Fab" row
 
@@ -156,3 +166,12 @@ its implementation isn't published. In practice that's almost always one of:
 
 None of that changes the account rule: whether a plugin is open, Fab or
 paid, it still has to be on your account before the hub will install it.
+
+## Keeping this page current
+
+This page is a hand-maintained snapshot, not a generated one — it can lag.
+The source of truth for every plugin's distribution and version is
+`plugins.json` (the register) in the private `forge` monorepo, and
+`manifest.json` (the built, hub-facing manifest, regenerated on every
+release) in this repository. Both live in the AutomationForgeHQ GitHub
+org; check them, not this table, when the two disagree.
