@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T15:26:52Z",
+  "generatedAt": "2026-09-07T15:29:26Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -368,6 +368,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/FaceForgeMetaHuman",
       "versions": [
+        {
+          "version": "0.2.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgemetahuman-v0.2.0/FaceForgeMetaHuman-0.2.0-UE5.8-Win64.zip",
+          "size": 206147,
+          "sha256": "9564d03ca06558f377813135eb9b5bf58806e47a8f8238b3d82f89a0afcf1350",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgemetahuman-v0.2.0/FaceForgeMetaHuman-0.2.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T15:29:07Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgemetahuman-v0.2.0"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
