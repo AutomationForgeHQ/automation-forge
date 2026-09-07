@@ -68,23 +68,58 @@ GPU), `MotionForgeQuality` (clip measurement), and three toolsets.
 
 ---
 
-## SpeechForge — every line in the game, spoken
+## SpeechForge — every line in the game, spoken, in every language
 
 **Goal:** a written line becomes a `USoundWave`, imported with
-character-level timing attached, on your own provider account.
+character-level timing attached, on your own provider account — and stays
+correct as the script, the cast and the languages around it change.
+
+The editor surface is one Speech Library panel with five pages, each doing
+one job in the screenwriter's own order: **Ingest** (pull lines in from an
+existing script or dialogue asset), **Cast** (define speakers and the
+voice each one speaks in), **Write** (author lines and separately, their
+direction), **Perform** (generate, or hand off to a recorded performance),
+**Localize** (translate and dub into other languages).
 
 - Voice a whole script in one pass; see the price before a single line
-  generates.
-- Re-run safely — unchanged lines are skipped, never re-bought.
-- Character-level timing comes back with every take, so dialogue can time
-  itself to its own audio with no hand-authoring.
+  generates, and re-run safely — unchanged lines are skipped, never
+  re-bought.
+- **A line resolves its voice, it doesn't declare one** — walking the
+  line's own override, the speaker's character sheet, the bank's default
+  and the project default in that order, and every resolution records
+  *which* of those answered, so "why is this line in the wrong voice" is
+  never a four-asset guessing game.
+- **Staleness is precise, not a hash mismatch.** A retuned voice marks its
+  whole cast stale, but the report says exactly what changed —
+  `stability 0.50 → 0.35`, not "the hash differs" — because what a line
+  was generated with is stored alongside it.
+- **Localize a whole scene**: one sibling Speech Bank per language, joined
+  to the source by line id; updating translates only stale or missing
+  lines, billed per character, and a face bank clones alongside it for the
+  same language automatically.
+- **Dub a recorded performance across languages** without losing it —
+  `Dub from Source` carries the actor's original pacing into the target
+  language, and remembers exactly which recording it was dubbed from, so a
+  later re-record of the source flags the dub as stale instead of silently
+  going on speaking a performance the scene has replaced.
+- Origin (`Generated` / `Recorded` / `Edited` / `Accepted`) and status
+  (`Draft` / `Generating` / `Generated` / `Failed`) are kept as two
+  separate facts on purpose — a **recorded** line whose script changed
+  underneath it is the one report here with real money attached, and it
+  would be inexpressible if the two were collapsed into one status.
 - Deliberately stops at the wave: no dialogue system, no subtitles, no
-  gameplay framework baked in. Binding it to yours is an add-on's job.
+  gameplay framework baked in. Binding it to yours — Narrative Pro's
+  `NP_VoiceOver` today — is an adapter's job, not this plugin's.
 
-**Status:** working; the product surface is still evolving.
+**Status:** graduated to **beta** — "well tested and established" is the
+call actually recorded against this release, covering the full
+Ingest/Cast/Write/Perform/Localize surface, localization and dubbing.
+`SpeechForgeElevenLabs` (the live hosted provider) graduated the same way,
+the same day. `SpeechForgeDeepL` (translation) remains a planned provider.
 
 **Members:** `SpeechForge` (core), `SpeechForgeElevenLabs` (hosted
-provider, live), `SpeechForgeDeepL` (planned provider), and a toolset.
+provider, live, beta), `SpeechForgeDeepL` (planned provider), and a
+toolset.
 
 ---
 
@@ -138,23 +173,72 @@ tooling, just as useful when every clip in the project came from mocap.
 
 ---
 
-## MeshForge — a prop from a prompt
+## MeshForge — a prop from a prompt, dressed and fitted
 
 **Goal:** a description or a reference image becomes a game-ready static
-mesh — textures, materials, collision and lightmap UVs included.
+mesh — collision, lightmap UVs, Nanite policy, real-world scale and a floor
+pivot included — with a matching pipeline that fits a generated garment
+onto a character instead of leaving it as a separate prop.
 
-- Describe a prop, or drop a reference image, and get mesh candidates back.
-- Import with real-world scale and a floor pivot already set.
-- Choose candidates without paying for generation again on a re-import.
+- Describe a prop, or drop a reference image, and get mesh candidates back
+  from two live hosted providers — **Tripo** and **Meshy** — through one
+  registered account each, both wired up as `MeshForgeCloud`.
+- **Free Unreal-side refinishing, already shipped.** Collision, hull count,
+  lightmap resolution, Nanite and real-world size/pivot all change in about
+  a second with no regeneration — the generation loop and the refinishing
+  loop are deliberately separate, so a crate that's the right shape but the
+  wrong size never needs paying for again.
+- Meshy's **Smart Topology** mode generates a low-polygon mesh instead of
+  decimating one — measured at ~6,275 triangles for 15 credits against
+  ~1.9M for a 4K PBR pass on the same reference image, visually close at
+  normal distance.
+- A free, local, seeded provider — **Microsoft TRELLIS.2** in Docker, MIT
+  licensed — works and has been tested, but it's the one member of this
+  set that isn't published yet (still pre-release; see status below).
 
-**Status:** developer preview. Concept generation, mesh generation and
-import work today; the free Unreal-side refinishing pass — collision,
-lightmap UVs, Nanite policy — is designed but **not yet shipped**. The
-fitted-garment pipeline that sits on top of a mesh (pose-matched clothing)
-is a separate, paid plugin: `MeshForgeGarment`.
+### Paired with Garment Fit: a small, from-scratch fitting pipeline
 
-**Members:** `MeshForge` (core), `MeshForgeCloud` and `MeshForgeTrellis`
-(providers), `MeshForgeGarment` (paid post-process), two toolsets.
+`MeshForgeGarment` is a post-processing step, not a separate product: point
+it at a character's body mesh and a generated or DCC-made garment, and it
+exports the body in its reference pose, hands both to a Blender fitting
+runner, and imports the garment back wrapped around that body with its
+vertices, UVs and materials untouched. Rigging and skin weights stay in
+Unreal, where the engine's own weight transfer does them.
+
+The core idea — pose the garment and a handful of the body's joints by
+hand or from a preset, let the solver bind the cloth to that posed skin,
+then straighten the body back to its reference pose and carry the garment
+with it — is the same shape of idea academic work on garment fitting calls
+*pose matching*. This is Automation Forge's own small implementation of
+that idea, built from scratch against our own solver and our own runner;
+no claim is made to reproducing anyone's proprietary system, only to the
+same underlying trick, at a much smaller scope.
+
+Two fit modes: **Place** (scale, align, clear the skin — for a garment
+already made for this exact body, which keeps its drape) and **Fit**
+(articulate, project, relax — for a garment made for some other body, at
+the cost of some drape). The route that keeps the most drape end to end:
+render the character as a grey mannequin, dress that picture with Tripo's
+image editor, extract the garment, generate it in Meshy at low-poly and
+in the character's own pose, then **Place** it — about 35 Tripo + Meshy
+credits, measured start to finish.
+
+Measured (2026-09-06, Blender 5.2): a Tripo T-shirt (10,130 vertices)
+fitted in 1.9s with zero vertices inside the body; a Meshy jacket in 1.8s
+with its pockets and buttons where they were generated; a skeletal CC5
+shirt (13,610 triangles, 62 influenced bones) validated triangle-for-
+triangle in UE 5.8 after skinning.
+
+**Status:** `MeshForge` and `MeshForgeCloud` (Tripo + Meshy) graduated to
+**beta** — well tested and established, not experimental. `MeshForgeTrellis`
+works but stays **experimental and unpublished** until it's released.
+`MeshForgeGarment` is **working and experimental**, sold as a paid plugin
+rather than free — see [DISTRIBUTION.md](DISTRIBUTION.md) for why it's
+priced like Performance Forge rather than shipped as a free add-on.
+
+**Members:** `MeshForge` (core), `MeshForgeCloud` (Tripo + Meshy provider),
+`MeshForgeTrellis` (local, free, unpublished), `MeshForgeGarment` (paid
+garment fitting), two toolsets.
 
 ---
 

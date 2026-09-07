@@ -103,6 +103,12 @@ to link to.
 | MeshForgeToolset | toolset | Fab | — |
 | MeshForgeTrellisToolset | toolset | Fab | — |
 
+`MeshForgeCloud` is one plugin covering two hosted vendors — **Tripo** and
+**Meshy** — registered as separate providers under it, not two plugins.
+`MeshForgeTrellis` (Microsoft TRELLIS.2, local and free) is tested and
+working but not yet released — the one member of this set still without a
+public build.
+
 ### SurfaceForge
 
 | Plugin | Role | Distribution | Repo |
@@ -139,8 +145,9 @@ Fab-only doesn't mean hidden away — it means the plugin is free to use but
 its implementation isn't published. In practice that's almost always one of:
 
 - **It wraps a provider's own container or SDK** (NVIDIA Kimodo, NVIDIA
-  Audio2Face-3D, StableMaterials/MatFuse) where the packaged binary plus a
-  public `Runner/` folder is what a customer needs, not the glue code.
+  Audio2Face-3D, Microsoft TRELLIS.2, StableMaterials/MatFuse) where the
+  packaged binary plus a public `Runner/` folder is what a customer needs,
+  not the glue code.
 - **It's a measurement or add-on pass** (MotionForge Quality) with nothing
   a project would fork.
 - **It was written new, next to a paid sibling**, rather than extracted
