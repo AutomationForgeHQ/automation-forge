@@ -20,7 +20,7 @@ public sealed class FirebaseAuth(HttpClient http)
             ["grant_type"] = "refresh_token",
             ["refresh_token"] = refreshToken,
         });
-        using var resp = await http.PostAsync($"https://securetoken.googleapis.com/v1/token?key={CloudConfig.ApiKey}", content, ct);
+        using var resp = await http.PostAsync($"{CloudConfig.SecureTokenUrl}/token?key={CloudConfig.ApiKey}", content, ct);
         if (!resp.IsSuccessStatusCode)
             throw new EntitlementException("Your sign-in has expired or was revoked. Sign in again.");
         using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync(ct));
@@ -35,7 +35,7 @@ public sealed class FirebaseAuth(HttpClient http)
     public async Task<AccountInfo?> LookupAsync(string idToken, CancellationToken ct = default)
     {
         using var content = new StringContent(JsonSerializer.Serialize(new { idToken }), System.Text.Encoding.UTF8, "application/json");
-        using var resp = await http.PostAsync($"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={CloudConfig.ApiKey}", content, ct);
+        using var resp = await http.PostAsync($"{CloudConfig.IdentityToolkitUrl}/accounts:lookup?key={CloudConfig.ApiKey}", content, ct);
         if (!resp.IsSuccessStatusCode) return null;
         using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync(ct));
         if (!doc.RootElement.TryGetProperty("users", out var users) || users.GetArrayLength() == 0) return null;
