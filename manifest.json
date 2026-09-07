@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T15:39:01Z",
+  "generatedAt": "2026-09-07T15:40:24Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1226,7 +1226,20 @@
         "SurfaceForge"
       ],
       "source": null,
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforgelocal-v0.1.0/SurfaceForgeLocal-0.1.0-UE5.8-Win64.zip",
+          "size": 112357,
+          "sha256": "0e3057b9c808efd2b8b52f764236a33247eb46c829a9ad1c594b0157cc750447",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforgelocal-v0.1.0/SurfaceForgeLocal-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T15:40:16Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/surfaceforgelocal-v0.1.0"
+        }
+      ]
     },
     {
       "id": "SurfaceForgePatina",
