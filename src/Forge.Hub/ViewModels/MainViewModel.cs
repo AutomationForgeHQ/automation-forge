@@ -35,6 +35,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly UpdateWatcher? _watcher;
     private Manifest? _manifest;
     private HubRelease? _hubUpdate;
+    private IReadOnlySet<string> _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     private readonly RunpodClient _runpod;
     private DeclaredRunner? _cloudRunner;
     private DeclaredKey? _cloudKey;
@@ -346,17 +347,29 @@ public partial class MainViewModel : ViewModelBase
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or ArgumentException) { Avatar = null; }
         }
+        await LoadOwnedAsync();
+    }
+
+    /// <summary>What the account holds, then the rows again so each one knows its standing.</summary>
+    private async Task LoadOwnedAsync()
+    {
         try
         {
+            _entitlements.Invalidate();
             var owned = await _entitlements.OwnedAsync();
+            _owned = owned;
             Owned.Clear();
             foreach (var id in owned.OrderBy(x => x)) Owned.Add(id);
-            OwnedLine = owned.Count == 0 ? "Nothing paid yet. Every free set installs without an account." : $"{owned.Count} paid plugin{(owned.Count == 1 ? "" : "s")} on this account.";
+            OwnedLine = owned.Count == 0
+                ? "Nothing on this account yet. Install adds a free plugin to it as it goes; paid ones are bought on the web."
+                : $"{owned.Count} plugin{(owned.Count == 1 ? "" : "s")} on this account.";
         }
         catch (Exception ex) when (ex is EntitlementException or HttpRequestException)
         {
+            _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             OwnedLine = ex.Message;
         }
+        Rebuild();
     }
 
     [RelayCommand]
@@ -393,11 +406,14 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void OpenAccountPage() => HubUpdater.OpenInBrowser(CloudConfig.AppUrl);
 
+    /// <summary>The account site's library, at the plugin: where a paid one is bought.</summary>
+    internal void OpenBuyPage(string pluginId) => HubUpdater.OpenInBrowser($"{CloudConfig.PluginsUrl}#{pluginId}");
+
     private void AccountChanged()
     {
         OnPropertyChanged(nameof(IsSignedIn));
         if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
-        else { Avatar = null; AccountName = AccountEmail = AccountUid = AccountProviders = OwnedLine = ""; Owned.Clear(); }
+        else { Avatar = null; AccountName = AccountEmail = AccountUid = AccountProviders = OwnedLine = ""; Owned.Clear(); _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase); }
         Rebuild();
     }
 
@@ -674,7 +690,7 @@ public partial class MainViewModel : ViewModelBase
             foreach (var id in set.Members)
             {
                 if (_manifest.Plugin(id) is not { } p) continue;
-                group.Plugins.Add(new PluginRow(p, p.Latest(engine, Channel), _state.Find(Target, p.Id), this));
+                group.Plugins.Add(new PluginRow(p, p.Latest(engine, Channel), _state.Find(Target, p.Id), this, _entitlements.IsSignedIn, _owned.Contains(p.Id)));
             }
             group.Refresh();
             Sets.Add(group);
@@ -690,9 +706,14 @@ public partial class MainViewModel : ViewModelBase
 
     internal Task InstallSetAsync(SetGroup set)
     {
-        var ids = set.Plugins.Where(r => r.Latest is not null && !r.IsPaid).Select(r => r.Id).ToArray();
+        if (!_entitlements.IsSignedIn) return SignInAsync();
+        var ids = set.Plugins.Where(r => r.Latest is not null && (!r.IsPaid || r.Owned)).Select(r => r.Id).ToArray();
+        var left = set.Plugins.Where(r => r.Latest is not null && r.IsPaid && !r.Owned).Select(r => r.Id).ToList();
+        if (left.Count > 0) Say($"not on your account, so not installed: {string.Join(", ", left)}. Buy at {CloudConfig.PluginsUrl}");
         return ids.Length > 0 ? RunAsync(ids) : Task.CompletedTask;
     }
+
+    internal Task SignInFromRowAsync() => SignInAsync();
 
     internal Task UninstallAsync(PluginRow row) => RunAsync([row.Id], uninstall: true);
 
@@ -733,7 +754,7 @@ public partial class MainViewModel : ViewModelBase
         finally
         {
             _state.Reload();
-            Rebuild();
+            if (!uninstall && _entitlements.IsSignedIn) await LoadOwnedAsync(); else Rebuild();
             Busy = false;
         }
     }
@@ -823,15 +844,20 @@ public sealed partial class SetGroup(string id, string name, MainViewModel owner
     [RelayCommand] private Task InstallSet() => owner.InstallSetAsync(this);
 }
 
-public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, InstalledPlugin? installed, MainViewModel owner) : ObservableObject
+public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, InstalledPlugin? installed, MainViewModel owner, bool signedIn, bool owned) : ObservableObject
 {
     public PluginInfo Plugin { get; } = plugin;
     public VersionInfo? Latest { get; } = latest;
     public InstalledPlugin? Installed { get; } = installed;
+    /// <summary>Whether a person is signed in at all; without it nothing installs.</summary>
+    public bool SignedIn { get; } = signedIn;
+    /// <summary>Whether the account holds this plugin. A free one is added on the first install.</summary>
+    public bool Owned { get; } = owned;
 
     public string Id => Plugin.Id;
-    public string Meta => $"{Plugin.Role} · {Plugin.Distribution}" + (Plugin.Dependencies.Count > 0 ? $" · needs {string.Join(", ", Plugin.Dependencies)}" : "");
+    public string Meta => $"{Plugin.Role} · {(Plugin.Distribution == "open" ? "open source · free" : Plugin.IsPaid ? "paid" : "free")}" + (Plugin.Dependencies.Count > 0 ? $" · needs {string.Join(", ", Plugin.Dependencies)}" : "");
     public bool IsPaid => Plugin.IsPaid;
+    public bool NeedsPurchase => IsPaid && !Owned;
     public bool HasUpdate => Installed is not null && Latest is not null && Installed.Version != Latest.Version;
 
     private string LatestLabel => Latest is null ? "" : Latest.Channel == Settings.Nightly ? $"{Latest.Version} · nightly" : Latest.Version;
@@ -844,22 +870,30 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
 
     public string Status =>
         Latest is null ? "not released"
-        : IsPaid && Latest.Url is null ? "paid · sign in"
-        : Installed is null ? "not installed"
+        : !SignedIn ? "sign in to install"
+        : NeedsPurchase ? "paid · not on your account"
+        : Installed is null ? (Owned ? "on your account" : "not installed")
         : HasUpdate ? "update available"
         : "up to date";
 
     public string ActionLabel =>
         Latest is null ? "—"
-        : IsPaid && Latest.Url is null ? "Sign in"
-        : Installed is null ? "Install"
+        : !SignedIn ? "Sign in"
+        : NeedsPurchase ? "Buy"
+        : Installed is null ? (Owned ? "Install" : "Add & install")
         : HasUpdate ? "Update"
         : "Installed";
 
-    public bool CanAct => Latest is not null && !(IsPaid && Latest.Url is null) && (Installed is null || HasUpdate);
+    public bool CanAct => Latest is not null && (!SignedIn || NeedsPurchase || Installed is null || HasUpdate);
     public bool CanUninstall => Installed is not null;
     public bool IsCurrent => Installed is not null && !HasUpdate;
 
-    [RelayCommand(CanExecute = nameof(CanAct))] private Task Act() => owner.InstallAsync(this);
+    [RelayCommand(CanExecute = nameof(CanAct))]
+    private Task Act() =>
+        !SignedIn ? owner.SignInFromRowAsync()
+        : NeedsPurchase ? Run(() => owner.OpenBuyPage(Id))
+        : owner.InstallAsync(this);
+
+    private static Task Run(Action a) { a(); return Task.CompletedTask; }
     [RelayCommand(CanExecute = nameof(CanUninstall))] private Task Uninstall() => owner.UninstallAsync(this);
 }
