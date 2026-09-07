@@ -100,8 +100,8 @@ to link to.
 | MeshForgeCloud | provider | Fab | — |
 | MeshForgeTrellis | provider | Fab | — |
 | MeshForgeGarment | post-process | **Paid** | — |
-| MeshForgeToolset | toolset | Fab | — |
-| MeshForgeTrellisToolset | toolset | Fab | — |
+| MeshForgeToolset | toolset | Open | [MeshForgeToolset](https://github.com/AutomationForgeHQ/MeshForgeToolset) |
+| MeshForgeTrellisToolset | toolset | Open | [MeshForgeTrellisToolset](https://github.com/AutomationForgeHQ/MeshForgeTrellisToolset) |
 
 `MeshForgeCloud` is one plugin covering two hosted vendors — **Tripo** and
 **Meshy** — registered as separate providers under it, not two plugins.
@@ -109,11 +109,11 @@ to link to.
 working but not yet released — the one member of this set still without a
 public build.
 
-**Open question, not yet decided:** `MeshForge` (core) is open while its
-own `MeshForgeToolset` is Fab. Every other set with both a core and a
-toolset — MotionForge, SpeechForge, FaceForge, MontageForge — keeps the two
-on the same tier. Noted here for Bojan to decide on; not changed
-unilaterally.
+`MeshForgeToolset` and `MeshForgeTrellisToolset` moved from Fab to Open on
+2026-09-07 — the open question noted here previously is resolved: every
+set's toolset is open regardless of its core's tier, the toolset is the MCP
+surface, and this set was the one exception. Neither has a mirror yet;
+`tools/mirror.ps1` creates one on first publish.
 
 ### SurfaceForge
 
