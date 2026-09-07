@@ -69,12 +69,15 @@ forge update                        everything on a target to its latest
 forge uninstall MontageForge
 forge enable MontageForge --project C:\Games\MyGame   the .uproject edit
 forge channel [stable|nightly]      the channel both surfaces follow
+forge claim <set|plugin>            add free plugins to your account, without installing
 forge login · logout · whoami       one account for the site, the hub and the CLI
 ```
 
-Free plugins need no account. Signing in opens the account site in the
-browser; when you say yes there, the session is handed to this machine over
-the loopback and kept under DPAPI — no password passes through the desktop.
+Nothing installs without an account. Every plugin is added to one first: a
+free plugin is claimed as it installs, a paid one is bought on the account
+site. Signing in opens that site in the browser; when you say yes there, the
+session is handed to this machine over the loopback and kept under DPAPI — no
+password passes through the desktop.
 Creating an account, signing the hub in, and how it all works:
 [docs/ACCOUNTS.md](docs/ACCOUNTS.md). A target under Program Files makes the CLI
 relaunch itself elevated once. The hub (`src/Forge.Hub`, Avalonia) is the same
