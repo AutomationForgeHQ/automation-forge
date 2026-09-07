@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T14:51:35Z",
+  "generatedAt": "2026-09-07T15:17:16Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -248,6 +248,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/FaceForge",
       "versions": [
+        {
+          "version": "0.2.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforge-v0.2.0/FaceForge-0.2.0-UE5.8-Win64.zip",
+          "size": 706329,
+          "sha256": "4becad011a48e3ed43d59fb6be9de164f657530bc6c609a195ecf92e1dd7236f",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforge-v0.2.0/FaceForge-0.2.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T15:16:58Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforge-v0.2.0"
+        },
         {
           "version": "0.1.1",
           "engine": "5.8",
