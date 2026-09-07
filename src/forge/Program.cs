@@ -10,8 +10,9 @@ using Forge.Core.Projects;
 // forge — the Automation Forge installer, as a command line.
 //
 // What CI, scripts and agents use, and what the hub runs when it needs to write
-// somewhere privileged. Free plugins need no account; `forge login` arrives with
-// the Pro backend and unlocks paid ones.
+// somewhere privileged. Nothing installs without an account (`forge login`):
+// a free plugin is added to the account as it installs, a paid one is bought
+// on the account site first.
 
 var http = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
 http.DefaultRequestHeaders.UserAgent.ParseAdd(AppInfo.UserAgent("cli"));
@@ -52,7 +53,9 @@ list.SetAction(async (parse, ct) =>
     var target = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
     var engineVersion = target.engine?.Version ?? "5.8";
     var channel = parse.GetValue(channelOpt)!;
-    Console.WriteLine($"manifest {manifest.GeneratedAt}{(fromCache ? " (cached)" : "")} · target {target.target.Label} · channel {channel}");
+    var owned = await OwnedOrEmptyAsync(ct);
+    Console.WriteLine($"manifest {manifest.GeneratedAt}{(fromCache ? " (cached)" : "")} · target {target.target.Label} · channel {channel}"
+                      + (entitlements.IsSignedIn ? $" · account {entitlements.AccountLabel}" : " · not signed in (forge login)"));
     foreach (var set in manifest.Sets)
     {
         Console.WriteLine();
@@ -63,8 +66,9 @@ list.SetAction(async (parse, ct) =>
             var latest = p.Latest(engineVersion, channel);
             var installed = state.Find(target.target, p.Id);
             var status = installed is null ? "" : installed.Version == latest?.Version ? "installed" : $"installed {installed.Version}, update available";
-            var avail = latest is null ? "no release yet" : (p.IsPaid && latest.Url is null ? $"{latest.Version} · paid" : latest.Version);
-            Console.WriteLine($"  {p.Id,-28} {p.Role,-9} {p.Distribution,-5} {avail,-24} {status}");
+            var avail = latest is null ? "no release yet" : latest.Version;
+            var standing = owned.Contains(p.Id) ? "yours" : p.IsPaid ? "paid" : "free";
+            Console.WriteLine($"  {p.Id,-28} {p.Role,-9} {standing,-6} {avail,-16} {status}");
         }
     }
     return 0;
@@ -96,6 +100,16 @@ install.SetAction(async (parse, ct) =>
     // An engine install carries the editor plugin (menu, update badge) whenever the manifest has it.
     order = manifest.WithHubPlugin(order.Select(p => p.Id), target.target.Kind).Select(id => manifest.Plugin(id)!).ToList();
 
+    if (!entitlements.IsSignedIn) { Console.Error.WriteLine($"  {AnonymousEntitlements.SignInMessage}  (forge login)"); return 4; }
+    var owned = await OwnedOrEmptyAsync(ct);
+    var unbought = order.Where(p => p.IsPaid && !owned.Contains(p.Id)).Select(p => p.Id).ToList();
+    if (unbought.Count > 0)
+    {
+        Console.Error.WriteLine($"  not on your account: {string.Join(", ", unbought)} — buy at {CloudConfig.PluginsUrl}");
+        order.RemoveAll(p => unbought.Contains(p.Id, StringComparer.OrdinalIgnoreCase));
+        if (order.Count == 0) return 5;
+    }
+
     if (!Installer.IsWritable(target.target.Root) && !parse.GetValue(noElevate) && !Elevation.IsElevated())
     {
         Console.WriteLine($"{target.target.Root} needs administrator rights — asking for elevation.");
@@ -122,9 +136,40 @@ install.SetAction(async (parse, ct) =>
             Console.Write("\r"); Console.Error.WriteLine($"  failed: {p.Id} — {ex.Message}"); failures++;
         }
     }
-    return failures == 0 ? 0 : 1;
+    return failures == 0 ? (unbought.Count == 0 ? 0 : 5) : 1;
 });
 root.Subcommands.Add(install);
+
+// ── claim ─────────────────────────────────────────────────────────────────
+var claimArg = new Argument<string[]>("plugins") { Description = "Plugin ids or set names to add to your account. Free ones are added; paid ones are named." };
+var claim = new Command("claim", "Add free plugins (and the free plugins they depend on) to your account without installing them.");
+claim.Arguments.Add(claimArg); claim.Options.Add(offlineOpt);
+claim.SetAction(async (parse, ct) =>
+{
+    if (!entitlements.IsSignedIn) { Console.Error.WriteLine($"  {AnonymousEntitlements.SignInMessage}  (forge login)"); return 4; }
+    var (manifest, _) = await manifestClient.GetAsync(parse.GetValue(offlineOpt), ct);
+    var ids = new List<string>();
+    foreach (var name in parse.GetValue(claimArg) ?? [])
+    {
+        if (manifest.Set(name) is { } set) ids.AddRange(set.Members);
+        else if (manifest.Plugin(name) is { } p) ids.Add(p.Id);
+        else { Console.Error.WriteLine($"Unknown plugin or set: {name}"); return 2; }
+    }
+    try
+    {
+        var r = await entitlements.ClaimAsync(ids, ct);
+        if (r.Added.Count > 0) Console.WriteLine($"  added to your account: {string.Join(", ", r.Added)}");
+        if (r.AlreadyOwned.Count > 0) Console.WriteLine($"  already yours: {string.Join(", ", r.AlreadyOwned)}");
+        if (r.Paid.Count > 0) Console.WriteLine($"  paid, so not added: {string.Join(", ", r.Paid)} — buy at {CloudConfig.PluginsUrl}");
+        return r.Paid.Count == 0 ? 0 : 5;
+    }
+    catch (EntitlementException ex)
+    {
+        Console.Error.WriteLine($"  {ex.Message}");
+        return 1;
+    }
+});
+root.Subcommands.Add(claim);
 
 // ── update ────────────────────────────────────────────────────────────────
 var update = new Command("update", "Update every installed plugin on a target to its latest version.");
@@ -142,15 +187,23 @@ update.SetAction(async (parse, ct) =>
         if (latest is not null && latest.Version != i.Version) pending.Add((p, latest));
     }
     if (pending.Count == 0) { Console.WriteLine("Everything is current."); return 0; }
+    if (!entitlements.IsSignedIn) { Console.Error.WriteLine($"  {AnonymousEntitlements.SignInMessage}  (forge login)"); return 4; }
     if (!Installer.IsWritable(target.target.Root) && !parse.GetValue(noElevate) && !Elevation.IsElevated())
     {
         var code = Elevation.RelaunchElevated(args);
         if (code is null) { Console.Error.WriteLine("Elevation was declined; nothing updated."); return 3; }
         return code.Value;
     }
+    var failures = 0;
     foreach (var (p, v) in pending)
-        await installer.InstallAsync(new InstallRequest(p, v, target.target), force: false, null, ct);
-    return 0;
+    {
+        try { await installer.InstallAsync(new InstallRequest(p, v, target.target), force: false, null, ct); }
+        catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException)
+        {
+            Console.Error.WriteLine($"  failed: {p.Id} — {ex.Message}"); failures++;
+        }
+    }
+    return failures == 0 ? 0 : 1;
 });
 root.Subcommands.Add(update);
 
@@ -238,7 +291,7 @@ logout.SetAction(_ =>
 });
 root.Subcommands.Add(logout);
 
-var whoami = new Command("whoami", "Who this machine is signed in as, and what the account owns.");
+var whoami = new Command("whoami", "Who this machine is signed in as, and what the account holds.");
 whoami.SetAction(async (parse, ct) =>
 {
     if (!entitlements.IsSignedIn) { Console.WriteLine("  not signed in — `forge login`"); return 0; }
@@ -246,7 +299,7 @@ whoami.SetAction(async (parse, ct) =>
     try
     {
         var owned = await entitlements.OwnedAsync(ct);
-        Console.WriteLine(owned.Count == 0 ? "  owns: nothing paid yet" : $"  owns: {string.Join(", ", owned)}");
+        Console.WriteLine(owned.Count == 0 ? $"  on the account: nothing yet — `forge claim <set>` or {CloudConfig.PluginsUrl}" : $"  on the account: {string.Join(", ", owned.OrderBy(x => x))}");
     }
     catch (Exception ex) when (ex is EntitlementException or HttpRequestException)
     {
@@ -260,6 +313,17 @@ root.Subcommands.Add(whoami);
 return await root.Parse(args).InvokeAsync();
 
 // ── helpers ───────────────────────────────────────────────────────────────
+async Task<IReadOnlySet<string>> OwnedOrEmptyAsync(CancellationToken ct)
+{
+    if (!entitlements.IsSignedIn) return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    try { return await entitlements.OwnedAsync(ct); }
+    catch (Exception ex) when (ex is EntitlementException or HttpRequestException)
+    {
+        Console.Error.WriteLine($"  (could not read your account: {ex.Message})");
+        return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    }
+}
+
 static (InstallTarget target, EngineInstall? engine) ResolveTarget(string? engineSpec, string? project)
 {
     if (!string.IsNullOrEmpty(project))
