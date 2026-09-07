@@ -15,10 +15,11 @@ public sealed class InstallResult
 }
 
 /// <summary>
-/// Download, verify, place. Every step is checked before the next: the archive's
-/// sha256 must match the manifest, the archive must contain exactly one plugin
-/// folder with a descriptor, and the target must be writable — the caller is
-/// told to elevate rather than failing halfway through a Program Files write.
+/// Download, verify, place. Every step is checked before the next: the account
+/// must hold the plugin (a free one is added on the way), the archive's sha256
+/// must match the manifest, the archive must contain exactly one plugin folder
+/// with a descriptor, and the target must be writable — the caller is told to
+/// elevate rather than failing halfway through a Program Files write.
 /// </summary>
 public sealed class Installer
 {
@@ -58,11 +59,16 @@ public sealed class Installer
         if (!IsWritable(target.Root))
             throw new UnauthorizedAccessException($"{target.Root} is not writable. Run elevated to install into this engine, or install into a project instead.");
 
-        var url = version.Url ?? await _entitlements.ResolveDownloadUrlAsync(plugin, version, ct)
-                  ?? throw new EntitlementException($"{plugin.Id} is a paid plugin. Sign in with an account that owns it, or buy it first.");
+        // The manifest's URL is where the backend finds the package, never where a
+        // client fetches it: every download is issued by the account service, for
+        // an account that holds the plugin. Signed out, this throws before any bytes.
+        if (!_entitlements.IsSignedIn) throw new EntitlementException(AnonymousEntitlements.SignInMessage, "unauthenticated");
+        var ownedBefore = await _entitlements.OwnsAsync(plugin, ct);
+        var download = await _entitlements.ResolveDownloadAsync(plugin, version, ct);
+        if (!ownedBefore) _log($"added to your account: {plugin.Id}");
 
-        var archive = await DownloadAsync(url, plugin.Id, version, progress, ct);
-        VerifyChecksum(archive, version.Sha256);
+        var archive = await DownloadAsync(download.Url, plugin.Id, version, progress, ct);
+        VerifyChecksum(archive, version.Sha256 ?? download.Sha256);
 
         var staging = Path.Combine(Paths.DownloadDir, $"extract-{plugin.Id}-{Guid.NewGuid():N}");
         try
