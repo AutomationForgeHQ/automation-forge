@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T20:07:03Z",
+  "generatedAt": "2026-09-07T20:09:40Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -603,8 +603,21 @@
       "dependencies": [
         "MeshForgeTrellis"
       ],
-      "source": null,
-      "versions": []
+      "source": "https://github.com/AutomationForgeHQ/MeshForgeTrellisToolset",
+      "versions": [
+        {
+          "version": "0.0.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgetrellistoolset-v0.0.1/MeshForgeTrellisToolset-0.0.1-UE5.8-Win64.zip",
+          "size": 95897,
+          "sha256": "1a80ffd856daa9d94bffb6fae502f8ebd7898cb4ae791ceb4bea8a88fce40c7e",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgetrellistoolset-v0.0.1/MeshForgeTrellisToolset-0.0.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T20:09:12Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgetrellistoolset-v0.0.1"
+        }
+      ]
     },
     {
       "id": "MeshWeightRemap",
