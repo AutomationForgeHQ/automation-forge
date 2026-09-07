@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T16:11:01Z",
+  "generatedAt": "2026-09-07T20:07:03Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -540,12 +540,24 @@
       "id": "MeshForgeToolset",
       "set": "meshforge",
       "role": "toolset",
-      "distribution": "fab",
+      "distribution": "open",
       "dependencies": [
         "MeshForge"
       ],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MeshForgeToolset",
       "versions": [
+        {
+          "version": "0.2.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgetoolset-v0.2.1/MeshForgeToolset-0.2.1-UE5.8-Win64.zip",
+          "size": 168899,
+          "sha256": "c59a239a4fbe98eb2b2b3140749c5493d7b9c677db49dae5f49b2bd8c4583179",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgetoolset-v0.2.1/MeshForgeToolset-0.2.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T20:06:18Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgetoolset-v0.2.1"
+        },
         {
           "version": "0.2.0",
           "engine": "5.8",
@@ -587,7 +599,7 @@
       "id": "MeshForgeTrellisToolset",
       "set": "meshforge",
       "role": "toolset",
-      "distribution": "fab",
+      "distribution": "open",
       "dependencies": [
         "MeshForgeTrellis"
       ],
