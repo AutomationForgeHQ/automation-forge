@@ -68,7 +68,9 @@ forge install <set>      adds free plugins to the account as it goes; names paid
 forge logout             forget the sign-in kept on this machine
 ```
 
-Exit codes: `4` not signed in, `5` something in the request is paid and not
+Exit codes: `2` what you asked for is not there — a mistyped `--project`,
+an engine that is not installed, an unknown plugin; `4` not signed in, or the
+account service could not answer; `5` something in the request is paid and not
 on the account (the rest was installed).
 
 The hub and the CLI share the sign-in: sign in with one and the other knows.

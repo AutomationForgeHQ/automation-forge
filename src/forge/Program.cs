@@ -310,7 +310,29 @@ whoami.SetAction(async (parse, ct) =>
 });
 root.Subcommands.Add(whoami);
 
-return await root.Parse(args).InvokeAsync();
+// A mistyped --project or --engine is the ordinary way to get this wrong, and
+// it used to arrive as an unhandled stack trace that read like a broken hub.
+// These are the exceptions that mean "what you asked for is not there"; a
+// genuine defect still escapes, because a stack trace is the right answer to one.
+try
+{
+    // Off, so the exceptions below reach the catch instead of being printed as a
+    // stack trace with "Unhandled exception:" in front of them.
+    var invocation = new InvocationConfiguration { EnableDefaultExceptionHandler = false };
+    return await root.Parse(args).InvokeAsync(invocation);
+}
+catch (EntitlementException ex)
+{
+    // Anything about the account keeps the account's code, so a script branching
+    // on 4 does not have to learn a second one for the same class of problem.
+    Console.Error.WriteLine($"  {ex.Message}");
+    return 4;
+}
+catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException or InvalidOperationException or UnauthorizedAccessException)
+{
+    Console.Error.WriteLine($"  {ex.Message}");
+    return 2;
+}
 
 // ── helpers ───────────────────────────────────────────────────────────────
 async Task<IReadOnlySet<string>> OwnedOrEmptyAsync(CancellationToken ct)

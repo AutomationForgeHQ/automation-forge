@@ -8,9 +8,17 @@ public sealed record InstallTarget(string Kind, string Root, string Label)
 {
     public static InstallTarget Engine(Engines.EngineInstall e) => new("engine", e.PluginRoot, $"UE {e.FullVersion}");
 
+    /// <summary>
+    /// A project by its .uproject or the folder holding one. A path that is not
+    /// there at all is the common typo, so it is named as such rather than
+    /// reaching Directory.GetFiles and surfacing as a stack trace.
+    /// </summary>
     public static InstallTarget Project(string uprojectOrDir)
     {
-        var dir = File.Exists(uprojectOrDir) ? Path.GetDirectoryName(Path.GetFullPath(uprojectOrDir))! : Path.GetFullPath(uprojectOrDir);
+        var full = Path.GetFullPath(uprojectOrDir);
+        if (!File.Exists(full) && !Directory.Exists(full))
+            throw new FileNotFoundException($"No project at {full}. Give the .uproject file, or the folder holding it.");
+        var dir = File.Exists(full) ? Path.GetDirectoryName(full)! : full;
         var uproject = Directory.GetFiles(dir, "*.uproject").FirstOrDefault()
                        ?? throw new FileNotFoundException($"No .uproject in {dir}");
         return new("project", Path.Combine(dir, "Plugins", Core.Paths.PluginFolder), Path.GetFileNameWithoutExtension(uproject));
