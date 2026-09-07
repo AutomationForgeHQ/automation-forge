@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T15:17:16Z",
+  "generatedAt": "2026-09-07T15:22:07Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -380,6 +380,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/FaceForgeToolset",
       "versions": [
+        {
+          "version": "0.2.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgetoolset-v0.2.0/FaceForgeToolset-0.2.0-UE5.8-Win64.zip",
+          "size": 190776,
+          "sha256": "ec2141abdd9c43f8059be2328fdee4a12df897d964fdf1a694c2304a46d36bd7",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgetoolset-v0.2.0/FaceForgeToolset-0.2.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T15:19:28Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgetoolset-v0.2.0"
+        },
         {
           "version": "0.1.1",
           "engine": "5.8",
@@ -1013,8 +1025,21 @@
       "dependencies": [
         "PerformanceForge"
       ],
-      "source": null,
-      "versions": []
+      "source": "https://github.com/AutomationForgeHQ/PerformanceForgeToolset",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforgetoolset-v0.1.0/PerformanceForgeToolset-0.1.0-UE5.8-Win64.zip",
+          "size": 68674,
+          "sha256": "6836665c23e81263abd0666536f13ae1a2d57fe246f341acf71ab51dff107f34",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforgetoolset-v0.1.0/PerformanceForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T15:21:48Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/performanceforgetoolset-v0.1.0"
+        }
+      ]
     },
     {
       "id": "SpeechForge",
