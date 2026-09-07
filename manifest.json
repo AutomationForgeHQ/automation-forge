@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-01T02:23:05Z",
+  "generatedAt": "2026-09-07T14:01:48Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -26,7 +26,8 @@
         "MotionForgeKimodoToolset",
         "MotionForgeQuality",
         "MotionForgeQualityToolset",
-        "MotionForgeToolset"
+        "MotionForgeToolset",
+        "MotionForgeUthana"
       ]
     },
     {
@@ -34,6 +35,8 @@
       "name": "SpeechForge",
       "members": [
         "SpeechForge",
+        "SpeechForgeDeepL",
+        "SpeechForgeElevenLabs",
         "SpeechForgeToolset"
       ]
     },
@@ -62,6 +65,7 @@
       "members": [
         "MeshForge",
         "MeshForgeCloud",
+        "MeshForgeGarment",
         "MeshForgeToolset",
         "MeshForgeTrellis",
         "MeshForgeTrellisToolset"
@@ -73,6 +77,24 @@
       "members": [
         "MeshWeightRemap",
         "MeshWeightRemapToolset"
+      ]
+    },
+    {
+      "id": "performanceforge",
+      "name": "PerformanceForge",
+      "members": [
+        "PerformanceForge",
+        "PerformanceForgeToolset"
+      ]
+    },
+    {
+      "id": "surfaceforge",
+      "name": "SurfaceForge",
+      "members": [
+        "SurfaceForge",
+        "SurfaceForgeLocal",
+        "SurfaceForgePatina",
+        "SurfaceForgeToolset"
       ]
     }
   ],
@@ -366,7 +388,7 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": null,
+      "source": "https://github.com/AutomationForgeHQ/MeshForge",
       "versions": [
         {
           "version": "0.1.0",
@@ -405,6 +427,17 @@
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgecloud-v0.1.0"
         }
       ]
+    },
+    {
+      "id": "MeshForgeGarment",
+      "set": "meshforge",
+      "role": "post",
+      "distribution": "paid",
+      "dependencies": [
+        "MeshForge"
+      ],
+      "source": null,
+      "versions": []
     },
     {
       "id": "MeshForgeToolset",
@@ -819,6 +852,37 @@
       ]
     },
     {
+      "id": "MotionForgeUthana",
+      "set": "motionforge",
+      "role": "provider",
+      "distribution": "open",
+      "dependencies": [
+        "MotionForge"
+      ],
+      "source": null,
+      "versions": []
+    },
+    {
+      "id": "PerformanceForge",
+      "set": "performanceforge",
+      "role": "core",
+      "distribution": "paid",
+      "dependencies": [],
+      "source": null,
+      "versions": []
+    },
+    {
+      "id": "PerformanceForgeToolset",
+      "set": "performanceforge",
+      "role": "toolset",
+      "distribution": "open",
+      "dependencies": [
+        "PerformanceForge"
+      ],
+      "source": null,
+      "versions": []
+    },
+    {
       "id": "SpeechForge",
       "set": "speechforge",
       "role": "core",
@@ -853,6 +917,28 @@
       ]
     },
     {
+      "id": "SpeechForgeDeepL",
+      "set": "speechforge",
+      "role": "provider",
+      "distribution": "fab",
+      "dependencies": [
+        "SpeechForge"
+      ],
+      "source": null,
+      "versions": []
+    },
+    {
+      "id": "SpeechForgeElevenLabs",
+      "set": "speechforge",
+      "role": "provider",
+      "distribution": "open",
+      "dependencies": [
+        "SpeechForge"
+      ],
+      "source": null,
+      "versions": []
+    },
+    {
       "id": "SpeechForgeToolset",
       "set": "speechforge",
       "role": "toolset",
@@ -875,6 +961,48 @@
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgetoolset-v0.1.0"
         }
       ]
+    },
+    {
+      "id": "SurfaceForge",
+      "set": "surfaceforge",
+      "role": "core",
+      "distribution": "open",
+      "dependencies": [],
+      "source": null,
+      "versions": []
+    },
+    {
+      "id": "SurfaceForgeLocal",
+      "set": "surfaceforge",
+      "role": "provider",
+      "distribution": "fab",
+      "dependencies": [
+        "SurfaceForge"
+      ],
+      "source": null,
+      "versions": []
+    },
+    {
+      "id": "SurfaceForgePatina",
+      "set": "surfaceforge",
+      "role": "provider",
+      "distribution": "fab",
+      "dependencies": [
+        "SurfaceForge"
+      ],
+      "source": null,
+      "versions": []
+    },
+    {
+      "id": "SurfaceForgeToolset",
+      "set": "surfaceforge",
+      "role": "toolset",
+      "distribution": "open",
+      "dependencies": [
+        "SurfaceForge"
+      ],
+      "source": null,
+      "versions": []
     }
   ]
 }
