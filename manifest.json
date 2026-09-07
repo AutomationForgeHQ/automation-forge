@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T15:29:26Z",
+  "generatedAt": "2026-09-07T15:36:28Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1201,8 +1201,21 @@
       "role": "core",
       "distribution": "open",
       "dependencies": [],
-      "source": null,
-      "versions": []
+      "source": "https://github.com/AutomationForgeHQ/SurfaceForge",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforge-v0.1.0/SurfaceForge-0.1.0-UE5.8-Win64.zip",
+          "size": 482373,
+          "sha256": "a654245b8c6756a599028607d0f457f08fb7043d0e76afa8c3e0ebb0ad19321f",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforge-v0.1.0/SurfaceForge-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T15:36:06Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/surfaceforge-v0.1.0"
+        }
+      ]
     },
     {
       "id": "SurfaceForgeLocal",
