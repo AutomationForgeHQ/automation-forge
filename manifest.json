@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T15:40:24Z",
+  "generatedAt": "2026-09-07T15:42:43Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1250,7 +1250,20 @@
         "SurfaceForge"
       ],
       "source": null,
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforgepatina-v0.1.0/SurfaceForgePatina-0.1.0-UE5.8-Win64.zip",
+          "size": 89921,
+          "sha256": "e10cdbdf34b7e38be2e24e3b705557c3716a2384c0d9e577b494129008791074",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforgepatina-v0.1.0/SurfaceForgePatina-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-07T15:42:35Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/surfaceforgepatina-v0.1.0"
+        }
+      ]
     },
     {
       "id": "SurfaceForgeToolset",
