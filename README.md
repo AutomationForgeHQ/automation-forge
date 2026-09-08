@@ -1,6 +1,6 @@
 # Automation Forge
 
-The prototyping suite for Unreal Engine 5.8 — motion, voice, faces and staging generated in the editor and run as one pipeline, by you and the agents working beside you, so your team plays the design before the assets exist. It's the first implementation of **Playable Ops**: turning creative intent into content a game can actually play, review, trace and safely replace.
+PlayableOps for Unreal Engine 5.8 — motion, voice, faces, meshes, materials and staging generated or recorded in the editor and run as one pipeline, by you and the agents working beside you, so your team plays the design before the assets exist. It's the first implementation of **PlayableOps**: turning creative intent into content a game can actually play, review, trace and safely replace.
 
 This repository is the product's front door: the release **manifest**, the `forge` command-line installer, the hub, and the public documentation. Each open plugin has its own repository under this organisation; builds for every free plugin are published on [`releases`](https://github.com/AutomationForgeHQ/releases).
 
@@ -8,14 +8,14 @@ Built by [Kovati](https://kovati.dev) — founded by MetaWorx LLC, backed and cu
 
 ## Documentation
 
-This README is the technical reference: the manifest's shape, the hub and CLI, machine configuration, releases. For everything else — what each Forge set does, how open/Fab/paid is decided, the Playable Ops argument, getting your first plugin installed — see the **[docs/ wiki](docs/README.md)**:
+This README is the technical reference: the manifest's shape, the hub and CLI, machine configuration, releases. For everything else — what each Forge set does, how open/Fab/paid is decided, the PlayableOps argument, getting your first plugin installed — see the **[docs/ wiki](docs/README.md)**:
 
 - [docs/PLAYABLE-OPS.md](docs/PLAYABLE-OPS.md) — the category, in short: the playable gap, graduation, Trinity architecture.
 - [docs/PLUGINS.md](docs/PLUGINS.md) — every Forge set's goal, current features and honest status.
 - [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md) — open, Fab and paid, explained, with the full per-plugin table.
 - [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) — install the hub, sign in, get a set running.
 - [docs/ACCOUNTS.md](docs/ACCOUNTS.md) — the account system in depth.
-- [docs/MANIFESTO.md](docs/MANIFESTO.md) — Playable Ops as a manifesto.
+- [docs/MANIFESTO.md](docs/MANIFESTO.md) — PlayableOps as a manifesto.
 
 Elsewhere: the [site](https://kovati.dev), the [account app](https://app.kovati.dev), the [whitepaper](https://kovati.dev/whitepaper), and the [org profile](https://github.com/AutomationForgeHQ).
 

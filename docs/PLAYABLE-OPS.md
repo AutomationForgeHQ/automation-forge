@@ -1,4 +1,4 @@
-# Playable Ops
+# PlayableOps
 
 *The short version. The long version is the [whitepaper](https://kovati.dev/whitepaper); the values version is [MANIFESTO.md](MANIFESTO.md).*
 
@@ -21,7 +21,7 @@ imagine the game or produce any single asset, but because every verb asks
 them to become a temporary animation engineer, voice producer, technical
 artist and build manager before they can test the design.
 
-**Working definition:** Playable Ops is the operational discipline and
+**Working definition:** PlayableOps is the operational discipline and
 software layer that turns creative intent into content that is playable,
 reviewable, traceable and replaceable.
 
@@ -84,7 +84,7 @@ hosted, and run faces locally — one project, several origins, one lifecycle.
 **The rule:** estimate before spend. Separate expensive generation from free
 Unreal-side refinishing wherever possible.
 
-## What Playable Ops is not
+## What PlayableOps is not
 
 - Not "AI makes the whole game." The discipline matters more, not less, when
   output is abundant.

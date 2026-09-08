@@ -20,8 +20,8 @@ through the same rules.
 other set plugs into, plus the in-editor Hub menu that ties installs,
 updates and API keys together.
 
-- Wire any Forge set into one pipeline — a definition anyone can author, no
-  code involved.
+- Wire the sets that declare pipeline nodes into one pipeline — a definition
+  anyone can author, no code involved.
 - Leave a run going for hours: stepped, resumable and cached, so nothing
   generates twice.
 - Price a run before it spends a cent, and gate the decisions a machine
@@ -33,7 +33,13 @@ updates and API keys together.
 - One Keys page for every installed plugin — a provider account is entered
   once, into the OS credential vault, and every set that needs it finds it.
 
-Editor and commandlet only. None of it ships inside your packaged game.
+Editor-side only; nothing here ships inside your packaged game. Nothing in
+the executor needs the editor UI either, so a commandlet of your own can
+advance a run — we do not ship one yet.
+
+**Status:** working developer preview. The graph, the gates, the executor
+and the ledger all run; systematic reliability testing and the final
+authoring surface are still ahead.
 
 **Members:** `AutomationForge` (core), `AutomationForgePipelines` (the
 graph editor and user-authored pipelines), `AutomationForgeHub` (the bridge
@@ -74,12 +80,13 @@ GPU), `MotionForgeQuality` (clip measurement), and three toolsets.
 character-level timing attached, on your own provider account — and stays
 correct as the script, the cast and the languages around it change.
 
-The editor surface is one Speech Library panel with five pages, each doing
+The editor surface is one Speech Library panel with six pages, each doing
 one job in the screenwriter's own order: **Ingest** (pull lines in from an
 existing script or dialogue asset), **Cast** (define speakers and the
 voice each one speaks in), **Write** (author lines and separately, their
-direction), **Perform** (generate, or hand off to a recorded performance),
-**Localize** (translate and dub into other languages).
+direction), **Produce** (price a run and generate it), **Perform** (hand a
+line off to a recorded performance), **Localize** (translate and dub into
+other languages).
 
 - Voice a whole script in one pass; see the price before a single line
   generates, and re-run safely — unchanged lines are skipped, never
@@ -113,7 +120,8 @@ direction), **Perform** (generate, or hand off to a recorded performance),
 
 **Status:** graduated to **beta** — "well tested and established" is the
 call actually recorded against this release, covering the full
-Ingest/Cast/Write/Perform/Localize surface, localization and dubbing.
+Ingest/Cast/Write/Produce/Perform/Localize surface, localization and
+dubbing.
 `SpeechForgeElevenLabs` (the live hosted provider) graduated the same way,
 the same day. `SpeechForgeDeepL` (translation) shipped 2026-09-08 — a
 **paid** provider, priced like Performance Forge and the Garment Fit
@@ -137,7 +145,8 @@ vocabulary your rig actually reads, and baked ready to play.
 - Or solve on NVIDIA Audio2Face-3D — your own card, or a GPU rented by the
   hour.
 - Emotion as an input, not only a reading: play a line angrier than it was
-  recorded, or let Audio2Emotion read the delivery frame by frame instead.
+  recorded, or let Audio2Emotion read the delivery instead, sampling about
+  once a second.
 - **Retargets curves between face vocabularies and reports coverage** — the
   problem this set exists to solve, because a solver and a rig speaking
   different vocabularies produce a "successful" solve that animates nothing.
@@ -227,7 +236,9 @@ in the character's own pose, then **Place** it — about 35 Tripo + Meshy
 credits, measured start to finish.
 
 Measured (2026-09-06, Blender 5.2): a Tripo T-shirt (10,130 vertices)
-fitted in 1.9s with zero vertices inside the body; a Meshy jacket in 1.8s
+fitted in 1.9s with no vertex inside the body — though nine triangle
+centres still penetrate, and the pipeline's own `PRESERVATION_RESULTS.md`
+makes no collision-free or animation-ready claim; a Meshy jacket in 1.8s
 with its pockets and buttons where they were generated; a skeletal CC5
 shirt (13,610 triangles, 62 influenced bones) validated triangle-for-
 triangle in UE 5.8 after skinning.
@@ -296,12 +307,14 @@ implementation is sold.
 
 ## Tools — MeshWeightRemap
 
-**Goal:** a utility rather than a full set — remaps skin weights from a
-leader pose across a whole folder of garments in one pass, instead of one
-right-click at a time.
+**Goal:** a utility rather than a full set — moves skin weights off every
+bone a leader mesh will never drive onto the nearest ancestor it does, so a
+garment can be leader-posed without its cuffs staying behind.
 
-**Status:** working. Its toolset lets an agent batch a whole wardrobe
-folder in one job.
+**Status:** working. The right-click dialog takes a multi-selection, and
+the toolset exposes the same three calls to an agent — there is deliberately
+no single batch tool, so a whole wardrobe is a loop over a folder rather
+than one call.
 
 **Members:** `MeshWeightRemap` (core), `MeshWeightRemapToolset`.
 
@@ -309,8 +322,10 @@ folder in one job.
 
 ## What's next
 
-The whitepaper names three more sets on the roadmap: **VisualForge**
-(images and textures on the same provider registry), **ArtForge** (one
-versioned style source every other Forge generates against), and continued
-work hardening `AutomationForge`'s executor and ledger. None of that is a
+The whitepaper named **VisualForge** as a roadmap set; that promise has
+since been kept under other names — hosted image generation went to
+MeshForge Cloud and materials to SurfaceForge, both shipped. What remains
+on the roadmap is **ArtForge** (one versioned style source every other
+Forge generates against) and continued work hardening `AutomationForge`'s
+executor and ledger. None of that is a
 shipping claim — see the honesty rule in [MANIFESTO.md](MANIFESTO.md) §12.
