@@ -306,7 +306,11 @@ public partial class MainViewModel : ViewModelBase
             _manifest = manifest;
             SourceStamp = $"{found.Releases} releases · checked {found.CheckedAt.ToLocalTime():HH:mm}{(found.FromCache || manifestCached ? " · offline copy" : "")}";
             _state.Reload();
-            Rebuild();
+            // Ownership too, not just the catalogue. Buying happens in a browser,
+            // and Refresh is what a person presses when they come back — without
+            // this the row they just paid for still says Buy until the hub restarts.
+            // LoadOwnedAsync rebuilds; only do it ourselves when signed out.
+            if (_entitlements.IsSignedIn) await LoadOwnedAsync(); else Rebuild();
             Say(found.Merged > 0 ? $"Found {found.Merged} release{(found.Merged == 1 ? "" : "s")} the manifest did not list yet." : "Up to date with the releases repository.");
         }
         catch (Exception ex)
