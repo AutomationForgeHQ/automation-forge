@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T20:09:40Z",
+  "generatedAt": "2026-09-08T01:32:41Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1165,12 +1165,25 @@
       "id": "SpeechForgeDeepL",
       "set": "speechforge",
       "role": "provider",
-      "distribution": "fab",
+      "distribution": "paid",
       "dependencies": [
         "SpeechForge"
       ],
       "source": null,
-      "versions": []
+      "versions": [
+        {
+          "version": "0.1.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgedeepl-v0.1.0/SpeechForgeDeepL-0.1.0-UE5.8-Win64.zip",
+          "size": 74784,
+          "sha256": "c78af9a31d3d03bd0a5f457806d6034936636187da281fd8f05e61c33e99ea65",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgedeepl-v0.1.0/SpeechForgeDeepL-0.1.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T01:32:27Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgedeepl-v0.1.0"
+        }
+      ]
     },
     {
       "id": "SpeechForgeElevenLabs",
