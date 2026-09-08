@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T10:56:34Z",
+  "generatedAt": "2026-09-08T10:59:11Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -404,6 +404,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/FaceForgeACEToolset",
       "versions": [
+        {
+          "version": "0.1.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgeacetoolset-v0.1.1/FaceForgeACEToolset-0.1.1-UE5.8-Win64.zip",
+          "size": 112289,
+          "sha256": "07fd3ea8dec7906f3ec90de391f4e19cdb24c03a34faa832e966f2f026c3c372",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgeacetoolset-v0.1.1/FaceForgeACEToolset-0.1.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T10:58:46Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgeacetoolset-v0.1.1"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
