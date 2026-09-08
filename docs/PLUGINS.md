@@ -115,11 +115,14 @@ direction), **Perform** (generate, or hand off to a recorded performance),
 call actually recorded against this release, covering the full
 Ingest/Cast/Write/Perform/Localize surface, localization and dubbing.
 `SpeechForgeElevenLabs` (the live hosted provider) graduated the same way,
-the same day. `SpeechForgeDeepL` (translation) remains a planned provider.
+the same day. `SpeechForgeDeepL` (translation) shipped 2026-09-08 — a
+**paid** provider, priced like Performance Forge and the Garment Fit
+pipeline rather than a free edge; the built-in, keyless `Pseudo` provider
+keeps the Localize page exercisable without any account either way.
 
 **Members:** `SpeechForge` (core), `SpeechForgeElevenLabs` (hosted
-provider, live, beta), `SpeechForgeDeepL` (planned provider), and a
-toolset.
+provider, live, beta), `SpeechForgeDeepL` (paid translation provider), and
+a toolset.
 
 ---
 

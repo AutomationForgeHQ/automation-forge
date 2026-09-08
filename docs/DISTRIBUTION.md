@@ -112,8 +112,9 @@ public build.
 `MeshForgeToolset` and `MeshForgeTrellisToolset` moved from Fab to Open on
 2026-09-07 — the open question noted here previously is resolved: every
 set's toolset is open regardless of its core's tier, the toolset is the MCP
-surface, and this set was the one exception. Neither has a mirror yet;
-`tools/mirror.ps1` creates one on first publish.
+surface, and this set was the one exception. Both were released and
+mirrored the same week (`tools/mirror.ps1` created each repo on first
+publish) — see the table above for their links.
 
 ### SurfaceForge
 
@@ -164,9 +165,12 @@ its implementation isn't published. In practice that's almost always one of:
   not the glue code.
 - **It's a measurement or add-on pass** (MotionForge Quality) with nothing
   a project would fork.
-- **It was written new, next to a paid sibling**, rather than extracted
-  from an already-open core (SpeechForge DeepL, MeshForge's Trellis
-  toolset) — "cores open, edges Fab."
+- **It was written new**, rather than extracted from an already-open core —
+  "cores open, edges Fab." Its two clearest past examples have both since
+  moved on: `SpeechForgeDeepL` to Paid (2026-09-08) and
+  `MeshForgeTrellisToolset` to Open (2026-09-07), which is not a
+  coincidence — a plugin written fresh in this shape tends not to stay
+  Fab for long.
 
 None of that changes the account rule: whether a plugin is open, Fab or
 paid, it still has to be on your account before the hub will install it.
