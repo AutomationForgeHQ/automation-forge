@@ -1,4 +1,4 @@
-# Playable Ops — a manifesto
+# PlayableOps — a manifesto
 
 *Kovati / Automation Forge — Bojan Andrejek, 2 September 2026*
 
@@ -25,10 +25,10 @@ much closer to being playable.
 This is **the playable gap**: the distance between a creative idea, a
 generated or recorded result, and content the game can truly use.
 
-> **Playable Ops** — the discipline and software layer that turns creative
+> **PlayableOps** — the discipline and software layer that turns creative
 > intent into playable, reviewable, traceable, and replaceable content.
 
-Playable Ops exists to close that gap. It does not promise a button that
+PlayableOps exists to close that gap. It does not promise a button that
 makes the game. It creates a clear path from intent to options, from options
 to a choice, from that choice to the engine, and from temporary work to
 final ownership.
@@ -98,7 +98,7 @@ uses.
 
 ## 06 — People own the game
 
-Playable Ops is not a manifesto for replacing artists, actors, designers,
+PlayableOps is not a manifesto for replacing artists, actors, designers,
 programmers, or technical artists. It is a manifesto for protecting their
 time and making their decisions easier to carry through production.
 
@@ -156,7 +156,7 @@ likely cost, and important limits before a person or an agent spends money.
 > Cost is part of the creative decision.
 
 Local work, rented compute, and hosted calls have different tradeoffs.
-Playable Ops should make those tradeoffs visible without forcing the
+PlayableOps should make those tradeoffs visible without forcing the
 developer to become an infrastructure expert.
 
 ## 11 — The boring safeguards protect the creative work
@@ -181,7 +181,7 @@ result.
 
 > Trust begins where exaggeration ends.
 
-Playable Ops depends on records, status, and visible limits. Its language
+PlayableOps depends on records, status, and visible limits. Its language
 should follow the same rule.
 
 ## 13 — Start with the people who feel every broken handoff
@@ -250,7 +250,7 @@ and a studio can buy responsibility when it needs it.
 
 ## Declaration
 
-Playable Ops is how creative intent survives contact with production.
+PlayableOps is how creative intent survives contact with production.
 
 It begins with an idea, a performance, a prompt, a recording, or a saved
 recipe. It creates options without hiding the choice. It brings the selected
@@ -260,7 +260,7 @@ replacement possible without rebuilding the game around it.
 
 It is useful for generated work, recorded work, authored work, vendor work,
 and work made by a mixed team. AI makes the missing layer easier to see, but
-Playable Ops is larger than AI. Every production creates candidates. Every
+PlayableOps is larger than AI. Every production creates candidates. Every
 team reviews. Every game needs targets. Every final asset has a history,
 even when that history was never recorded.
 
@@ -269,7 +269,7 @@ the structure that helps you reach the playable version sooner, understand
 what happened, protect the work people own, and keep moving when tools and
 providers change.
 
-**The Playable Ops commitment:** make the idea playable before the team pays
+**The PlayableOps commitment:** make the idea playable before the team pays
 to make it perfect. Keep the path from intent to result. Give people the
 final say. Let agents work through the same rules. Replace what must change
 without destroying what already works.
