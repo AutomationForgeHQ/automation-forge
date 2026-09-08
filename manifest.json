@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T11:23:25Z",
+  "generatedAt": "2026-09-08T11:25:52Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -938,6 +938,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/MontageForgeToolset",
       "versions": [
+        {
+          "version": "0.1.2",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforgetoolset-v0.1.2/MontageForgeToolset-0.1.2-UE5.8-Win64.zip",
+          "size": 72095,
+          "sha256": "d5d931bef8944733479e33924a7fac6d00123733be295a74456ea8f164ecaf45",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforgetoolset-v0.1.2/MontageForgeToolset-0.1.2-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T11:25:29Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/montageforgetoolset-v0.1.2"
+        },
         {
           "version": "0.1.1",
           "engine": "5.8",
