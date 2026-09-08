@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T11:47:35Z",
+  "generatedAt": "2026-09-08T11:50:13Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1556,6 +1556,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/SpeechForgeElevenLabs",
       "versions": [
+        {
+          "version": "0.1.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgeelevenlabs-v0.1.1/SpeechForgeElevenLabs-0.1.1-UE5.8-Win64.zip",
+          "size": 149859,
+          "sha256": "4e7a52b6a1d4df4cdce97ae5daaa19cc1427e86f93457134fdfdee5eda011989",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgeelevenlabs-v0.1.1/SpeechForgeElevenLabs-0.1.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T11:49:50Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgeelevenlabs-v0.1.1"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
