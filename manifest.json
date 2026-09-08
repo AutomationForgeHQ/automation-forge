@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T10:37:25Z",
+  "generatedAt": "2026-09-08T10:40:24Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -534,6 +534,18 @@
       ],
       "source": null,
       "versions": [
+        {
+          "version": "0.1.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarment-v0.1.1/MeshForgeGarment-0.1.1-UE5.8-Win64.zip",
+          "size": 372157,
+          "sha256": "150764df4e0d9be6095873a33cc12dd6c4d401ddfc0a785b2066357e4d2a608d",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarment-v0.1.1/MeshForgeGarment-0.1.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T10:40:12Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgegarment-v0.1.1"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
