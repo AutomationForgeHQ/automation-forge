@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T11:32:57Z",
+  "generatedAt": "2026-09-08T11:35:33Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1308,6 +1308,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/MotionForgeToolset",
       "versions": [
+        {
+          "version": "0.2.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgetoolset-v0.2.1/MotionForgeToolset-0.2.1-UE5.8-Win64.zip",
+          "size": 151310,
+          "sha256": "73980083baf526d15bda6527f983a8be532a7083443c3b2066724af1040c265b",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgetoolset-v0.2.1/MotionForgeToolset-0.2.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T11:35:10Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgetoolset-v0.2.1"
+        },
         {
           "version": "0.2.0",
           "engine": "5.8",
