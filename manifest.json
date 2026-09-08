@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T10:40:24Z",
+  "generatedAt": "2026-09-08T10:42:53Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1113,6 +1113,18 @@
       "dependencies": [],
       "source": null,
       "versions": [
+        {
+          "version": "0.1.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforge-v0.1.1/PerformanceForge-0.1.1-UE5.8-Win64.zip",
+          "size": 700006,
+          "sha256": "a52b51373ef51cd11c19e0bb6d260a77db3bb05c80a9471c49114c59c2979913",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforge-v0.1.1/PerformanceForge-0.1.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T10:42:40Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/performanceforge-v0.1.1"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
