@@ -105,9 +105,9 @@ to link to.
 
 `MeshForgeCloud` is one plugin covering two hosted vendors — **Tripo** and
 **Meshy** — registered as separate providers under it, not two plugins.
-`MeshForgeTrellis` (Microsoft TRELLIS.2, local and free) is tested and
-working but not yet released — the one member of this set still without a
-public build.
+`MeshForgeTrellis` (Microsoft TRELLIS.2, local and free) was the last plugin
+in the family without a build of any kind; it released on 2026-09-08, so every
+plugin in the register now has one.
 
 `MeshForgeToolset` and `MeshForgeTrellisToolset` moved from Fab to Open on
 2026-09-07 — the open question noted here previously is resolved: every
@@ -142,6 +142,13 @@ purpose (the toolset is the MCP surface, and publishing the surface is the
 point even when the implementation behind it is sold), and SpeechForgeDeepL
 needs no equivalent move — it has no toolset of its own, and was already
 reachable through the always-open `SpeechForgeToolset`.
+
+**A paid plugin ships its licence terms in the package**, from 2026-09-08.
+Before that the three sold plugins carried none at all — no EULA, no grant,
+nothing — which is a gap rather than a licence, and it is the sort of thing
+only somebody reading the zip would notice. An open plugin carries Apache-2.0
+in the same place. A Fab plugin carries neither: it is free, closed, and
+governed by the terms of wherever you obtained it.
 
 ### Tools
 

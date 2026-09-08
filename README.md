@@ -126,6 +126,12 @@ with no editor open at all. So a plugin *declares* what it needs from the machin
 in `Config/ForgeMachine.json`, and the hub reads it — nothing here is hard-coded,
 and a plugin written next year needs no change to this application.
 
+It only works if the file is actually in the package, which is less obvious than
+it sounds: the engine's own `BuildPlugin` filter does not include `Config/`, so
+every release published before 2026-09-08 left it behind and the Keys and Runners
+pages were empty for anything installed from one. Plugins now carry a
+`Config/FilterPlugin.ini` naming it, and CI fails a build that drops it.
+
 ```jsonc
 {
   "keys": [ {

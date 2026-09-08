@@ -204,9 +204,10 @@ onto a character instead of leaving it as a separate prop.
   decimating one — measured at ~6,275 triangles for 15 credits against
   ~1.9M for a 4K PBR pass on the same reference image, visually close at
   normal distance.
-- A free, local, seeded provider — **Microsoft TRELLIS.2** in Docker, MIT
-  licensed — works and has been tested, but it's the one member of this
-  set that isn't published yet (still pre-release; see status below).
+- A free, local, seeded provider — **Microsoft TRELLIS.2** in Docker,
+  released 2026-09-08. The model's code and weights are MIT licensed, with
+  one real asterisk: it conditions on a Meta-gated encoder, so you accept
+  those terms and request access once before anything generates.
 
 ### Paired with Garment Fit: a small, from-scratch fitting pipeline
 
@@ -245,13 +246,13 @@ triangle in UE 5.8 after skinning.
 
 **Status:** `MeshForge` and `MeshForgeCloud` (Tripo + Meshy) graduated to
 **beta** — well tested and established, not experimental. `MeshForgeTrellis`
-works but stays **experimental and unpublished** until it's released.
+shipped on 2026-09-08, its first release, and stays **experimental**.
 `MeshForgeGarment` is **working and experimental**, sold as a paid plugin
 rather than free — see [DISTRIBUTION.md](DISTRIBUTION.md) for why it's
 priced like Performance Forge rather than shipped as a free add-on.
 
 **Members:** `MeshForge` (core), `MeshForgeCloud` (Tripo + Meshy provider),
-`MeshForgeTrellis` (local, free, unpublished), `MeshForgeGarment` (paid
+`MeshForgeTrellis` (local, free), `MeshForgeGarment` (paid
 garment fitting), two toolsets.
 
 ---
