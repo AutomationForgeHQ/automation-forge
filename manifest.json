@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T11:01:50Z",
+  "generatedAt": "2026-09-08T11:04:10Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -488,6 +488,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/FaceForgeToolset",
       "versions": [
+        {
+          "version": "0.2.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgetoolset-v0.2.1/FaceForgeToolset-0.2.1-UE5.8-Win64.zip",
+          "size": 193118,
+          "sha256": "1f2a39bff9b1fc0872458446aa7fed815c39ac5ee93dd131985187be51c9a573",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgetoolset-v0.2.1/FaceForgeToolset-0.2.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T11:03:47Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgetoolset-v0.2.1"
+        },
         {
           "version": "0.2.0",
           "engine": "5.8",
