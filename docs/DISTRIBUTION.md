@@ -72,7 +72,7 @@ to link to.
 |---|---|---|---|
 | SpeechForge | core | Open | [SpeechForge](https://github.com/AutomationForgeHQ/SpeechForge) |
 | SpeechForgeElevenLabs | provider | Open | [SpeechForgeElevenLabs](https://github.com/AutomationForgeHQ/SpeechForgeElevenLabs) |
-| SpeechForgeDeepL | provider | Fab | — |
+| SpeechForgeDeepL | provider | **Paid** | — |
 | SpeechForgeToolset | toolset | Open | [SpeechForgeToolset](https://github.com/AutomationForgeHQ/SpeechForgeToolset) |
 
 ### FaceForge
@@ -132,11 +132,15 @@ surface, and this set was the one exception. Neither has a mirror yet;
 | PerformanceForgeToolset | toolset | Open | [PerformanceForgeToolset](https://github.com/AutomationForgeHQ/PerformanceForgeToolset) |
 
 Performance Forge is the first plugin priced from day one, and
-`MeshForgeGarment` followed it: performance capture, take ledgers and a
-fitted-garment solve are production-layer work, not prototyping — see the
-whitepaper's "from indie tool to studio layer". Their agent toolsets are
-still open, on purpose: the toolset is the MCP surface, and publishing the
-surface is the point even when the implementation behind it is sold.
+`MeshForgeGarment` and `SpeechForgeDeepL` followed it: performance capture,
+take ledgers, a fitted-garment solve and voice-over localisation are all
+production-layer work, not prototyping — see the whitepaper's "from indie
+tool to studio layer". The agent surface stays open regardless: Performance
+Forge and MeshForgeGarment each keep a dedicated Toolset sibling open on
+purpose (the toolset is the MCP surface, and publishing the surface is the
+point even when the implementation behind it is sold), and SpeechForgeDeepL
+needs no equivalent move — it has no toolset of its own, and was already
+reachable through the always-open `SpeechForgeToolset`.
 
 ### Tools
 
