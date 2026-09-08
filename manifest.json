@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T11:28:33Z",
+  "generatedAt": "2026-09-08T11:30:28Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1236,6 +1236,18 @@
       ],
       "source": null,
       "versions": [
+        {
+          "version": "0.1.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequality-v0.1.1/MotionForgeQuality-0.1.1-UE5.8-Win64.zip",
+          "size": 159103,
+          "sha256": "d37704d56dc0f7470757c9c4237f605a27bf1052cb24f17efab2e5207de9b376",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequality-v0.1.1/MotionForgeQuality-0.1.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T11:30:15Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgequality-v0.1.1"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
