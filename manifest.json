@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T11:16:53Z",
+  "generatedAt": "2026-09-08T11:19:40Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -878,6 +878,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/MontageForge",
       "versions": [
+        {
+          "version": "0.1.2",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforge-v0.1.2/MontageForge-0.1.2-UE5.8-Win64.zip",
+          "size": 9131927,
+          "sha256": "3d622afd837f5f2867518cd3414d842ce2ddef04ceb975376ecc9a42ec159538",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforge-v0.1.2/MontageForge-0.1.2-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T11:19:17Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/montageforge-v0.1.2"
+        },
         {
           "version": "0.1.1",
           "engine": "5.8",
