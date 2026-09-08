@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T11:05:57Z",
+  "generatedAt": "2026-09-08T11:07:42Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -558,6 +558,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/MeshForge",
       "versions": [
+        {
+          "version": "0.2.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforge-v0.2.1/MeshForge-0.2.1-UE5.8-Win64.zip",
+          "size": 1180779,
+          "sha256": "3aa6c850fd8e3a2dcc21a899c8ae5b7147dc71749b3e3b0a44e2a35b65dde837",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforge-v0.2.1/MeshForge-0.2.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-08T11:07:20Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforge-v0.2.1"
+        },
         {
           "version": "0.2.0",
           "engine": "5.8",
