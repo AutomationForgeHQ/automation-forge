@@ -42,6 +42,7 @@ public sealed class ReleaseDiscovery
             var tag = rel.GetProperty("tag_name").GetString() ?? "";
             var tm = Tag.Match(tag);
             if (!tm.Success || !byLower.TryGetValue(tm.Groups["plugin"].Value, out var plugin)) continue;
+            if (plugin.IsPaid) continue; // Paid builds come only from the entitlement-backed catalogue.
             releases++;
             var prerelease = rel.TryGetProperty("prerelease", out var pre) && pre.GetBoolean();
             var publishedAt = rel.TryGetProperty("published_at", out var pa) ? pa.GetString() ?? "" : "";

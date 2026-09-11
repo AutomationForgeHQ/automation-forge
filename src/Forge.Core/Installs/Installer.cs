@@ -131,7 +131,7 @@ public sealed class Installer
             return file;
         }
 
-        _log($"downloading: {url}");
+        _log($"downloading: {new Uri(url).GetLeftPart(UriPartial.Path)}");
         using var resp = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
         resp.EnsureSuccessStatusCode();
         var total = resp.Content.Headers.ContentLength ?? version.Size;

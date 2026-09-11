@@ -24,6 +24,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from refresh_paid_manifest import fetch_paid, refresh
 
 RELEASES_REPO = "AutomationForgeHQ/releases"
 API = f"https://api.github.com/repos/{RELEASES_REPO}/releases?per_page=100"
@@ -97,6 +98,8 @@ def build(forge: Path) -> dict:
         if not plugin:
             print(f"skip {rel['tag_name']}: not in the register", file=sys.stderr)
             continue
+        if plugins_reg[plugin]['distribution'] == 'paid':
+            continue
         assets = {a["name"]: a for a in rel["assets"]}
         for name, asset in assets.items():
             am = ASSET.match(name)
@@ -136,14 +139,14 @@ def build(forge: Path) -> dict:
         members = [p["id"] for p in plugins_out if p["set"] == sid]
         sets_out.append({"id": sid, "name": s["name"], "members": members})
 
-    return {
+    return refresh({
         "schemaVersion": SCHEMA_VERSION,
         "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "releases": f"https://github.com/{RELEASES_REPO}",
         "channels": ["stable", "nightly"],
         "sets": sets_out,
         "plugins": plugins_out,
-    }
+    }, fetch_paid())
 
 
 def main() -> int:

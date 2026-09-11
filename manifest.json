@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T11:53:45Z",
+  "generatedAt": "2026-09-11T14:02:51Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -659,24 +659,12 @@
           "engine": "5.8",
           "platform": "Win64",
           "channel": "stable",
-          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarment-v0.1.1/MeshForgeGarment-0.1.1-UE5.8-Win64.zip",
-          "size": 372157,
           "sha256": "150764df4e0d9be6095873a33cc12dd6c4d401ddfc0a785b2066357e4d2a608d",
-          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarment-v0.1.1/MeshForgeGarment-0.1.1-UE5.8-Win64-symbols.zip",
-          "releasedAt": "2026-09-08T10:40:12Z",
-          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgegarment-v0.1.1"
-        },
-        {
-          "version": "0.1.0",
-          "engine": "5.8",
-          "platform": "Win64",
-          "channel": "stable",
-          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarment-v0.1.0/MeshForgeGarment-0.1.0-UE5.8-Win64.zip",
-          "size": 298844,
-          "sha256": "94ee5c23dba7a80d85afc8933b1c8b968c5814f588b02ee4ae3e89ad2462e113",
-          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarment-v0.1.0/MeshForgeGarment-0.1.0-UE5.8-Win64-symbols.zip",
-          "releasedAt": "2026-09-07T14:30:35Z",
-          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgegarment-v0.1.0"
+          "size": 372157,
+          "releasedAt": "2026-09-11T13:55:37Z",
+          "url": null,
+          "symbols": null,
+          "notes": null
         }
       ]
     },
@@ -1395,24 +1383,12 @@
           "engine": "5.8",
           "platform": "Win64",
           "channel": "stable",
-          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforge-v0.1.1/PerformanceForge-0.1.1-UE5.8-Win64.zip",
-          "size": 700006,
           "sha256": "a52b51373ef51cd11c19e0bb6d260a77db3bb05c80a9471c49114c59c2979913",
-          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforge-v0.1.1/PerformanceForge-0.1.1-UE5.8-Win64-symbols.zip",
-          "releasedAt": "2026-09-08T10:42:40Z",
-          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/performanceforge-v0.1.1"
-        },
-        {
-          "version": "0.1.0",
-          "engine": "5.8",
-          "platform": "Win64",
-          "channel": "stable",
-          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforge-v0.1.0/PerformanceForge-0.1.0-UE5.8-Win64.zip",
-          "size": 697917,
-          "sha256": "c5db59e3312ad215251e28f5e5d1460afc69da659af7fb06ac12e37ba1a5d37c",
-          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforge-v0.1.0/PerformanceForge-0.1.0-UE5.8-Win64-symbols.zip",
-          "releasedAt": "2026-09-07T15:24:20Z",
-          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/performanceforge-v0.1.0"
+          "size": 700006,
+          "releasedAt": "2026-09-11T13:55:22Z",
+          "url": null,
+          "symbols": null,
+          "notes": null
         }
       ]
     },
@@ -1525,24 +1501,12 @@
           "engine": "5.8",
           "platform": "Win64",
           "channel": "stable",
-          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgedeepl-v0.1.1/SpeechForgeDeepL-0.1.1-UE5.8-Win64.zip",
-          "size": 77373,
           "sha256": "5a4e315cdd42773fe35fa2b82c3037ed604cc612a194667f6d26f2ae9395081c",
-          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgedeepl-v0.1.1/SpeechForgeDeepL-0.1.1-UE5.8-Win64-symbols.zip",
-          "releasedAt": "2026-09-08T10:45:11Z",
-          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgedeepl-v0.1.1"
-        },
-        {
-          "version": "0.1.0",
-          "engine": "5.8",
-          "platform": "Win64",
-          "channel": "stable",
-          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgedeepl-v0.1.0/SpeechForgeDeepL-0.1.0-UE5.8-Win64.zip",
-          "size": 74784,
-          "sha256": "c78af9a31d3d03bd0a5f457806d6034936636187da281fd8f05e61c33e99ea65",
-          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgedeepl-v0.1.0/SpeechForgeDeepL-0.1.0-UE5.8-Win64-symbols.zip",
-          "releasedAt": "2026-09-08T01:32:27Z",
-          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgedeepl-v0.1.0"
+          "size": 77373,
+          "releasedAt": "2026-09-11T13:55:10Z",
+          "url": null,
+          "symbols": null,
+          "notes": null
         }
       ]
     },
