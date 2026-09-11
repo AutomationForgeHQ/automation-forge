@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-11T15:41:14Z",
+  "generatedAt": "2026-09-11T15:43:55Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1604,6 +1604,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/SpeechForgeToolset",
       "versions": [
+        {
+          "version": "0.2.2",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgetoolset-v0.2.2/SpeechForgeToolset-0.2.2-UE5.8-Win64.zip",
+          "size": 184924,
+          "sha256": "38c02587b60d6ae74ba0e651b128379ffb513196956e4eb5f6b6858a7e197c0a",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgetoolset-v0.2.2/SpeechForgeToolset-0.2.2-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-11T15:43:31Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgetoolset-v0.2.2"
+        },
         {
           "version": "0.2.1",
           "engine": "5.8",
