@@ -123,13 +123,17 @@ call actually recorded against this release, covering the full
 Ingest/Cast/Write/Produce/Perform/Localize surface, localization and
 dubbing.
 `SpeechForgeElevenLabs` (the live hosted provider) graduated the same way,
-the same day. `SpeechForgeDeepL` (translation) shipped 2026-09-08 — a
+the same day. `SpeechForgeDeepL` (localisation) shipped 2026-09-08 — a
 **paid** provider, priced like Performance Forge and the Garment Fit
 pipeline rather than a free edge; the built-in, keyless `Pseudo` provider
-keeps the Localize page exercisable without any account either way.
+keeps the Localize page exercisable without any account either way. Since
+0.1.2 it owns more than the translation: its banks know what each line is a
+translation of, so producing one generates the lines that were synthesised
+and **dubs** the ones that were performed, then points the faces serving
+them at the new audio — a localised line keeps the acting captured for it.
 
 **Members:** `SpeechForge` (core), `SpeechForgeElevenLabs` (hosted
-provider, live, beta), `SpeechForgeDeepL` (paid translation provider), and
+provider, live, beta), `SpeechForgeDeepL` (paid localisation provider), and
 a toolset.
 
 ---
