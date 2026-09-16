@@ -46,16 +46,8 @@ jobs:
           if ($h -ne '${{ inputs.version }}') { throw "hub --version wrote '$h', expected '${{ inputs.version }}'" }
           Get-Content dist/SHA256SUMS.txt
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: automation-forge-${{ inputs.version }}
-          path: |
-            dist/AutomationForge-Setup.exe
-            dist/AutomationForge-Hub-win-x64.zip
-            dist/forge-win-x64.zip
-            dist/SHA256SUMS.txt
-
       - name: Release
+        id: release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag }}
@@ -68,3 +60,18 @@ jobs:
             dist/AutomationForge-Hub-win-x64.zip
             dist/forge-win-x64.zip
             dist/SHA256SUMS.txt
+
+      # The release holds these files for good, so a run artifact is kept only when it failed.
+      # Keeping one of every build counted ~150 MB each, for 90 days, against the organisation's
+      # 0.5 GB of Actions storage - nightlies included, long after their releases were pruned.
+      - name: Keep an unpublished build
+        if: ${{ !cancelled() && steps.release.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-forge-${{ inputs.version }}
+          path: |
+            dist/AutomationForge-Setup.exe
+            dist/AutomationForge-Hub-win-x64.zip
+            dist/forge-win-x64.zip
+            dist/SHA256SUMS.txt
+          retention-days: 7
