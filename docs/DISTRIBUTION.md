@@ -102,6 +102,7 @@ to link to.
 | MeshForgeGarment | post-process | **Paid** | — |
 | MeshForgeToolset | toolset | Open | [MeshForgeToolset](https://github.com/AutomationForgeHQ/MeshForgeToolset) |
 | MeshForgeTrellisToolset | toolset | Open | [MeshForgeTrellisToolset](https://github.com/AutomationForgeHQ/MeshForgeTrellisToolset) |
+| MeshForgeGarmentToolset | toolset | Open | [MeshForgeGarmentToolset](https://github.com/AutomationForgeHQ/MeshForgeGarmentToolset) |
 
 `MeshForgeCloud` is one plugin covering two hosted vendors — **Tripo** and
 **Meshy** — registered as separate providers under it, not two plugins.
@@ -115,6 +116,10 @@ set's toolset is open regardless of its core's tier, the toolset is the MCP
 surface, and this set was the one exception. Both were released and
 mirrored the same week (`tools/mirror.ps1` created each repo on first
 publish) — see the table above for their links.
+
+`MeshForgeGarmentToolset` joined them on 2026-09-21, its first release, with
+MeshForgeGarment 0.2.0. It is open although the plugin it drives is paid, for
+the same reason every toolset is: it is the agent surface.
 
 ### SurfaceForge
 

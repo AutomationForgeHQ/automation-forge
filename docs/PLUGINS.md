@@ -199,6 +199,24 @@ onto a character instead of leaving it as a separate prop.
 - Describe a prop, or drop a reference image, and get mesh candidates back
   from two live hosted providers — **Tripo** and **Meshy** — through one
   registered account each, both wired up as `MeshForgeCloud`.
+- **A definition is a recipe you set up in one choice.** A *Mesh Workflow*
+  picks which of the five stages it uses (Concept, References, Mesh, Post,
+  Import), the pipeline on each and the post-processing chain with its
+  settings. Three ship: generate from a prompt, generate from your own
+  picture, and edit a mesh you already have in Blender. A definition that
+  starts from your own mesh simply has the generation stages switched off.
+- **Words or a picture, chosen rather than guessed.** A generator whose
+  vendor sells the two as separate requests says which one it sends —
+  Tripo's `text_to_model` or `image_to_model` — and the price quoted is the
+  price of that request. Each stage keeps its own prompt.
+- **Post-processing is a chain you can rearrange.** Steps reorder, and any
+  step can start from any earlier step's run or from one particular take of
+  the Mesh stage — try a retexture twice and carry on from the one you
+  liked. A retexture on Tripo or Meshy repaints any mesh, including one the
+  vendor did not make: it uploads the mesh when the vendor no longer holds it.
+- **Finish it by hand without leaving the chain.** *Edit in Blender* opens
+  the mesh, static or skinned, in Blender with a MeshForge tab, and the
+  chain waits until you press *Send back to Unreal*.
 - **Free Unreal-side refinishing, already shipped.** Collision, hull count,
   lightmap resolution, Nanite and real-world size/pivot all change in about
   a second with no regeneration — the generation loop and the refinishing
@@ -240,6 +258,24 @@ image editor, extract the garment, generate it in Meshy at low-poly and
 in the character's own pose, then **Place** it — about 35 Tripo + Meshy
 credits, measured start to finish.
 
+**The Garment Studio** (MeshForgeGarment 0.2.0) puts that whole route in
+one window: pose the body, place the garment, sculpt it against the posed
+body with Epic's own sculpt tools, wrap it, and see the result on the
+character before you finish. A *Garment for a character* workflow sets a
+definition up for it. Bone profiles decide which of the body's bones a
+garment follows when it is skinned, so a vest follows the chest and not the
+arms; thirteen ship, and they are ordinary editable assets. With the plugin
+installed, MeshForge's Mesh tab can stand the character inside any garment,
+at true size and position, to judge the fit. The in-editor *Sculpt mesh*
+step, for any static mesh anywhere in a chain, ships in this plugin too.
+
+`MeshForgeGarmentToolset` (open, first released 2026-09-21) is the Garment
+Studio as agent tools, for agents that can see. An agent captures the
+studio from named angles, poses the body, places the garment, sculpts by
+dragging across the last picture, wraps and finishes. It comes with a *Fit
+a garment by sight* skill that describes the loop and when to hand it over
+to a person.
+
 Measured (2026-09-06, Blender 5.2): a Tripo T-shirt (10,130 vertices)
 fitted in 1.9s with no vertex inside the body — though nine triangle
 centres still penetrate, and the pipeline's own `PRESERVATION_RESULTS.md`
@@ -257,7 +293,7 @@ priced like Performance Forge rather than shipped as a free add-on.
 
 **Members:** `MeshForge` (core), `MeshForgeCloud` (Tripo + Meshy provider),
 `MeshForgeTrellis` (local, free), `MeshForgeGarment` (paid
-garment fitting), two toolsets.
+garment fitting), three toolsets.
 
 ---
 
