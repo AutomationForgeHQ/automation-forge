@@ -42,8 +42,10 @@ and the ledger all run; systematic reliability testing and the final
 authoring surface are still ahead.
 
 **Members:** `AutomationForge` (core), `AutomationForgePipelines` (the
-graph editor and user-authored pipelines), `AutomationForgeHub` (the bridge
-to the Windows hub app), `AutomationForgeToolset`.
+graph editor and user-authored pipelines), `AutomationForgeHub` (the
+editor's Automation Forge menu and the bridge to the Windows hub app; once
+installed into an engine it is on in every project on that engine),
+`AutomationForgeToolset`.
 
 ---
 
@@ -56,8 +58,20 @@ provider, with no retarget step.
 - Describe a motion and watch it on your character in seconds.
 - Import straight onto your skeleton — an ordinary `AnimSequence` the rest
   of the project can't tell was generated.
-- Run it three ways behind one interface: your own GPU, a card rented from
-  inside the editor, or a hosted API.
+- Run it behind one interface: your own GPU, a studio machine on your
+  network, a card rented from inside the editor, or a hosted API.
+- **Get started** walks a new user from nothing to a first motion. It
+  measures each provider's setup (keys, access grants, Docker, the runner)
+  and puts the button that moves each step on beside it. Then it helps you
+  choose a character prepared for that provider, or make one from any
+  skeletal mesh, and suggests a first prompt.
+- **Watch a take before choosing it.** The definition window plays each
+  take on the character it is for, exactly as its import will. Every
+  Generate a person presses stops there for review.
+- **Each provider brings its own settings** under its own names: seed,
+  steps and guidance for Kimodo, prompt rewriting for Uthana. Generate says
+  what it will cost and asks before spending. A price you have not set says
+  so: Uthana's is marked as its published rate until you enter your own.
 - Direct a take with constraints — pose a character in the level, read a
   pose off an existing animation, or harvest every keyed moment in a Level
   Sequence.
@@ -69,8 +83,9 @@ provider — the free local model predicts a body with no fingers, so its
 takes ship with a fixed hand pose; the hosted provider animates fingers.
 
 **Members:** `MotionForge` (core + provider registry), `MotionForgeUthana`
-(hosted provider), `MotionForgeKimodo` (NVIDIA Kimodo in Docker, your own
-GPU), `MotionForgeQuality` (clip measurement), and three toolsets.
+(hosted provider), `MotionForgeKimodo` (NVIDIA Kimodo in Docker, on your
+own GPU, another machine or a rented one), `MotionForgeQuality` (clip
+measurement), and three toolsets.
 
 ---
 

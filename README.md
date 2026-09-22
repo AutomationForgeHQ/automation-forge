@@ -107,7 +107,11 @@ at.
 Two tabs and three drawers, added in 0.3.0.
 
 **Plugins** is the catalogue: sets, one action per plugin, engine picker, update
-counts. It relaunches itself headless and elevated for engine installs.
+counts. It relaunches itself headless and elevated for engine installs. **What's
+new**, beside a plugin's Update button, lists every release since the version you
+have, skipped ones included, with each one's notes, paid plugins too. The notes
+travel in the manifest, read from each plugin's `CHANGELOG.md`, so the window works
+offline from the cached catalogue.
 
 **Runners** is what this machine can run. Today that is a Docker container and a
 GPU rented by the hour, both belonging to MotionForge Kimodo. Docker state and
