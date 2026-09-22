@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-22T12:54:33Z",
+  "generatedAt": "2026-09-22T12:56:24Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -2039,6 +2039,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/MotionForgeUthana",
       "versions": [
+        {
+          "version": "0.2.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgeuthana-v0.2.0/MotionForgeUthana-0.2.0-UE5.8-Win64.zip",
+          "size": 163331,
+          "sha256": "4a24cbab125ce91d9d393da8f92e64f43708081a18e0bebb650bb23c3ac0d1b8",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgeuthana-v0.2.0/MotionForgeUthana-0.2.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-22T12:55:56Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgeuthana-v0.2.0"
+        },
         {
           "version": "0.1.1",
           "engine": "5.8",
