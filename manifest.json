@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-21T19:36:09Z",
+  "generatedAt": "2026-09-22T12:00:07Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -132,6 +132,18 @@
           "releasedAt": "2026-08-28T11:01:34Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforge-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- A node library found by reflection, not by a list\n- Find the plugins whichever order they loaded in, and keep element types\n- A curated palette, organised by what the step does\n- Long work starts and is observed, rather than waited for\n- A ledger that knows what already exists, and what a run would cost\n- Refuse to write over something we did not make\n- Nodes somebody else writes, in C++ or in Blueprint\n- The wait, proven against a solve that really takes minutes\n- Wires you can see, undo on the keyboard, and assets you pick\n- Cost before commit, for real this time"
+        }
       ]
     },
     {
@@ -142,6 +154,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/AutomationForgeHub",
       "versions": [
+        {
+          "version": "0.2.4",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgehub-v0.2.4/AutomationForgeHub-0.2.4-UE5.8-Win64.zip",
+          "size": 333279,
+          "sha256": "4c08efc1322ed827e879e94e80e925c9c98ebc0a4e8d6f5bbcda2d56c79a2e96",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgehub-v0.2.4/AutomationForgeHub-0.2.4-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-22T11:59:38Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgehub-v0.2.4"
+        },
         {
           "version": "0.2.3",
           "engine": "5.8",
@@ -214,6 +238,43 @@
           "releasedAt": "2026-08-28T17:41:13Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgehub-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.4",
+          "date": "2026-09-22",
+          "body": "### Changed\n- **On in every project, with nothing to set up.** Installed into an engine, the menu now appears in\n  every project on that engine. Until now a project had to name the plugin in its `.uproject` first,\n  so the menu you use to switch the other plugins on was itself switched off. To leave it out of one\n  project, untick it in that project's Plugins window.\n- **Nothing reaches a packaged game.** The keys registry is now built for the editor only, so a game\n  packaged from any of those projects, for any platform, carries no part of this plugin.\n\n### Added\n- The package includes this changelog."
+        },
+        {
+          "version": "0.2.3",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.2.2",
+          "date": "2026-09-07",
+          "body": "- The Tools menu shows one Automation Forge section, not eight loose tools\n- Every plugin now points at kovati.dev\n- AutomationForgeHub 0.2.2 release"
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-08-30",
+          "body": "- Keys that belong to a person, not to a plugin\n- Emotion detection: the audio decides, and a token is not access\n- Versions for the release"
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-08-29",
+          "body": "- Apache-2.0, and a release publishes its source\n- Kimodo: a panel for the machine that generates\n- Every plugin descriptor agrees with its release tag, and says who made it\n- ForgeKeys is not a plugin any more; the hub carries the keys\n- The READMEs catch up with a long day"
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-08-28",
+          "body": "- Tools menu, the engine handed to the hub, preferences under Automation Forge"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- AutomationForgeHub: the menu in the editor"
+        }
       ]
     },
     {
@@ -249,6 +310,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgepipelines-v0.1.0/AutomationForgePipelines-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T10:51:28Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgepipelines-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- A pipeline that runs from data, and a register of what is still wrong\n- Keys come from named fields, and a bad one is refused before it runs\n- A pipeline you can open and edit, and the parent survives its own expansion\n- A second run does no work, which was the whole point\n- Scope is not optional, and a filter is how you say it\n- Refuse to write over something we did not make\n- A pipeline an agent can write without a graph existing\n- Wires decide the order, so the graph can branch and rejoin\n- Nodes somebody else writes, in C++ or in Blueprint\n- A run that outlives the call that started it\n- The wait, proven against a solve that really takes minutes\n- A pipeline you can open, wire, and now edit\n- Left to right, and a graph you can actually run from\n- A gate: the one construct that is not about data\n- Output paths belong to the pipeline, not the project\n- The hands Kimodo never generated, and a gate that can test a number\n- Wires you can see, undo on the keyboard, and assets you pick\n- A details panel you can fill in, and nodes with names\n- Readable node titles, and a handoff\n- A run that reported success while doing the wrong thing\n- A step needs what a step needs, and not twenty other things\n- Runs you can look at, and the decisions a gate is waiting for\n- Cost before commit, for real this time"
         }
       ]
     },
@@ -286,6 +359,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgetoolset-v0.1.0/AutomationForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T10:40:33Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgetoolset-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- The package now carries its Apache-2.0 LICENSE, which earlier zips omitted.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- A node library found by reflection, not by a list\n- A ledger that knows what already exists, and what a run would cost\n- A pipeline that runs from data, and a register of what is still wrong\n- A pipeline an agent can write without a graph existing\n- A run that outlives the call that started it\n- The wait, proven against a solve that really takes minutes\n- A gate: the one construct that is not about data\n- Wires you can see, undo on the keyboard, and assets you pick\n- A details panel you can fill in, and nodes with names\n- A step needs what a step needs, and not twenty other things\n- Cost before commit, for real this time"
         }
       ]
     },
@@ -357,6 +442,33 @@
           "releasedAt": "2026-08-28T10:23:53Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforge-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.2",
+          "date": "2026-09-11",
+          "body": "### Added\n- A cloned face bank now remembers the bank it was cloned from, and solving a clip whose sibling\n  there already carries layers **follows that performance** instead of solving from audio alone:\n  every layer is copied in order, the audio-driven ones re-solved from this clip's own audio, and\n  the result merged. A dubbed line keeps the acting that was captured under the new words.\n- A second solve on a following clip reports it already current rather than redoing the work.\n\n### Changed\n- A correction authored against the source clip rides across to the clip that follows it; one\n  authored on the localised clip is kept."
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-07",
+          "body": "- Face clips gain layers; the mix is a recipe, not a rerun\n- Merge crosses vocabularies; mouth layers override only what they drive\n- Casting made human-readable and controllable: audition, discovered actions, a stage\n- The Face Bank stage now frames the face, not the back of the head\n- Face Bank editor: montage-editor-style stage, voice-with-face preview, an inspector, transport\n  controls and orbit-or-free camera\n- The take became the unit: four quadrants, folders, one decision\n- Fixed: solving a bank could overwrite a merged face\n- The plan for editing and graduating a face written down (`GRADUATION.md`)\n- Fixed: preview mesh list not following the bank; face preview drawing at the wrong detail level;\n  needed its own preview component rather than a re-pointed one\n- Face bank now links to its speech bank by id instead of guessing\n- Tools menu consolidated into one Automation Forge section\n- Every Forge asset now has a factory; double-click opens the panel that owns it\n- Hand correction shipped as a layer, so the solve underneath can be replaced\n- Localisation: a sibling bank per language, joined by line id\n- A face bank now answers what a line plays, and takes outside buttons\n- Repointed to kovati.dev"
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-08-30",
+          "body": "- Apache-2.0 relicensing; keys moved to Editor Preferences\n- FaceForgeACE shipped: a MetaHuman can now be baked, and the container has controls\n- The oldest gap in FaceForge closed: a character talks, and somebody watched\n- Versions cut for the release"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial release: audio to facial animation, and the vocabulary it lands in\n- Runpod provisioning fix after an API change; settings relocated\n- Output roots reworked\n- Long-running solves made observable rather than blocking-waited\n- Cost-before-commit pricing"
+        }
       ]
     },
     {
@@ -417,6 +529,28 @@
           "releasedAt": "2026-08-30T00:21:22Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgeace-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.2",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it.\n- The `Runner/` folder ships, so the container this plugin resolves from its own installed directory can finally be built from a release."
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-09-07",
+          "body": "- Tools menu consolidated into one Automation Forge section\n- Repointed to kovati.dev\n- Two small maintenance fixes from the SurfaceForge distribution audit"
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-01",
+          "body": "- The renting gap closed, and its cost measured\n- FaceForgeACE now speaks the shared runner contract\n- Both runners (this and its sibling) pass the contract check, measured not assumed\n- Audio2Face's runner pinned to contract version 1.1 everywhere, enforced by a checker"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-30",
+          "body": "- Initial release: Audio2Face-3D as a local provider, in a self-built container\n- Model kept loaded rather than polled at a walking pace\n- A MetaHuman can now be baked; the container gained controls\n- Keys made to belong to a person, not a plugin\n- FaceForgeACEToolset shipped alongside it\n- The oldest gap in FaceForge closed: a character talks, and somebody watched\n- Emotion detection shipped: the audio decides, and a token is not access\n- A dedicated runner panel, with three verbs that finally differ; one visual language shared with\n  the sibling runner panel\n- Keys made settable without the hub; a rented pod made to survive an editor restart\n- Renting made to work, after four separate bugs were found and fixed\n- Versions cut for the release"
+        }
       ]
     },
     {
@@ -452,6 +586,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgeacetoolset-v0.1.0/FaceForgeACEToolset-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-30T00:19:51Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgeacetoolset-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-30",
+          "body": "- Initial release, alongside FaceForgeACE\n- Emotion detection: the audio decides, and a token is not access\n- A runner panel for Audio2Face, and three verbs that finally differ\n- Settings-page copy, a measured pull size, and a pod disk distinct from Kimodo's\n- Renting made to work, after four separate bugs were found and fixed\n- Versions cut for the release"
         }
       ]
     },
@@ -500,6 +646,23 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/faceforgemetahuman-v0.1.0/FaceForgeMetaHuman-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T10:44:46Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgemetahuman-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-07",
+          "body": "- Apache-2.0 relicensing; every plugin descriptor made to agree with its release tag\n- The video solve shipped: a webcam take through MetaHuman Animator, into a layer\n- PerformanceForge's toolset moved out; provider toolsets stay with their providers\n- A provider now earns a toolset only by having something only it can do\n- Hand correction shipped as a layer, so the solve underneath can be replaced\n- Repointed to kovati.dev"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial release: the engine's own solver, and the conversion it needs"
         }
       ]
     },
@@ -573,6 +736,33 @@
           "releasedAt": "2026-08-28T10:59:27Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/faceforgetoolset-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.2",
+          "date": "2026-09-11",
+          "body": "### Changed\n- `CloneFaceBankForLanguage` records the source face bank on the clone. That is what lets the\n  clone's clips follow the source-language performance underneath a dub instead of guessing the\n  acting from audio.\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry."
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-07",
+          "body": "- Face clips gain layers; the mix is a recipe, not a rerun\n- Merge crosses vocabularies; mouth layers override only what they drive\n- The culmination wiring: one library, a teleprompter, and panels that meet\n- Casting made human-readable and controllable: audition, discovered actions, a stage\n- A re-voicing given its own path, distinct from a new take\n- The take became the unit: four quadrants, folders, one decision\n- Hear a voice without committing to it, and a face that gets made\n- Face bank now links to its speech bank by id instead of guessing\n- Speech and face joined by id: a speaker names their head, a bank says what it holds\n- Hand correction shipped as a layer, so the solve underneath can be replaced\n- Localisation: a sibling bank per language, joined by line id\n- A face bank now answers what a line plays, and takes outside buttons\n- Repointed to kovati.dev"
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-08-30",
+          "body": "- Apache-2.0 relicensing\n- Every plugin descriptor made to agree with its release tag\n- FaceForgeACE shipped: a MetaHuman can now be baked, and the container gained controls\n- Versions cut for the release"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial release: the face pipeline as MCP tools\n- Output roots reworked"
+        }
       ]
     },
     {
@@ -630,6 +820,28 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforge-v0.1.0/MeshForge-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-09-01T02:20:44Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforge-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.3.0",
+          "date": "2026-09-21",
+          "body": "### Added\n- **Skinned takes can be looked at in the Mesh tab.** The take list now holds skeletal meshes as well\n  as static ones, so a garment that has been through a skinning step is no longer the one take of\n  itself you could not see. The strip beneath says how many bones it has, and counts its triangles\n  and vertices from the authored data rather than the render data, as it already did for a static\n  mesh. Where a definition has made both, the skinned result is what opens \u2014 the same order the\n  Content Browser tile uses.\n- **An installed add-on can put its own control in the Mesh tab's bar**, and its own meshes beside\n  the one on screen. MeshForge never reads what an add-on builds. The first is MeshForgeGarment's\n  *Character*, which stands a body inside a garment.\n- **Anything drawn beside the mesh puts the viewer into true space.** Left alone the viewer\n  normalises \u2014 it centres each take on the origin and, comparing, turns and scales B to match A \u2014\n  which is right when the question is *which of these takes is better*. The moment something else is\n  in the picture the question is *does this fit*, which is entirely about size and position, and\n  every one of those adjustments becomes a lie. So then nothing is adjusted at all: every mesh is\n  drawn at its own origin, at its own size, with its own pivot, exactly as a level would show them\n  all dropped at 0, 0, 0. *Align* greys out with that as its reason, and the strip beneath reports\n  each mesh's bounds centre and how much bigger B is than A \u2014 said, rather than fixed.\n- **Post steps can be reordered.** Up and down arrows on each step move it with its settings and runs.\n  The Post stage goes stale, since order changes what the chain makes; every output is kept. A move the\n  chain could not run is not offered, and the greyed arrow says why.\n- **Mesh Workflows**: a data asset that sets a definition up in one choice \u2014 which stages it uses,\n  the pipeline on each and the post-processing chain, with their settings, and optionally its import\n  settings. A slot holds its own copy of a pipeline or a soft pointer to a preset in another plugin's\n  content; a preset from a plugin that is not installed is named, not an error. Choosing a workflow\n  copies it into the definition, so editing one afterwards changes neither. The Stages tab picks,\n  reapplies and saves them, and says what has changed since the workflow was applied. A new\n  definition asks which workflow to start from, the project default first. Three ship with the\n  plugin: *Generate from a prompt*, *Generate from your own picture* and *Edit a mesh in Blender*.\n- **Stages can be switched off** per definition. A definition that starts from your own picture does\n  not need Concept, one that starts from a mesh you already have does not need Concept, References\n  or Mesh, and one whose takes you want to review first does not need Import. A switched-off stage is\n  hidden from the Stages tab and the Settings tab, refused by every tool and left out of staleness.\n  Every definition made before this keeps all five on and is not marked stale.\n- A Mesh Definition's Content Browser tile shows what it made \u2014 its newest mesh, skinned or static \u2014\n  or, before anything is made, its main image, instead of the same icon on every definition. The\n  thumbnail is stored in the asset and survives a restart: the mesh it shows is finished building before\n  it is drawn, so it is never saved empty.\n- `MeshForge.RebuildThumbnails [folder]` (and the Rebuild Definition Thumbnails agent tool) regenerates\n  and saves every definition's thumbnail, and says which have nothing to show.\n- A post step can start from **a step's output**: choose the step, then its latest run or any\n  particular earlier run. Try a step with different settings, then carry on from the run you liked\n  rather than the last one. Latest run inside a chain uses that chain's result. The default is\n  unchanged and now reads \"Step above, latest run\".\n- A **Floor** checkbox in the Mesh tab, off by default: most generated meshes keep their pivot at\n  their centre, and the floor cut through the middle of them. The choice is remembered per user.\n- **Edit in Blender - round trip**, a post step you finish by hand. It opens the mesh in Blender\n  with any reference meshes locked beside it and a MeshForge tab in the sidebar. The chain waits\n  until you press *Send back to Unreal*, then imports your edit as the step's output, restores the\n  input's materials and carries on. A result sent after you stopped waiting, or while the editor was\n  closed, can be picked up from the step. Blender's location is a per-user setting.\n- Other plugins can add post steps without depending on MeshForge. A plugin registers a step \u2014 a\n  settings class and a function \u2014 through `MeshForgeExtensions.h`, a header-only interface, and it\n  appears under \"From other plugins\" in the Post stage's step picker. A definition opened without\n  that plugin keeps the step and says which plugin it needs. A setting the plugin adds later and marks\n  `SignatureOmitsDefault` does not mark existing steps stale.\n- A step a person finishes can do its work inside the editor and hand back the edited asset itself.\n  The chain records that asset as the step's output with nothing exported or imported again, so its\n  vertex order, materials and build settings are kept. MeshForge Garment's in-editor garment sculpt\n  is the first such step.\n- **Edit in Blender works on a skinned mesh** as well as a static one. *Edit skinned mesh* on the step\n  sends the skeletal mesh out with its skeleton, weights and morph targets, and brings back a copy of\n  that same asset with its vertices moved to where Blender left them - nothing is imported, so the\n  skeleton it is bound to, its weights, its morph targets and its materials are untouched. The topology\n  has to come back unchanged, and the step says so, with both counts, when it does not. With the setting\n  on the step works on assets, so it may follow a skinning step.\n- An agent can work a step a person finishes one command at a time, through the step's\n  `HandleInteractiveCommand` and MeshForge Toolset's Send Interactive Step Command. A step that runs to\n  completion but has a window of its own takes commands too (`TakesCommands`), with or without a session\n  (`CommandsNeedSession`).\n- A post step can run on its own edit of its input instead of the input itself (`GetEditedInput`, asked\n  on the game thread before the export). MeshForge Garment's Garment Studio keeps its sculpt this way.\n- What belongs to one definition rather than to how things are made, such as a step's last session or an\n  edit of its input, is left behind when a step is saved into a workflow and kept when a workflow is\n  reapplied to the same definition (`ForgetDefinitionState`, `KeepDefinitionState`).\n\n### Changed\n- **A generator's pictures sit at the top of its settings**, straight under the prompt, instead of\n  below every texture and shape setting. They are the first thing anybody checks. A post step keeps\n  its own Input where it was.\n- **A generator can say whether it builds from words or from a picture**, and the whole definition\n  follows it: the settings show the prompt *or* the pictures, the Mesh stage asks for whichever is\n  missing, the price quoted is the price of that request, and the take records only what was sent.\n  Tripo is the first to offer the choice (`EMeshPipelineInput`, `UMeshForgePipeline::GetInputMode`).\n  A generator that does not offer one behaves exactly as before.\n- **A post step can start from a particular take of the Mesh stage.** *A step's output* listed only\n  other post steps, so the first step - the one most likely to want a particular mesh - was told\n  there were no steps to start from, even with a mesh freshly generated. The Mesh stage is now first\n  in that list, and its finished takes are its runs: *Selected take* follows the Takes tab, or pick\n  one and it stays that one. The take record names the take that was actually used, and List Post\n  Inputs gives agents the same takes.\n- A post step's **Advanced** actions now sit under the settings they work on, with Input and Pipeline\n  after them, rather than above everything. The wardrobe skinning step put its *Sculpt in pose...*\n  button above the Target Character it opens.\n- **Each prompt belongs to the stage that reads it.** There is no longer one prompt above the stages:\n  the Concept image stage's image pipeline has the words it draws from, the Mesh stage's generator the\n  words it builds from where its provider reads text, and a retexture keeps its Style Prompt. A prompt\n  shows only where it is read, first in that pipeline's settings; a definition that starts from a mesh\n  shows none. Switching provider keeps a stage's prompt, and workflows keep the definition's prompts\n  and never store their own. Existing definitions have their one prompt copied into their image and\n  mesh pipelines when they load, and no stage goes stale.\n- **The Stages tab reads at a glance.** Each stage is a box that opens and closes, numbered among the\n  stages the definition uses (a definition that starts from a mesh no longer shows 4 and 5 after three\n  stages it does not have), with a badge for where it stands and its status in the header. A stage\n  that has run starts closed. Each post step is its own box inside Post-processing, with its last run in\n  the header. A stage that has run and is up to date now says \"done\" rather than \"ready\".\n- Post steps that make assets instead of geometry can now follow one another. The rule used to be\n  \"skeletal wardrobe creation must be last\"; it is now \"nothing that works on geometry may come after\n  a step that makes an asset\", so a skinned garment can be turned into an inventory item in the same\n  chain.\n- A post step's selected input can be a skeletal mesh, for steps that work on one.\n\n### Fixed\n- **A contradictory generator setting is now refused on the agent route too, before it spends.** The\n  Stages tab has always checked a mesh pipeline before offering to run it, but the toolset came in\n  further down and submitted regardless \u2014 so an agent could pay for a setting the vendor quietly\n  ignores. The check now sits where both routes converge. Found by paying for it.\n- **A post step no longer loses track of what made the mesh.** The chain used to overwrite the\n  provenance after *every* step, so it answered \"what ran last\" rather than \"what made this\" \u2014 after\n  a garment fit, a shirt genuinely generated on Tripo reported that it had not come from Tripo. The\n  originating vendor task is now carried separately and only written by a step that actually returns\n  one.\n- **And it no longer offers a shortcut that would throw work away.** A vendor retextures the copy\n  *it* holds and hands back its own geometry, which is free and correct while that copy is still our\n  mesh \u2014 and silent data loss the moment it is not: point a wrapped garment at its originating task\n  and back comes the *unwrapped* mesh, beautifully textured, with the wrap gone. A step that moves\n  vertices now says so (`FMeshPipelineIO::bChangesGeometry`, on by default), the chain remembers it,\n  and `UMeshPostPipeline::CanUseVendorTask` is the one place that decides. Getting it wrong in the\n  safe direction costs an upload; getting it wrong the other way costs the work.\n\n### Compatibility\n- Update the MeshForge add-ons with it: MeshForgeCloud 0.3.0, MeshForgeTrellis 0.0.3, MeshForgeGarment\n  0.2.0 and their toolsets. Their earlier builds were compiled against the previous MeshForge and are\n  not compatible with this one."
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-07",
+          "body": "- Documented that quads do not survive Unreal's Interchange import, and where they still exist for reference.\n- Updated Tripo documentation to match the shipped v3 vendor surface.\n- Repointed every plugin's Docs/Support URLs at kovati.dev.\n- Added the garment pipeline: a generated shirt placed onto a MetaHuman, and the runner learning what a \"body\" is.\n- Added a garment generated from the character's own picture (placed rather than fitted).\n- Added Unreal-side inpainting as a separate skeletal post step.\n- Added independent post-step execution with selectable saved inputs.\n- Fixed healing of a definition that was saved while a job was in flight.\n- Merged SurfaceForge (PR #4)."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-01",
+          "body": "- Initial release: the mesh pipeline (prompt/image \u2192 provider \u2192 glTF \u2192 static mesh), Meshy and TRELLIS.2 as providers, image generation as its own pipeline stage with a gallery, per-take provenance vault, retexture as the first post pass, and the staged Mesh Definition panel (Stages/Images/Mesh/Settings).\n- Fixed convex decomposition voxelising at 100 (always returning one hull) and corrected Meshy's image pricing.\n- Moved HTTP polling off the game thread so drawing/generating no longer freezes the editor.\n- Declared per-provider options (`FMeshControl::Extra`) so vendor-specific settings don't collide with the shared control struct.\n- Split MeshForge Cloud out to ask for its own keys; documented that a key belongs to the plugin that spends it."
         }
       ]
     },
@@ -691,6 +903,28 @@
           "releasedAt": "2026-09-01T02:18:32Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgecloud-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.3.0",
+          "date": "2026-09-21",
+          "body": "### Added\n- **meshy-7.1**, and it is the new default for the Standard pipeline. Same fields and the same price\n  as meshy-7, with finer geometry; the vendor has deprecated meshy-7 and now resolves `latest` to\n  7.1. A definition that names meshy-7 keeps naming it, and it still runs. **meshy-6-lite** is\n  offered too, because the vendor accepts it \u2014 untested here.\n- **`geometry_resolution`** \u2014 `standard`, `2k` or `4k` \u2014 replacing `ultra_mode`, which Meshy\n  deprecated. It is how finely the *shape* is reconstructed and is easy to confuse with\n  `texture_resolution`, which is unchanged and separate. `standard` is what `ultra_mode: false`\n  gave and `2k` is what `ultra_mode: true` gave, so a saved definition is carried across to `2k` on\n  load and keeps producing what it produced. 2k and 4k cost the same five extra credits; **4k needs\n  meshy-7.1 or latest and a single picture**, and asking for it elsewhere is refused with the reason\n  rather than sent. Measured why that matters: Meshy accepted `4k` on meshy-6 without a word of\n  complaint, produced a mesh, and charged for the run \u2014 a setting silently dropped is worse than one\n  refused.\n- **Tripo can retexture a mesh it did not make.** It used to refuse one outright and tell you to go\n  and use the Meshy step instead. `POST /v3/files` takes a `.glb` by the same plain multipart the\n  plugin already used for pictures, and `/v3/models/texture` accepts the token it returns \u2014 the\n  endpoint says so itself when refused: *\"must be a valid task_id (UUID), file_token, or URL\"*. So a\n  CC5 shirt, a kitbash, a corridor somebody modelled all retexture on Tripo now, for the same 10\n  credits. Measured: a 0.4 MB upload, textured in about a minute. An older note in this family held\n  that our own meshes needed Tripo's STS route and therefore an AWS SigV4 signer; that was true of\n  the v2 API and is not true of v3 \u2014 no signing, no S3, no extra dependency.\n\n### Changed\n- **Both retexture steps ask the same question, and a better one.** Each used to ask \"was the step\n  before me this vendor\", which a local step in between silently invalidated. They now ask whether\n  the vendor's copy is still the mesh in hand, and upload whenever it is not.\n- **An expired task is no longer a failed run.** Meshy keeps a task for days, so a fortnight-old take\n  is perfect lineage pointing at nothing \u2014 measured: HTTP 404, and the whole chain stopped. The step\n  now uploads the mesh it is already holding and carries on, and says in its summary that it did.\n  Nothing is billed for the refused attempt.\n- **Tripo asks whether you are building from words or from a picture.** Both Tripo generators have\n  a `type` at the top of their settings: `image_to_model` shows the picture it will send, with\n  `multiview_to_model` beneath it for up to four views; `text_to_model` shows the prompt and sends\n  no picture. It used to be decided for you - any main picture in the definition turned a text\n  request into an image one and dropped the prompt without a word - and the Mesh stage would not\n  run a text request at all without a main picture. `text_to_model` is 10 credits cheaper on the\n  H-series and P1 models, and the quoted price follows the choice. Existing definitions stay on\n  `image_to_model`, which is what they were sending.\n\n### Fixed\n- **Tripo's retexture no longer refuses a picture it is looking at.** Its style picture was offered\n  in every mode but only accepted beside a written description, so a picture dropped there with the\n  surface set to come from pictures - while `image / images` held one empty slot - was refused with\n  \"one image or exactly four\", which read as though the step could not see the mesh. The field is\n  now `style_image`, shown only with `text_style_prompt`, and an empty picture list says so.\n\n### Compatibility\n- Needs MeshForge 0.3.0 or later."
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-07",
+          "body": "- Migrated the shared Tripo HTTP transport, generation, image pipeline, retexture pipeline and image-generation model IDs to Tripo API v3.\n- Added native Tripo v3 generation and P2 provider support; exposed and implemented Tripo P2 pipeline controls.\n- Raised the Tripo credit guardrail for P2 pricing; tightened v3 request shapes and cost estimates.\n- Allowed v3 Extreme textures on H-series and P1.\n- Documented that quads do not survive Unreal import; updated the Tripo docs to match the v3 vendor surface; the Cloud README now admits there are two vendors.\n- Restored property hints that had been lost; aligned the Tripo surface with v3 documentation.\n- Repointed every plugin's Docs/Support URLs at kovati.dev.\n- Folded in the garment-fit prototype work merged from a parallel branch (region-aware fitting, collision correction, async job manager, Blender container, hardened solver, tests) \u2014 later split out into the standalone [MeshForgeGarment](MeshForgeGarment.md) plugin.\n- Added a garment generated from the character's own picture, placed rather than fitted; added a generated shirt onto a MetaHuman.\n- Merged SurfaceForge (PR #4)."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-01",
+          "body": "- Initial release: `FMeshyProvider` (text-to-image, image-to-3d, multi-image-to-3d, retexture) and `FTripoProvider` (photoreal + P1 game-ready mesh, image generation, multiview, retexture) both shipped as hosted providers.\n- Established Meshy's two-mode quality ladder (Smart Topology vs. Standard) with corrected image pricing.\n- Built and proved Tripo against the live v2/openapi API (later superseded by v3), including the discovery that quad topology cannot survive Interchange's FBX import.\n- Wired per-vendor keys into the family's shared key store; documented that MeshForge Cloud asks for its own keys."
+        }
       ]
     },
     {
@@ -714,6 +948,23 @@
           "url": null,
           "symbols": null,
           "notes": null
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.0",
+          "date": "2026-09-21",
+          "body": "### Added\n- **A character in MeshForge\u2019s Mesh tab.** Installing this plugin adds a *Character* control to the\n  bar above the mesh preview, whatever the definition is and whether or not it has any post-processing\n  at all. Off to begin with. Turn it on and a body stands inside the garment, so a shirt is judged on\n  somebody rather than on its own. Pick *the one this definition fits* and it follows the fit step\u2019s\n  Target Character, so one garment definition after another is shown on the body it was actually\n  wrapped around; or pick any skeletal mesh in the project, to see how a garment fitted to one body\n  sits on another. **The answer is kept per definition**, so it is still there the next time that\n  definition is opened, and a definition never asked about draws nobody \u2014 turning a character on for\n  a shirt does not stand one inside the next crate you open. The last few picked by hand stay in the\n  menu, which is shared, since a project dresses the same few bodies whichever garment is open. The\n  face found beside the body is drawn too, so a collar is judged against a neck rather than a capped\n  hole; that can be turned off.\n\n  **With a character on, nothing in the viewer is centred, turned or scaled.** Every mesh is drawn at\n  its own origin, at its own size, with its own pivot \u2014 what a level would show with all of them\n  dropped at 0, 0, 0. A garment this plugin wrapped is already in that character\u2019s space, so it lands\n  on the body exactly as the chain left it, with no arithmetic anywhere. One that has not been wrapped\n  hangs wrong, at the wrong size, in the wrong place, which is the answer rather than a fault in the\n  picture \u2014 and the reason to wrap it. *Align* is unavailable while a character is shown: it exists to\n  throw away size and position, which are the two things being checked.\n- **The Garment Studio.** *Pose and place...* on the garment fit step is now *Open Garment Studio...*,\n  with two more modes. **Sculpt**: the same tools as Sculpt mesh, on the garment where you placed it,\n  against the body as you bent it. The wrap starts from the sculpt. It is kept with the definition as a\n  plain file, not an asset, and a sculpt made on a garment that has since been regenerated is refused\n  with the reason. *Back to the original* throws it away. A changed sculpt marks the step stale.\n  **Wrap**: runs the fit in the window, from your sculpt or the original, with the step's settings, and\n  shows the result on the body; wrap again after changing anything, and the studio says when the result\n  on screen is out of date. The wrapped garment can be sculpted too. The last wrap is kept with the\n  sculpt. **Finish** saves the wrap as an asset and hands it to the chain as the step's output. Save\n  also saves the definition, and closing with unsaved changes asks first.\n- **A finished garment is handed on as it is.** A chain run over a finished fit step uses the finished\n  garment without wrapping again, in about a second, so a sculpt made after the wrap is never lost. If the\n  garment changed since, the studio opens and the chain waits for it. A step never finished wraps by\n  itself as before.\n- An agent can work the Garment Studio through Send Interactive Step Command on the fit step: open,\n  mode, place, pose, tool, stroke, keep, options, wrap with settings, save, finish, unfinish, close. `help`\n  lists them. Other plugins can drive it through `GarmentStudio.h`: its status, its commands, and captures of\n  its viewport from named angles around the character, written to PNG. MeshForge Garment Toolset builds the\n  tools for agents that can see on it.\n- A **Garment for a character** Mesh Workflow: Concept off, the fit and skinning steps, and an import\n  that keeps the fitted origin and builds no collision. Choose a mesh provider and the target\n  character, and a new definition is ready to run.\n- **Bone profiles** for wardrobe skinning: choose which of the body's bones a garment follows, so a\n  vest follows the chest and not the arms, and trousers the hips and legs and not the spine. Thirteen\n  ship: Head, Shirt / jacket, T-shirt, Vest, Arms only, Hands and feet, Pants, Pants and feet, Shorts,\n  Full bodysuit, Full bodysuit and head, Backpack and Belt. They are editable assets, and new ones are\n  made from the Content Browser. Leave the skinning step's profile empty and it skins exactly as before.\n- **Sculpt mesh - in the editor**, a post step you finish by hand without leaving Unreal, for any static\n  mesh anywhere in a chain. It opens the mesh, with its Reference Meshes locked beside it (a MetaHuman\n  body brings its face), in a window with Epic's Vertex Sculpt, Smooth, Lattice and Bend / twist tools,\n  which only move vertices. UV seams are welded while you sculpt. *Finish edit* hands the edited asset to\n  the chain as the step's output with nothing exported or re-imported; closing the window or the editor\n  keeps the sculpt, and the step carries on from where it stood. The plugin now enables Epic's Mesh\n  Modeling Toolset, where the tools come from.\n- **Sculpt in pose...**, under Advanced on the wardrobe skinning step, opens the skinned garment in the Skeletal Mesh\n  Editor with the target body and its MetaHuman face beside it, following the garment's pose, so a\n  garment can be sculpted in a pose or given a pose corrective.\n- An agent can work the sculpt window one command at a time through MeshForge Toolset's Send\n  Interactive Step Command, or from the console with `MeshForgeGarment.Sculpt`.\n\n### Changed\n- *Save and fit* is gone. **Finish** takes its place and records the garment the studio shows, instead of\n  running the whole chain, which could open other steps' windows first.\n- A sculpt command's stroke that starts beside the mesh now says so. It used to report success and\n  sculpt nothing.\n\n### Fixed\n- **Lattice and Bend / twist can be moved again.** Both drew their handles in the Sculpt mesh window\n  and the Garment Studio, but not the gizmo that moves them: a selected lattice control point had\n  nothing to drag it with, and Bend / twist showed the handles that set how far it bends without the\n  one that aims it. Both now carry the full translate / rotate / scale gizmo.\n- Reopening **Pose and place** after the fit has run shows the garment where it was placed. It used\n  to load the fit's own result, which was already sized and positioned, and apply the placement to it\n  a second time, so the garment appeared shrunk and floating above the character. The panel now\n  shows the mesh the fit step starts from. The saved placement was never affected.\n- Wardrobe skinning no longer shows \"Ensure condition failed: Solver->bSucceeded()\" on AI garments\n  whose skin came out fine. An attempt that would leave part of the garment with nothing to inpaint\n  from is now skipped before the engine runs it, and the log says why.\n\n### Compatibility\n- Needs MeshForge 0.3.0 or later.\n\n### Known issues\n- Smooth relaxes the whole garment. At its default strength it shrinks a garment noticeably and pulls\n  hems up, enough to change how skinning matches it to the body. Lower the steps, or use the Sculpt\n  tool's Shift-smooth on one area."
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- The `Runner/` folder ships, so the container this plugin resolves from its own installed directory can finally be built from a release.\n- First release to carry licence terms. They are a draft pending review."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- Initial release: garment fit (Place and Fit modes), the two-bone articulation solver, and the wardrobe skinning post step with automatic retry escalation for AI-generated garment normals.\n- Shipped the rule and its enforcement: a garment binds to the target body mesh, not the shared `USkeleton` \u2014 verified per-bone against the reference pose before saving, not just trusted.\n- Added Unreal inpainting as a separate, chainable skeletal post step.\n- Added the MetaHuman face auto-discovery and neck-seam weld so the body doesn't need manual \"additional meshes\" entries.\n- Fixed the self-test to capture actual polygon/edge snapshots rather than just their counts.\n- Documented the detail-preserving CC5 shirt solver result \u2014 first user-accepted example, not a claim that arbitrary clothing is solved (see `PRESERVATION_RESULTS.md`)."
         }
       ]
     },
@@ -739,6 +990,13 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarmenttoolset-v0.1.0/MeshForgeGarmentToolset-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-09-21T19:26:45Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgegarmenttoolset-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.0",
+          "date": "2026-09-21",
+          "body": "### Added\n- The Garment Studio as agent tools: open it, capture it from named angles to a PNG, turn joints, place the\n  garment, sculpt with drags across the last picture, wrap with fit settings and wait for it, save, finish and\n  close.\n- The **Fit a garment by sight** skill: the loop, what to look for in each picture, and when to hand over to a\n  person.\n\n### Compatibility\n- Needs MeshForge 0.3.0 and MeshForgeGarment 0.2.0 or later. The Garment Studio it drives\n  arrived in MeshForgeGarment 0.2.0."
         }
       ]
     },
@@ -812,6 +1070,33 @@
           "releasedAt": "2026-09-01T02:13:40Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgetoolset-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.3.0",
+          "date": "2026-09-21",
+          "body": "### Added\n- Move Post Step moves one post-processing step to another position, keeping its settings and runs, and\n  refuses an order the chain could not run. Set Post Pipelines rebuilds the chain with default settings.\n- List Mesh Workflows, Apply Mesh Workflow, Set Stage Enabled and Save Definition As Workflow. A\n  definition's description now carries its stage switches, the workflow it came from and what has\n  changed since.\n- Rebuild Definition Thumbnails regenerates and saves the Content Browser thumbnail of every Mesh\n  Definition under a folder.\n- Send Interactive Step Command works a step a person finishes, such as sculpting a garment in the\n  editor, one command at a time and without a mouse or keyboard. `help` lists the step's commands;\n  Edit in Blender takes none. It also works the Garment Studio on a garment fit step: send `open` first.\n\n### Changed\n- Get Mesh Definition reports `imagePrompt` and `meshPrompt`: the words the concept pipeline draws from\n  and the words the mesh stage sends. Each pipeline keeps its own prompt - set it with the object\n  property tools as `Prompt` on the pipeline Set Pipeline returned. Create Mesh Definition's `prompt` is\n  the brief every image and mesh pipeline set afterwards starts from; switching a stage's pipeline keeps\n  its prompt.\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- List Pipelines with kind Post includes post steps other plugins registered, by id, and Set Post\n  Pipelines accepts those ids. For a registered step it returns the settings object's path.\n- List Post Inputs describes starting a step from another step's run: `InputSource` `StepOutput`\n  with `InputStepId` and `InputTakeId`, empty to follow the latest run.\n- List Post Inputs lists the Mesh stage's finished takes too, under step `Mesh stage`, with no asset\n  and the stepId that names that stage. Point a step at one the same way; an empty `InputTakeId`\n  follows the take selected in the Takes tab.\n\n### Compatibility\n- Needs MeshForge 0.3.0 or later."
+        },
+        {
+          "version": "0.2.2",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-09-07",
+          "body": "- Version-only bump. `v0.2.0` was already tagged while the plugin was still closed-source; a tag\n  can't be reused, so going `open` the same day needed a fresh patch version to release under.\n  No code or feature change from 0.2.0."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-07",
+          "body": "- Repointed Docs/Support URLs at kovati.dev (superseded again the same day by the distribution flip to `open` with a GitHub mirror).\n- Added the tool surface for independent post-step execution with selectable saved inputs (`ListPostInputs`, alongside `RunPostProcessing`'s per-step `stepIndex`).\n- Merged SurfaceForge (PR #4)."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-01",
+          "body": "- Initial release: provider discovery, mesh-definition authoring, generation and import tools, built alongside MeshForge's own first release.\n- Added agent tools for the panel's newer work (pipeline selection, concept drawing) so the panel and the agent surface quote the same price and cover the same actions.\n- Added post-processing tools; noted in the same release that this set (three of five members at the time) shipped with only the core open."
+        }
       ]
     },
     {
@@ -859,6 +1144,23 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgetrellis-v0.0.1/MeshForgeTrellis-0.0.1-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-09-08T10:47:08Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgetrellis-v0.0.1"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.0.3",
+          "date": "2026-09-21",
+          "body": "### Compatibility\n- Rebuilt against MeshForge 0.3.0, which it now needs. The 0.0.2 build was compiled against the\n  previous MeshForge and is not compatible with the new one. No change to what it does."
+        },
+        {
+          "version": "0.0.2",
+          "date": "2026-09-11",
+          "body": "### Fixed\n- The reference-image runner reaches an installed copy for the first time. `ImageRunner/` was\n  never staged for the package, so a plugin installed from a release carried only the mesh\n  runner \u2014 and the image pipeline, which resolves that folder inside the installed plugin,\n  could not start its container at all. Both the register and this plugin's own package filter\n  now carry it.\n\n### Changed\n- Both runner images are numbered `0.1`, in the two-part scheme runners use; they were `0.0.1`,\n  which is the three-part scheme plugins use. Neither image had ever been published, so no\n  published tag moves."
+        },
+        {
+          "version": "0.0.1",
+          "date": "2026-09-08",
+          "body": "- **First release.** Previously the only plugin in the family with no build at all, while its toolset was public and depended on it.\n- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- The `Runner/` folder ships, so the container this plugin resolves from its own installed directory can finally be built from a release.\n\nReleased 2026-09-08 as `meshforgetrellis-v0.0.1`, its first build of any kind \u2014 until then it was the only plugin in the family with no package, while its own toolset was public and declared a dependency on it. That build also proved the game-target compile, which had never run for this plugin."
         }
       ]
     },
@@ -908,6 +1210,23 @@
           "releasedAt": "2026-09-07T20:09:12Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgetrellistoolset-v0.0.1"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.0.3",
+          "date": "2026-09-21",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n\n### Compatibility\n- Rebuilt against MeshForge 0.3.0 and MeshForgeTrellis 0.0.3, which it needs."
+        },
+        {
+          "version": "0.0.2",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.0.1",
+          "date": "2026-09-08",
+          "body": "- First release, cut the day the plugin went `open` (no code change from the prior unreleased\n  state \u2014 the tag simply marks the first version that could be mirrored).\n- Docs/Support URLs pointed at the new GitHub mirror.\n- MeshForge, and the model that only speaks in pictures.\n- Do not advise somebody whose runner is working."
+        }
       ]
     },
     {
@@ -954,6 +1273,23 @@
           "releasedAt": "2026-08-28T11:03:40Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshweightremap-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-09-07",
+          "body": "- Aligned the plugin descriptor with its release tag and author attribution.\n- Repointed Docs/Support URLs at kovati.dev (superseded the same day by the distribution flip to `open` with a GitHub mirror).\n- Flipped distribution from unlisted to `open`, 0.1.1."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial release: moving weights off bones a leader mesh will never drive, using the engine's own `IMeshBoneReduction::ReduceBoneCounts`."
+        }
       ]
     },
     {
@@ -989,6 +1325,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshweightremaptoolset-v0.1.0/MeshWeightRemapToolset-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T10:42:40Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshweightremaptoolset-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- The package now carries its Apache-2.0 LICENSE, which earlier zips omitted.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial release: the same three measurements (`InspectLeader`, `GetWeightedBones`, `RemapToLeader`) as MeshWeightRemap's Content Browser tool, reachable from an agent."
         }
       ]
     },
@@ -1035,6 +1383,23 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforge-v0.1.0/MontageForge-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T10:00:04Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/montageforge-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-09-07",
+          "body": "- Apache-2.0 licensing, and a release now publishes its source\n- Every plugin descriptor agrees with its release tag, and says who made it\n- Every Forge asset has a factory, and double-click opens the panel that owns it\n- Every plugin now points at kovati.dev\n- Tagged as MontageForge 0.1.1"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial commit: Colony prototype, plugins and plans\n- MontageForge: include AnimSequenceBase where the notify uses it"
         }
       ]
     },
@@ -1083,6 +1448,23 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/montageforgetoolset-v0.1.0/MontageForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T10:55:41Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/montageforgetoolset-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-08-29",
+          "body": "- Apache-2.0, and a release publishes its source"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial commit: Colony prototype, plugins and plans\n- Kimodo: free local motion generation, proven end to end"
         }
       ]
     },
@@ -1165,6 +1547,38 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforge-v0.1.0/MotionForge-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T10:20:40Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforge-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.3.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it."
+        },
+        {
+          "version": "0.3.0",
+          "date": "2026-09-07",
+          "body": "- Extract ElevenLabs and Uthana; the cores now name no vendor\n- The Tools menu shows one Automation Forge section, not eight loose tools\n- Every plugin now points at kovati.dev"
+        },
+        {
+          "version": "0.2.2",
+          "date": "2026-08-30",
+          "body": "- Keys that belong to a person, not to a plugin\n- Settings-page copy, a measured pull size, and a pod disk that is not Kimodo's\n- Versions for the release"
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-08-29",
+          "body": "- ForgeKeys is not a plugin any more; the hub carries the keys\n- Kimodo declares where it can be rented\n- The READMEs catch up with a long day"
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-08-29",
+          "body": "- Apache-2.0, and a release publishes its source\n- ForgeKeys: one page for every key, and no plugin needs it\n- Keys move to Editor Preferences, where a key belongs\n- A window for a definition, and one take by default\n- The prompt timeline opens with its motion on it\n- Reach the provider's own setup, without knowing what it is\n- Wire provider state, so a runner started elsewhere shows up here\n- Ask before offering, not after failing\n- A Motion Character as a sequence, not ten equal fields\n- A provider is picked, and a character without one is universal\n- README: the editor surface\n- A definition says which provider it will use, and whether its clip still exists\n- Both asset types can be created from the Content Browser\n- The library\n- Every plugin descriptor agrees with its release tag, and says who made it\n- A shared plugin has to be optional at build time, not only at runtime"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial commit: Colony prototype, plugins and plans\n- Kimodo: free local motion generation, proven end to end; rent a GPU from the editor\n- Kimodo: prove the pose converter, and fix the four things that broke it\n- Kimodo: send authored poses, capture constraint keys, and prove the payload against the binary\n- Direct retarget rest-alignment: find and fix why the arms crossed\n- Choose the retargeter per clip instead of per rebuild\n- Pose asset keys work, and constraint times are harvested from a Level Sequence\n- Beats are addressable, and divisible only when you want them to be\n- Normalisation is off by decision, not by a missing Blender\n- Provenance: a clip can say what made it\n- A prompt is a timeline, so author it on one; the harvest reads a sequence we built\n- A rig that arrives switched off; copy the take's pose onto the rig and let the engine solve\n- Constraint types along the clip, and no generation spent filling a row\n- Output roots move; the things they read from stay where they are\n- Quality is its own add-on, beside the providers rather than inside core\n- The hands Kimodo never generated, and a gate that can test a number\n- Cost before commit, for real this time"
         }
       ]
     },
@@ -1262,6 +1676,43 @@
           "releasedAt": "2026-08-28T11:06:05Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgekimodo-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.4.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it.\n- The `Runner/` folder ships, so the container this plugin resolves from its own installed directory can finally be built from a release."
+        },
+        {
+          "version": "0.4.0",
+          "date": "2026-09-07",
+          "body": "- The Tools menu shows one Automation Forge section, not eight loose tools\n- Every plugin now points at kovati.dev"
+        },
+        {
+          "version": "0.3.0",
+          "date": "2026-09-01",
+          "body": "- A written contract, because three runners had grown three dialects\n- Kimodo now requires a runner that speaks the contract\n- Both runners pass the contract check, measured not assumed\n- Kimodo's runner image moves to 1.1, with a note on one host serving many runners"
+        },
+        {
+          "version": "0.2.2",
+          "date": "2026-08-30",
+          "body": "- Keys that belong to a person, not to a plugin\n- Emotion detection: the audio decides, and a token is not access\n- A runner panel for Audio2Face, and three verbs that finally differ\n- One visual language for both runner panels\n- Keys are settable without the hub, and a rented pod survives a restart\n- Settings-page copy, a measured pull size, and a pod disk that is not Kimodo's\n- Versions for the release"
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-08-29",
+          "body": "- ForgeKeys is not a plugin any more; the hub carries the keys\n- A stopped container is no longer reported as a running one\n- The state check has to succeed before its answer means anything\n- Kimodo declares where it can be rented\n- The READMEs catch up with a long day"
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-08-29",
+          "body": "- ForgeKeys: one page for every key, and no plugin needs it; keys move to Editor Preferences\n- A panel for the machine that generates\n- Stop blaming a first run for a wait that happens every time\n- One place at a time, and a shape a person can read\n- Try every affordable GPU, and let Stop work\n- Say what is measured, not what is assumed\n- Stop stops, Set up starts, Rebuild rebuilds\n- Know which runner image is installed\n- Reach the provider's own setup, without knowing what it is\n- Wire provider state, so a runner started elsewhere shows up here\n- README: the runner panel, the three buttons, the image signature\n- The status says whether the keys exist, and the descriptions name Drifted\n- Every plugin descriptor agrees with its release tag, and says who made it\n- A shared plugin has to be optional at build time, not only at runtime"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Free local motion generation, proven end to end; rent a GPU from the editor and make it fast\n- Cloud image, settings persistence, capacity failures, network volumes, disposable pods\n- Prove the pose converter and fix the four things that broke it\n- Send authored poses and prove the payload against the binary\n- Ship the SOMA rig with the plugin; make hand IK a choice rather than a default\n- Build FK and hand-IK rigs as separate assets, and disprove the goals theory\n- Make the IK half of the retarget actually run; document the three ways its IK dies silently\n- Make the Kimodo runner build and run on a Blackwell card\n- Kimodo is a thirty-frame model, and clips import as a T-pose \u2014 fixed\n- Duration is per beat, not per clip; the ceiling belongs on the beat, not the clip\n- Provisioning was broken by a Runpod API change; settings move house\n- Three clips played at double speed; repair them and plan the prevention\n- The harvest reads a sequence we built, and naming a pose is worth 58cm\n- Two console commands the README named wrong, and what a baked rig costs\n- Carved out of Colony: the Automation Forge plugins, with their history"
+        }
       ]
     },
     {
@@ -1334,6 +1785,33 @@
           "releasedAt": "2026-08-28T10:53:36Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgekimodotoolset-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.3.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.3.0",
+          "date": "2026-09-07",
+          "body": "- Kimodo now requires a runner that speaks the contract\n- Every plugin now points at kovati.dev"
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-08-29",
+          "body": "- A stopped container is no longer reported as a running one"
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-08-29",
+          "body": "- Apache-2.0, and a release publishes its source\n- The status says whether the keys exist, and the descriptions name Drifted\n- Every plugin descriptor agrees with its release tag, and says who made it"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Free local motion generation, proven end to end; rent a GPU from the editor and make it fast\n- Prove the pose converter and fix the four things that broke it\n- Send authored poses and prove the payload against the binary\n- Measure where bones actually ended up\n- Capture a constraint key from the character you posed\n- Let constraint authoring be read back and undone\n- Write down what today changed, and keep beats where they belong"
+        }
       ]
     },
     {
@@ -1370,6 +1848,18 @@
           "releasedAt": "2026-08-28T11:08:26Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgequality-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Quality becomes its own add-on, beside the providers rather than inside core\n- Contact is not penetration, and a good clip now reports zero\n- Getting the limb back out, and refusing when it cannot\n- The proxy could see 38.8% of the character, and said nothing about it\n- A proxy that can see the whole character, calibrated against itself\n- A refusal that leaves nothing behind\n- Write down what was learned, and park the corrector\n- The hands Kimodo never generated, and a gate that can test a number\n- Wires you can see, undo on the keyboard, and assets you pick\n- Cost before commit, for real this time"
+        }
       ]
     },
     {
@@ -1405,6 +1895,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequalitytoolset-v0.1.0/MotionForgeQualityToolset-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-08-28T10:58:00Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgequalitytoolset-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- The package now carries its Apache-2.0 LICENSE, which earlier zips omitted.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Quality becomes its own add-on, beside the providers rather than inside core\n- Getting the limb back out, and refusing when it cannot\n- The proxy could see 38.8% of the character, and said nothing about it\n- A proxy that can see the whole character, calibrated against itself\n- Write down what was learned, and park the corrector"
         }
       ]
     },
@@ -1454,6 +1956,23 @@
           "releasedAt": "2026-08-28T10:47:03Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgetoolset-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-08-29",
+          "body": "- Apache-2.0, and a release publishes its source\n- A window for a definition, and one take by default\n- The prompt timeline opens with its motion on it\n- Readiness and provider state become tools\n- Every plugin descriptor agrees with its release tag, and says who made it"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial commit: Colony prototype, plugins and plans\n- Free local motion generation, proven end to end\n- Provenance: a clip can say what made it\n- Document provenance, and put the menu work on hold\n- A prompt is a timeline, so author it on one\n- Write down what today changed, and keep beats where they belong\n- Output roots move; the things they read from stay where they are\n- What was done to a clip, and where it puts its own limbs\n- Quality becomes its own add-on, beside the providers rather than inside core"
+        }
       ]
     },
     {
@@ -1490,6 +2009,18 @@
           "releasedAt": "2026-09-07T14:40:06Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgeuthana-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- Extract ElevenLabs and Uthana; the cores now name no vendor\n- Two open plugins get their licence, and DeepL joins the register\n- Every plugin now points at kovati.dev"
+        }
       ]
     },
     {
@@ -1511,6 +2042,18 @@
           "url": null,
           "symbols": null,
           "notes": null
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- First release to carry licence terms. They are a draft pending review."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- PerformanceForge: a capture stage in the editor\n- Capture verified live, and the two failures that cost it (NV12 frames, unfocused-editor throttling)\n- One library, a teleprompter, and panels that meet\n- Human-readable and controllable: casting, audition, discovered actions, and a stage\n- Sessions and takes: recording stops deciding, the director chooses\n- The camera goes off with the window\n- Harvest from the panel, watch a take, and the paid-plugin position\n- Documentation catches up with the code\n- PerformanceForge's toolset moves out; the providers' stay put\n- The take's picture actually appears\n- Re-voice a line without rewriting it\n- Ask the subtitle question of every line, not just the ones a tool can fix\n- A re-voicing is not another take, and the pipeline gets doors\n- The take is the unit: four quadrants, folders, and one decision\n- Pressing Use gave you a different voice, and charged for it \u2014 fixed\n- Hear a voice without committing to it, and a face that gets made\n- An empty take list should say why it is empty\n- Takes are always remembered, and IN USE is measured rather than claimed\n- Save Takes is a latch, and takes can be removed or brought in\n- Ensure the clip before anything touches it\n- Re-solve, so redoing the work does not need a second take\n- Link the face bank to its speech bank instead of guessing\n- The session list says which one is open, and opens one\n- The Tools menu shows one Automation Forge section, not eight loose tools\n- A session is found from the bank it serves, and opens where it is used\n- Every Forge asset has a factory, and double-click opens the panel that owns it\n- Every plugin now points at kovati.dev"
         }
       ]
     },
@@ -1547,6 +2090,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/performanceforgetoolset-v0.1.0/PerformanceForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-09-07T15:21:48Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/performanceforgetoolset-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- PerformanceForge's toolset moves out; the providers' stay put\n- A session is found from the bank it serves, and opens where it is used\n- Every plugin now points at kovati.dev"
         }
       ]
     },
@@ -1618,6 +2173,33 @@
           "releasedAt": "2026-08-28T10:21:54Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforge-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.2",
+          "date": "2026-09-11",
+          "body": "### Added\n- **Authoring Language Code** (default `en`). A bank carries no language of its own, and leaving a\n  dub's source language to detection \u2014 which guesses from a few seconds of audio \u2014 dubbed fluent\n  nonsense whenever it guessed wrong. Every dub now states its source language explicitly.\n- Two seams a localisation add-on can fill: a bank can describe where each line's audio came from,\n  and can produce a whole bank its own way. The Speech Library's Origin column and its Generate All\n  button defer to them, so a specialised bank behaves correctly in the panel with no change here.\n\n### Fixed\n- Speech bank queries now search subclasses. Without that, a specialised bank was invisible to the\n  localisation status and to the line-home index \u2014 present in the project, absent from the UI."
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-07",
+          "body": "- Extracted ElevenLabs and Uthana out of the core plugins, so the cores name no vendor\n- Speakers, voice profiles, and the three-page Speech Library shipped, then grew to five pages\n  (Ingest, Cast, Write, Perform, Localize)\n- Casting made human-readable and controllable: audition, discovered actions, a stage\n- Sessions and takes: recording stops deciding, the director chooses via a take ledger\n- `ConvertSpeechLine` \u2014 re-voice a line without rewriting it (speech-to-speech)\n- Cost estimation extended to the conversion pipeline (\"price the pipeline's other meter\")\n- Subtitle-worthiness (\"words-unverified\") asked of every line, not just tool-fixable ones\n- Fixed: pressing Use gave a different voice than expected, and billed for it\n- Fixed: solving a face bank could overwrite a merged face\n- Face bank now links to its speech bank by id instead of guessing\n- Tools menu consolidated into one Automation Forge section\n- Every Forge asset now has a factory; double-click opens the panel that owns it\n- Localisation shipped: a sibling bank per language, joined to everything by line id\n- Dubbing shipped: a dub records which recording it was made from\n- All plugin links repointed to kovati.dev"
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-08-29",
+          "body": "- Relicensed Apache-2.0; a release now publishes its source\n- Keys moved to Editor Preferences and consolidated under ForgeKeys, then again onto the hub\n- Every plugin descriptor made to agree with its release tag and credit its author\n- Shared-plugin dependency made optional at build time, not just runtime"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial release: text to a sound asset, with timings\n- Runpod provisioning fix after an API change; settings relocated\n- Output roots reworked so generated assets move independently of their sources\n- Curated editor palette, organised by pipeline step\n- Long-running solve wait proven against a multi-minute job\n- Cost-before-commit pricing, and single-line banks supported"
+        }
       ]
     },
     {
@@ -1641,6 +2223,23 @@
           "url": null,
           "symbols": null,
           "notes": null
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-09-11",
+          "body": "### Added\n- A localised bank now knows what each of its lines is a translation of, and records it beside the\n  line: the method it will use, what the source was, whether this bank dubbed it, and which\n  recording the dub followed. It is visible on the asset, so \"why is this line a dub\" is answered\n  where you are already looking.\n- **Generate All** on a localised bank generates the lines whose source is synthesis and **dubs**\n  the lines whose source is a recorded performance, in one costed confirmation \u2014 instead of paying\n  a speech provider to read every line out again and discarding the acting. Afterwards it points\n  every face bank serving that bank at the new audio, so the separate Create/Update Face Bank step\n  is gone.\n\n### Fixed\n- A dub of a dry voice recording played two languages at once. The dubbing service separates\n  \"background\" from speech and lays it back under the dub; on a dry recording that \"background\" is\n  a smeared copy of the original performance. It is now always dropped.\n- A dub's source language is stated rather than detected \u2014 see SpeechForge's Authoring Language\n  Code.\n- The service's own transcript of the finished dub is fetched, logged, and kept on the line as its\n  alignment text, so nobody has to listen to a take to find out whether the dub understood its\n  source. A transcript that cannot be read degrades to a warning and never to a failed dub: the\n  audio is already on disk.\n\n### Compatibility\n- Needs a SpeechForge with the Authoring Language Code setting and the two bank seams."
+        },
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it.\n- First release to carry licence terms. They are a draft pending review."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-08",
+          "body": "- First release, tagged the same day the plugin went paid. Built as the DeepL side of SpeechForge's\n  localisation work (2026-09-05, \"a sibling bank per language, joined to everything by line id\"),\n  running unreleased on Fab distribution until this tag.\n- Docs/Support URLs pointed at kovati.dev."
         }
       ]
     },
@@ -1677,6 +2276,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforgeelevenlabs-v0.1.0/SpeechForgeElevenLabs-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-09-07T14:44:33Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgeelevenlabs-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- Extracted out of the SpeechForge core so the core names no vendor\n- Voice conversion closes the capture-brief pipeline, measured at one millisecond of timing drift\n- Casting made human-readable and controllable: audition, discovered actions, a stage\n- Speakers, voice profiles, and the three-page Speech Library\n- `ConvertSpeechLine` shipped \u2014 re-voice a line without rewriting it\n- PerformanceForge's toolset moved out; provider toolsets stay with their providers\n- A provider now earns a toolset only by having something only it can do\n- Localisation: a sibling bank per language, joined by line id\n- Licensed and registered in `plugins.json` alongside SpeechForgeDeepL\n- Repointed to kovati.dev\n- Two small maintenance fixes from the SurfaceForge distribution audit\n- Marked beta rather than experimental"
         }
       ]
     },
@@ -1738,6 +2349,28 @@
           "releasedAt": "2026-08-28T10:49:12Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforgetoolset-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.2.2",
+          "date": "2026-09-11",
+          "body": "### Added\n- `ProduceSpeechBank` \u2014 produce a whole bank the bank's own way, the agent-side twin of the Speech\n  Library's Generate All. On a plain bank that generates what is missing or stale; on a localised\n  bank it generates the synthesis-sourced lines, dubs the performed ones, and points the face banks\n  serving it at the new audio.\n\n### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry."
+        },
+        {
+          "version": "0.2.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.2.0",
+          "date": "2026-09-07",
+          "body": "- Apache-2.0 relicensing; a release now publishes its source\n- Every plugin descriptor made to agree with its release tag and credit its author\n- The culmination wiring: one library, a teleprompter, and panels that meet\n- Speakers, voice profiles, and the three-page Speech Library\n- Sessions and takes: recording stops deciding, the director chooses\n- Documentation pass to catch up with the code\n- `ConvertSpeechLine` shipped \u2014 re-voice a line without rewriting it\n- Cost estimation extended to the conversion pipeline\n- Subtitle-worthiness asked of every line, not just tool-fixable ones\n- A re-voicing given its own path, distinct from a new take\n- Fixed: pressing Use gave a different voice than expected, and billed for it\n- Takes always remembered; \"in use\" now measured rather than claimed\n- Save Takes made a latch; takes can be removed or brought back in\n- Speech and face joined by id: a speaker names their head, a bank says what it holds\n- Localisation: a sibling bank per language, joined by line id\n- Repointed to kovati.dev"
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-08-28",
+          "body": "- Initial release: the pipeline as MCP tools\n- Output roots reworked so generated assets move independently of their sources"
+        }
       ]
     },
     {
@@ -1771,6 +2404,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforge-v0.1.0/SurfaceForge-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-09-07T15:36:06Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/surfaceforge-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- Scaffold SurfaceForge local-first material generation\n- Package the SurfaceForge local runner with the plugin\n- Make SurfaceForge limits and map provenance explicit\n- Two defects the scaffold could only show by running, and the papers to match\n- Masters that ship, so a graduation ends in a material rather than five textures\n- Masters that compile, and an import that stops duplicating itself\n- A tab, so a surface can be made by somebody who has not read the code\n- A Surface Definition stops being an anonymous data asset\n- The panel separates what is still being chosen from what was made\n- The work on the left, the controls on the right\n- Resolution means the size that is generated, and the price says which price\n- The whole set goes open, the toolset catches up with the panel, and the papers say what is true\n- SurfaceForgeLocal and SurfaceForgePatina ship free, not open"
         }
       ]
     },
@@ -1808,6 +2453,18 @@
           "releasedAt": "2026-09-07T15:40:16Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/surfaceforgelocal-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it.\n- The `Runner/` folder ships, so the container this plugin resolves from its own installed directory can finally be built from a release."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- Scaffold SurfaceForge local-first material generation\n- Package the SurfaceForge local runner with the plugin\n- Make SurfaceForge limits and map provenance explicit\n- Two defects the scaffold could only show by running, and the papers to match\n- Resolution means the size that is generated, and the price says which price\n- The whole set goes open, the toolset catches up with the panel, and the papers say what is true\n- SurfaceForgeLocal and SurfaceForgePatina ship free, not open"
+        }
       ]
     },
     {
@@ -1844,6 +2501,18 @@
           "releasedAt": "2026-09-07T15:42:35Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/surfaceforgepatina-v0.1.0"
         }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- Scaffold SurfaceForge local-first material generation\n- Make SurfaceForge limits and map provenance explicit\n- Two defects the scaffold could only show by running, and the papers to match\n- Resolution means the size that is generated, and the price says which price\n- The whole set goes open, the toolset catches up with the panel, and the papers say what is true\n- SurfaceForgeLocal and SurfaceForgePatina ship free, not open"
+        }
       ]
     },
     {
@@ -1879,6 +2548,18 @@
           "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforgetoolset-v0.1.0/SurfaceForgeToolset-0.1.0-UE5.8-Win64-symbols.zip",
           "releasedAt": "2026-09-07T15:38:41Z",
           "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/surfaceforgetoolset-v0.1.0"
+        }
+      ],
+      "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-09-08",
+          "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
+        },
+        {
+          "version": "0.1.0",
+          "date": "2026-09-07",
+          "body": "- Scaffold SurfaceForge local-first material generation\n- Resolution means the size that is generated, and the price says which price\n- The whole set goes open, the toolset catches up with the panel, and the papers say what is true"
         }
       ]
     }
