@@ -70,8 +70,26 @@ public sealed class PluginInfo
     [JsonPropertyName("dependencies")] public List<string> Dependencies { get; set; } = [];
     [JsonPropertyName("source")] public string? Source { get; set; }
     [JsonPropertyName("versions")] public List<VersionInfo> Versions { get; set; } = [];
+    /// <summary>Every versioned section of the plugin's CHANGELOG.md, newest first. Empty in a manifest older than the field.</summary>
+    [JsonPropertyName("changelog")] public List<ChangelogEntry> Changelog { get; set; } = [];
 
     public bool IsPaid => Distribution == "paid";
+
+    /// <summary>
+    /// What an update from <paramref name="installed"/> to <paramref name="offered"/> brings: every
+    /// section newer than the one installed, up to and including the one offered, newest first.
+    /// On 0.2.1 with 0.3.0 offered, that is 0.3.0 and 0.2.2 - the versions skipped count too.
+    /// </summary>
+    public IReadOnlyList<ChangelogEntry> ChangesBetween(string installed, string offered)
+    {
+        if (!SemVer.TryParse(installed, out var from) || !SemVer.TryParse(offered, out var to)) return [];
+        return Changelog
+            .Select(e => (entry: e, ok: SemVer.TryParse(e.Version, out var v), v))
+            .Where(x => x.ok && x.v > from && x.v <= to)
+            .OrderByDescending(x => x.v)
+            .Select(x => x.entry)
+            .ToList();
+    }
 
     /// <summary>
     /// Newest version for an engine on a channel, or null when none is published.
@@ -98,6 +116,14 @@ public sealed class VersionInfo
     [JsonPropertyName("symbols")] public string? Symbols { get; set; }
     [JsonPropertyName("releasedAt")] public string ReleasedAt { get; set; } = "";
     [JsonPropertyName("notes")] public string? Notes { get; set; }
+}
+
+/// <summary>One section of a plugin's CHANGELOG.md: the version, its date, and the Markdown under the heading.</summary>
+public sealed class ChangelogEntry
+{
+    [JsonPropertyName("version")] public string Version { get; set; } = "";
+    [JsonPropertyName("date")] public string? Date { get; set; }
+    [JsonPropertyName("body")] public string Body { get; set; } = "";
 }
 
 /// <summary>Fetches the manifest, keeps the last good copy, and serves it offline.</summary>
