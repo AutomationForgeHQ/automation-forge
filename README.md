@@ -27,7 +27,15 @@ Elsewhere: the [site](https://kovati.dev), the [account app](https://app.kovati.
 python tools/build_manifest.py --forge <path to the forge monorepo>
 ```
 
-The generator joins three sources of truth — the GitHub Releases on `releases` (what is downloadable), the plugin register in the monorepo (what each plugin is: set, role, distribution), and each plugin's descriptor (its dependencies) — and takes every checksum from GitHub's own per-asset digest, so nothing is downloaded to build it.
+The generator joins five sources of truth:
+
+- the GitHub Releases on `releases`: what is downloadable, for `open` and `fab` plugins;
+- the paid catalogue that the account app serves at `app.kovati.dev/api/paid-releases`: a `paid` plugin's versions, sizes and checksums, never where to download them;
+- the plugin register in the monorepo: what each plugin is (set, role, distribution);
+- each plugin's descriptor: its dependencies;
+- each plugin's `CHANGELOG.md`: what every version changed.
+
+It takes every public checksum from GitHub's own per-asset digest, so nothing is downloaded to build it.
 
 Shape, abridged:
 
@@ -52,12 +60,19 @@ Shape, abridged:
       "symbols": "…-symbols.zip",
       "releasedAt": "2026-08-28T10:00:04Z",
       "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/montageforge-v0.1.0"
+    } ],
+    "changelog": [ {                      // every versioned section of CHANGELOG.md, newest first
+      "version": "0.1.0", "date": "2026-08-28",
+      "body": "### Added\n- …"            // the Markdown under the heading
     } ]
   } ]
 }
 ```
 
-Versions are newest first per engine. A `fab` or `paid` plugin's package carries binaries and public headers only; an `open` plugin's carries its source. Until the product domain exists the manifest is served from this repository's raw URL.
+Versions are newest first per engine. `changelog` is what the hub's **What's new** shows: every section
+newer than the installed version, up to the one offered. It is read from the monorepo rather than from
+the releases, so a `paid` plugin has its notes here too. A paid plugin's versions carry `url`, `symbols`
+and `notes` as `null`, because the account app hands out the build after an entitlement check. A `fab` or `paid` plugin's package carries binaries and public headers only; an `open` plugin's carries its source. Until the product domain exists the manifest is served from this repository's raw URL.
 
 ## The hub and the CLI
 
