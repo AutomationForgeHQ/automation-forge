@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-22T12:52:50Z",
+  "generatedAt": "2026-09-22T12:54:33Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1609,6 +1609,18 @@
       ],
       "source": null,
       "versions": [
+        {
+          "version": "0.5.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgekimodo-v0.5.0/MotionForgeKimodo-0.5.0-UE5.8-Win64.zip",
+          "size": 751468,
+          "sha256": "2ae010c88748621dea8f82e5b7a301ab4499059859411752aaaec63ad0ec624b",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgekimodo-v0.5.0/MotionForgeKimodo-0.5.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-22T12:54:17Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgekimodo-v0.5.0"
+        },
         {
           "version": "0.4.1",
           "engine": "5.8",
