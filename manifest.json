@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-22T13:01:35Z",
+  "generatedAt": "2026-09-22T13:03:17Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1940,6 +1940,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/MotionForgeQualityToolset",
       "versions": [
+        {
+          "version": "0.1.2",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequalitytoolset-v0.1.2/MotionForgeQualityToolset-0.1.2-UE5.8-Win64.zip",
+          "size": 67344,
+          "sha256": "771ae160b129b6acd97acfd7785759b11d72fa4070afe23d575b473bb73c6042",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforgequalitytoolset-v0.1.2/MotionForgeQualityToolset-0.1.2-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-22T13:02:49Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforgequalitytoolset-v0.1.2"
+        },
         {
           "version": "0.1.1",
           "engine": "5.8",
