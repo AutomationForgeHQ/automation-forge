@@ -3,9 +3,9 @@
 
 The releases are the source of truth for what is downloadable; the register
 (plugins.json in the forge monorepo) is the source of truth for what a plugin
-*is* — its set, role and distribution — and each plugin's descriptor names its
-dependencies. This script joins the three into the one document the hub, the
-forge CLI and the website read.
+*is* — its set, role and distribution — each plugin's descriptor names its
+dependencies, and its CHANGELOG.md says what every version changed. This script
+joins them into the one document the hub, the forge CLI and the website read.
 
     python tools/build_manifest.py --forge C:\\UNREAL\\Colony_NP24\\Plugins\\Forge
 
@@ -82,6 +82,36 @@ def read_dependencies(forge: Path, plugin: str, known: set[str]) -> list[str]:
     return sorted({p["Name"] for p in data.get("Plugins", []) if p.get("Name") in known})
 
 
+# "## 0.3.0 — 2026-09-21", the heading forge/tools/changelog.ps1 checks for. "## Unreleased" is not a version.
+CHANGELOG_HEADING = re.compile(r"^##\s+v?(?P<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\b(?:\s*[—–-]\s*(?P<date>\d{4}-\d{2}-\d{2}))?")
+
+
+def read_changelog(forge: Path, plugin: str) -> list[dict]:
+    """Every versioned section of the plugin's CHANGELOG.md, newest first, as the file orders them.
+
+    The same text a release publishes as its body, read from the file rather than from the
+    releases - so a paid plugin, whose releases are private, has its notes here too, and a
+    plugin updated across three versions can be shown all three at once."""
+    path = forge / plugin / "CHANGELOG.md"
+    if not path.exists():
+        return []
+    entries: list[dict] = []
+    current: dict | None = None
+    fenced = False
+    for line in path.read_text(encoding="utf-8-sig").splitlines():
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+        elif not fenced and line.startswith("## "):
+            m = CHANGELOG_HEADING.match(line)
+            current = {"version": m.group("version"), "date": m.group("date"), "lines": []} if m else None
+            if current:
+                entries.append(current)
+            continue
+        if current is not None:
+            current["lines"].append(line)
+    return [{"version": e["version"], "date": e["date"], "body": "\n".join(e["lines"]).strip()} for e in entries]
+
+
 def build(forge: Path) -> dict:
     register = read_register(forge)
     plugins_reg: dict = register["plugins"]
@@ -132,6 +162,7 @@ def build(forge: Path) -> dict:
             "dependencies": read_dependencies(forge, name, known),
             "source": f"https://github.com/{reg['mirror']}" if reg.get("mirror") and repo_exists(reg["mirror"]) else None,
             "versions": vs,
+            "changelog": read_changelog(forge, name),
         })
 
     sets_out = []

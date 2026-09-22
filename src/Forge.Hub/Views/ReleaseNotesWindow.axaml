@@ -1,0 +1,82 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Forge.Hub.ViewModels"
+        xmlns:views="using:Forge.Hub.Views"
+        x:Class="Forge.Hub.Views.ReleaseNotesWindow"
+        x:DataType="vm:ReleaseNotesViewModel"
+        Width="720" Height="680" MinWidth="480" MinHeight="360"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource InkBrush}"
+        Icon="/Assets/forge.ico"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Title="{Binding Title}">
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+    <!-- The same chrome as the main window: a drag strip and our own close. -->
+    <Border Grid.Row="0" Background="{StaticResource PlateBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1"
+            PointerPressed="TitleBar_PointerPressed">
+      <Grid ColumnDefinitions="*,Auto" Height="38">
+        <StackPanel Orientation="Horizontal" Spacing="9" Margin="16,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+          <Path Data="M 6.5 0 L 13 11.5 L 0 11.5 Z" Stroke="{StaticResource AmberBrush}" StrokeThickness="1.3" Fill="Transparent" Width="13" Height="12" VerticalAlignment="Center" />
+          <TextBlock Classes="stamp" Text="What's new" Foreground="{StaticResource BoneBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="caption close" Command="{Binding CloseCommand}" ToolTip.Tip="Close">
+          <Path Data="M 0 0 L 10 10 M 10 0 L 0 10" Stroke="{StaticResource BoneBrush}" Opacity="0.75" StrokeThickness="1" Width="10" Height="10" />
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- Which plugin, from where to where. -->
+    <Border Grid.Row="1" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="28,20,28,18">
+      <StackPanel Spacing="6">
+        <TextBlock Classes="display" Text="{Binding Plugin}" FontSize="26" />
+        <TextBlock Classes="stamp" Text="{Binding SummaryLine}" />
+      </StackPanel>
+    </Border>
+
+    <!-- One surface per release, newest first. -->
+    <ScrollViewer Grid.Row="2" Padding="28,20,28,8" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel>
+        <ItemsControl ItemsSource="{Binding Entries}" IsVisible="{Binding HasEntries}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:ReleaseNotesEntry">
+              <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="1" Background="{StaticResource PlateBrush}"
+                      Padding="22,18" Margin="0,0,0,14">
+                <StackPanel Spacing="12">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Classes="display" Text="{Binding Version}" FontSize="18" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Classes="stamp" Text="{Binding Date}" IsVisible="{Binding HasDate}" VerticalAlignment="Center" />
+                  </Grid>
+                  <views:MarkdownBlock Markdown="{Binding Body}" />
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border IsVisible="{Binding !HasEntries}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1"
+                Background="{StaticResource PlateBrush}" Padding="22,18">
+          <StackPanel Spacing="12">
+            <TextBlock Classes="stamp" Text="{Binding EmptyLine}" TextWrapping="Wrap" Foreground="{StaticResource BoneBrush}" />
+            <Button Classes="ghost" Content="Open the release page" Command="{Binding OpenReleasePageCommand}"
+                    IsVisible="{Binding HasReleasePage}" HorizontalAlignment="Left" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- The decision this window exists for, on its own row. -->
+    <Border Grid.Row="3" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Background="{StaticResource PlateBrush}" Padding="28,12">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+        <Button Grid.Column="0" Classes="link" Content="Release page" Command="{Binding OpenReleasePageCommand}"
+                IsVisible="{Binding HasReleasePage}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Classes="ghost" Content="Close" Command="{Binding CloseCommand}" />
+        <Button Grid.Column="2" Classes="primary" Content="{Binding ActionLabel}" Command="{Binding ActCommand}"
+                IsEnabled="{Binding CanAct}" MinWidth="120" HorizontalContentAlignment="Center" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>
