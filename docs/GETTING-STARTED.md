@@ -46,9 +46,10 @@ command reference is in the [repository root README](../README.md#the-hub-and-th
 
 ## 4. Open Unreal
 
-Open your project — or a fresh 5.8 project — and the plugin is already
-enabled. If you installed to a specific project rather than the shared
-engine location:
+Open your project — or a fresh 5.8 project. **Automation Forge** is in the
+toolbar, after Play: that menu comes with every engine install and is on in
+every project. Under **Installed**, tick the plugins this project should use;
+the editor applies them when it restarts. The same from the CLI:
 
 ```
 forge enable MotionForge --project C:\Games\MyGame
@@ -66,6 +67,8 @@ work.
 - [DISTRIBUTION.md](DISTRIBUTION.md) — which plugins are open, Fab or paid.
 - The hub checks for updates every four hours and shows a Windows
   notification when one's ready; `forge update` does the same from the CLI.
+  **What's new**, beside a plugin's Update button, lists every release since
+  the version you have — skipped ones included — before you take it.
 
 ## If something needs a provider key or a local runner
 
