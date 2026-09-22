@@ -3,6 +3,10 @@
 The short path from nothing installed to a Forge set running in your
 project.
 
+**Prefer to watch?** [The whole setup in under eight minutes](https://youtu.be/qROAvFtDoBw) —
+the hub installed and signed in, sets installed and updated, and the plugins
+turned on in a project.
+
 ## 1. Get the hub
 
 Download from **[kovati.dev/download](https://kovati.dev/download)**, or
