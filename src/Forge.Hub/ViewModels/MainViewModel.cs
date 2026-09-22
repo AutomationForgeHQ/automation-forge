@@ -719,6 +719,15 @@ public partial class MainViewModel : ViewModelBase
 
     internal Task SignInFromRowAsync() => SignInAsync();
 
+    /// <summary>The release notes an update would bring, in a window over this one.</summary>
+    internal void ShowChanges(PluginRow row)
+    {
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: { } owner }) return;
+        var window = new Views.ReleaseNotesWindow();
+        window.DataContext = new ReleaseNotesViewModel(row, window.Close);
+        _ = window.ShowDialog(owner);
+    }
+
     internal Task UninstallAsync(PluginRow row) => RunAsync([row.Id], uninstall: true);
 
     private async Task RunAsync(string[] ids, bool uninstall = false)
@@ -891,6 +900,17 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
     public bool CanAct => Latest is not null && (!SignedIn || NeedsPurchase || Installed is null || HasUpdate);
     public bool CanUninstall => Installed is not null;
     public bool IsCurrent => Installed is not null && !HasUpdate;
+
+    private IReadOnlyList<ChangelogEntry>? _changes;
+
+    /// <summary>Every changelog section between the installed version and the offered one, newest first.</summary>
+    public IReadOnlyList<ChangelogEntry> Changes => _changes ??= HasUpdate ? Plugin.ChangesBetween(Installed!.Version, Latest!.Version) : [];
+
+    /// <summary>Offered beside Update when there is something to read: the notes, or at least the release's page.</summary>
+    public bool CanShowChanges => HasUpdate && (Changes.Count > 0 || Latest!.Notes?.StartsWith("https://", StringComparison.Ordinal) == true);
+    public string ChangesTip => HasUpdate ? $"What changed since {Installed!.Version}" : "";
+
+    [RelayCommand] private void ShowChanges() => owner.ShowChanges(this);
 
     [RelayCommand(CanExecute = nameof(CanAct))]
     private Task Act() =>
