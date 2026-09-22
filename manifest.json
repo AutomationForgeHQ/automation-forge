@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-22T12:00:07Z",
+  "generatedAt": "2026-09-22T12:52:50Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1477,6 +1477,18 @@
       "source": "https://github.com/AutomationForgeHQ/MotionForge",
       "versions": [
         {
+          "version": "0.4.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforge-v0.4.0/MotionForge-0.4.0-UE5.8-Win64.zip",
+          "size": 1892015,
+          "sha256": "9d80f8289ea798a6d97ebcd181a823abdba4729c7b45a29f72b678ccd9ade6fd",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/motionforge-v0.4.0/MotionForge-0.4.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-09-22T12:52:22Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/motionforge-v0.4.0"
+        },
+        {
           "version": "0.3.1",
           "engine": "5.8",
           "platform": "Win64",
@@ -1550,6 +1562,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.4.0",
+          "date": "2026-09-22",
+          "body": "### Added\n- **Get started.** *Tools \u25b8 Automation Forge \u25b8 MotionForge* walks a new user from nothing to a first motion: where motion is made (each provider's setup, measured, with the button that moves each step on, and what it costs), who it is for (a character prepared for that provider, or one made from any skeletal mesh), and a first prompt with examples. Finished steps fold to one line. The library is the other page of the same tab.\n- **Watch a take before choosing it.** The definition window opens on a stage that plays a take on the character it is for - fetched where that is free, built into a clip that is never saved. *Show as B* puts a second take beside it on the same clock; floor, in place and orbit are switches. It plays exactly as its import will: on a character with a provider rig, the preview is built on that rig and retargeted with the character's own retargeter.\n- Takes are numbered and listed with when, provider and model, seed, length, cost and state - in the game, ready on disk, or made from an older recipe. *Record* shows everything a take was sent.\n- **Each provider brings its own settings**, under its own names: model, seed, steps and guidance for Kimodo; prompt rewriting for Uthana. A definition keeps one set per provider, so switching and switching back restores both.\n- The Generate button says what it will do and what it costs, and asks before spending money. A stopped local runner is started rather than refused.\n- *Choose and import* names the montages and sequences that use the clip before replacing it.\n- The Motion Character window shows, per provider, whether the character suits it, the route its clips take, and that provider's own actions - build a Kimodo rig, upload to Uthana - with *Import directly* for a provider rig that has no retargeter. The route says when clips stop on the provider rig for want of a retargeter.\n- Get started and the definition window are built from boxed sections that open and close like a Details category. Numbered steps carry a badge - their number, a tick when done, orange when something needs you - and a one-line summary in the header, readable while closed.\n\n### Changed\n- **Every Generate a person presses stops for review** - the definition window, the library and the prompt timeline. Unattended generation stays available to pipelines and agents through Run Full Pipeline.\n- Billing belongs to each provider. Uthana's plan and rates moved to its own settings page, carried over automatically. A pay-as-you-go rate left at zero, which meant seconds only, now starts at Uthana's published price, and every price says it is that until you set your own.\n- The model and sampler settings moved from the definition into the provider's settings. Older definitions migrate when loaded; *Migrate Motion Definitions* resaves them.\n- The frame rate comes from the provider; the Target Frame Rate setting is gone.\n- The library prices a selection per definition, on each one's own provider, and asks before generating or importing anything that bills.\n- The prompt timeline's Generate gives its real price and asks before spending; Pull asks before replacing edited beats; pose actions are disabled, with the reason, on providers that take no poses.\n\n### Fixed\n- A take whose recorded file path is stale - a duplicated definition, a moved project - is found by name in the staging folder, so it previews and imports without fetching again.\n- The download estimate priced fetching a pay-as-you-go take, which is free, at the generation rate.\n- Cancel leaves its definitions in review if any take finished, or failed with the reason, instead of generating forever. A job past its timeout is kept and polled less often rather than dropped.\n- Poses keyed only on the prompt timeline are sent, read once per generation rather than once per take.\n- Generating new takes no longer takes the clip already in the game out of the record.\n- Adding or moving a pose marks earlier takes as an older recipe.\n- Setting one sampler setting through an update - Update Motion Definition, or any spec carrying the old `Control` fields - no longer resets the others (seed, postprocess, beat splitting, pose type) to their defaults. Only the settings the caller set are written.\n- A clip's untracked bones - fingers, in-between spine bones - are posed from the hand-pose clip only when that clip is on the same skeleton. Copied onto another skeleton, a Narrative idle stretched a CC5 character's fingers into claws and bent its spine.\n\n### Compatibility\n- Removed settings: Default Model Id, Billing Model, Rate Per Billed Second, Currency, Default Mode and Target Frame Rate. Their values were carried to where they now live.\n- A definition resaved by this version keeps its model and sampler settings in the provider's settings; an older MotionForge opens it with its own defaults for those.\n- Update the MotionForge add-ons with it: MotionForgeUthana 0.2.0, MotionForgeKimodo 0.5.0,\n  MotionForgeQuality 0.1.2 and the toolsets. Their earlier builds were compiled against the previous\n  MotionForge and are not compatible with this one.\n\n### Known issues\n- Fetched takes are still kept per project in `Saved/MotionForge`; the shared take vault is not built yet."
+        },
         {
           "version": "0.3.1",
           "date": "2026-09-08",
@@ -1679,6 +1696,11 @@
       ],
       "changelog": [
         {
+          "version": "0.5.0",
+          "date": "2026-09-22",
+          "body": "### Added\n- Kimodo's own settings on every definition: model, seed, diffusion steps, postprocess, beat splitting, and - under Advanced - separated guidance (`cfg_text`, `cfg_constraint`) and where poses come from.\n- **Direct**, in the definition window: a plain guide to beats, poses at moments, guidance and seeds, and actions beside it - *Pin a pose from an animation* at the start, the end, both or a moment; *Show what will be sent*; *Clear authored poses*; *Measure the imported clip*.\n- Generate starts a stopped local runner - Docker first if it is closed - and waits for the text encoder, instead of refusing.\n- The Kimodo Runner panel gains **Another machine**: point the project at a studio workstation's runner, with its token kept in this computer's vault and the commands to start it there.\n- **Llama 3 access is measured**, not assumed: Hugging Face is asked whether the stored token can read the gated model, and the answer - granted, not granted yet, token refused - is shown with the link to request it.\n- Setup steps for Get started: where it runs, Docker, the token, Llama 3 access, the image, the runner, and renting a GPU instead.\n\n### Changed\n- Cost follows where it runs: free on this machine or another, per hour on a rented GPU, which bills while the pod is up whether or not anything generates.\n- The character's route and actions come from Kimodo: *Build Kimodo rig* for IK on the feet, *Import directly instead* to skip it.\n- Building a Kimodo rig marks the character as Kimodo's. Left universal, it could be offered to another provider, which would then have retargeted its own clips through Kimodo's rig.\n\n### Fixed\n- Poses keyed only on the prompt timeline reach the runner.\n- A rotation a little off orthonormal no longer fires an engine ensure while a clip is read.\n- The README and the plugin's own messages name the real console commands: `Kimodo.PreviewConstraints`, `Kimodo.Measure`, `Kimodo.Diagnose`.\n\n### Compatibility\n- Needs MotionForge 0.4.0 or later.\n\n### Known issues\n- The runner's compose file publishes port 8757 on every network interface, while its comments describe a loopback-only desktop runner. Set `KIMODO_API_TOKEN` on any machine the network can reach."
+        },
+        {
           "version": "0.4.1",
           "date": "2026-09-08",
           "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it.\n- The `Runner/` folder ships, so the container this plugin resolves from its own installed directory can finally be built from a release."
@@ -1788,6 +1810,11 @@
       ],
       "changelog": [
         {
+          "version": "0.3.2",
+          "date": "2026-09-22",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- The skill catches up with the plugin: a beat is at most ten seconds and a clip sixty, Generate\n  starts a stopped runner by itself, Llama 3 access is measured separately from the token, and a\n  rented GPU bills while it is up.\n\n### Compatibility\n- Rebuilt against MotionForge 0.4.0 and MotionForgeKimodo 0.5.0, which it needs."
+        },
+        {
           "version": "0.3.1",
           "date": "2026-09-08",
           "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
@@ -1851,6 +1878,11 @@
       ],
       "changelog": [
         {
+          "version": "0.1.2",
+          "date": "2026-09-22",
+          "body": "### Compatibility\n- Rebuilt against MotionForge 0.4.0, which it now needs. The 0.1.1 build was compiled against the\n  previous MotionForge and is not compatible with the new one. No change to what it does."
+        },
+        {
           "version": "0.1.1",
           "date": "2026-09-08",
           "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
@@ -1898,6 +1930,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-09-22",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n\n### Compatibility\n- Rebuilt against MotionForgeQuality 0.1.2, which it needs."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
@@ -1959,6 +1996,11 @@
       ],
       "changelog": [
         {
+          "version": "0.3.0",
+          "date": "2026-09-22",
+          "body": "### Added\n- Create Motion Definition, a draft without generating; Preview Motion Request, exactly what Generate would send, what it would cost and what would stop it.\n- Set Motion Provider, List Pipeline Options and Set Motion Pipeline Option: each provider's own settings by their own names.\n- Find Characters For Provider, Get Provider Setup Steps, and Open MotionForge Window, which shows a person Get started or the library.\n- Choose And Import Take, Hide Take, Get Clip Users, Cancel Motion Definition, Get Motion Activity and Migrate Motion Definitions.\n\n### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- Generate Motions stops at review and its description says what it costs per provider; Update Motion Definition reports the settings it refused and changes only the sampler settings you set, where setting one used to reset the others; Estimate Download Cost prices fetching only.\n- A pipeline option's range is text, empty where there is no bound, instead of zero.\n- The skill states each provider's facts for that provider - it had presented Uthana's billing as\n  everyone's - and covers review, provider settings, poses and first-time setup.\n\n### Compatibility\n- Needs MotionForge 0.4.0 or later."
+        },
+        {
           "version": "0.2.1",
           "date": "2026-09-08",
           "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
@@ -2011,6 +2053,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.2.0",
+          "date": "2026-09-22",
+          "body": "### Added\n- A settings page for the plan - pay as you go or subscription - its rates and currency, carried over from MotionForge's old billing settings. Every price in the editor comes from it. A pay-as-you-go rate starts at Uthana's published price, $0.10 a generated second, and every price says it is that until you enter your own - including on a project whose old rate was zero, which meant seconds only.\n- Uthana's own settings on every definition: the model and prompt rewriting.\n- Setup steps for Get started - the key, the plan, a character on Uthana, the connection - and the character's actions: *Upload*, with its options, and *Import Uthana's rig*.\n- On pay as you go, takes play in the editor before choosing, because fetching one is free. On a subscription the viewer link, and an import that says what quota it will use and asks.\n\n### Compatibility\n- Needs MotionForge 0.4.0 or later."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
