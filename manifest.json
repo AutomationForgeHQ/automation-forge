@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-04T21:59:44Z",
+  "generatedAt": "2026-10-04T22:10:00Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -341,6 +341,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/AutomationForgeToolset",
       "versions": [
+        {
+          "version": "0.1.2",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgetoolset-v0.1.2/AutomationForgeToolset-0.1.2-UE5.8-Win64.zip",
+          "size": 144740,
+          "sha256": "c69adec7fbdc9f28408b03d0c73d3d961e4e270ea74ceb35d026bd065ce57288",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgetoolset-v0.1.2/AutomationForgeToolset-0.1.2-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-10-04T22:09:26Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgetoolset-v0.1.2"
+        },
         {
           "version": "0.1.1",
           "engine": "5.8",
