@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-04T23:06:44Z",
+  "generatedAt": "2026-10-04T23:08:54Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1120,6 +1120,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/MeshForgeGarmentToolset",
       "versions": [
+        {
+          "version": "0.1.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarmenttoolset-v0.1.1/MeshForgeGarmentToolset-0.1.1-UE5.8-Win64.zip",
+          "size": 126871,
+          "sha256": "becdabf6ecca5490a4bff64abe1b8806293e4694cf1a2ed6400eab07a3980565",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgegarmenttoolset-v0.1.1/MeshForgeGarmentToolset-0.1.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-10-04T23:08:19Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgegarmenttoolset-v0.1.1"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
