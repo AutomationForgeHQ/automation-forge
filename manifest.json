@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-04T22:49:24Z",
+  "generatedAt": "2026-10-04T22:51:18Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -3005,6 +3005,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/SurfaceForgeToolset",
       "versions": [
+        {
+          "version": "0.1.2",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforgetoolset-v0.1.2/SurfaceForgeToolset-0.1.2-UE5.8-Win64.zip",
+          "size": 87286,
+          "sha256": "17bc9d8d9c0fd9e179b8230cb5676683b411aebc4e7273b19a6fb7f600c8379b",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/surfaceforgetoolset-v0.1.2/SurfaceForgeToolset-0.1.2-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-10-04T22:50:43Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/surfaceforgetoolset-v0.1.2"
+        },
         {
           "version": "0.1.1",
           "engine": "5.8",
