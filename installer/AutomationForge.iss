@@ -21,7 +21,7 @@
 #endif
 
 #define AppName "Automation Forge"
-#define AppPublisher "Blackcode SA"
+#define AppPublisher "Bojan Andrejek / MetaWorx LLC"
 #define AppURL "https://github.com/AutomationForgeHQ/automation-forge"
 #define HubExe "AutomationForgeHub.exe"
 ; Must match HubUpdater.AppId in src/Forge.Hub/HubUpdater.cs.

@@ -103,7 +103,7 @@ configuration is in `website/account/.env`.
 A plugin bought on Fab is linked from inside Unreal Editor — *Automation Forge
 → Link my Fab purchases* — through Epic's own ownership check (`PluginWarden`,
 which asks the Epic Games Launcher). The link is designed (HUB_PLAN.md §4) and
-not built yet; until it is, send the Fab order id to bojan@blackcode.ch and
+not built yet; until it is, send the Fab order id to bojan@kovati.dev and
 the plugin is added to the account by hand. There is no seller-side Fab API,
 so the launcher, once, is the only way Epic sanctions.
 
