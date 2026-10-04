@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-04T22:33:54Z",
+  "generatedAt": "2026-10-04T22:36:01Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -2460,6 +2460,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/SpeechForge",
       "versions": [
+        {
+          "version": "0.2.3",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforge-v0.2.3/SpeechForge-0.2.3-UE5.8-Win64.zip",
+          "size": 1278935,
+          "sha256": "97cfce55fa26785d6856b35c23abef63d99daa5eaf6dfc79119340a50041be32",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/speechforge-v0.2.3/SpeechForge-0.2.3-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-10-04T22:35:25Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/speechforge-v0.2.3"
+        },
         {
           "version": "0.2.2",
           "engine": "5.8",
