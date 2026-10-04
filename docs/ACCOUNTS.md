@@ -94,7 +94,7 @@ not where a client fetches it. Signing out deletes the file; the account site
 and other machines are untouched.
 
 Providers are switched on for the project: Google, GitHub, email and password.
-The project is Firebase `automation-forge-hq`; the account API is
+The project is Firebase `kovatidev` (`automation-forge-hq` until 2026-10-04); the account API is
 `website/functions/` (its README has the routes); the site's public
 configuration is in `website/account/.env`.
 
