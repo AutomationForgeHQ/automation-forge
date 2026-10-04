@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-04T22:36:01Z",
+  "generatedAt": "2026-10-04T22:39:02Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -154,6 +154,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/AutomationForgeHub",
       "versions": [
+        {
+          "version": "0.2.5",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgehub-v0.2.5/AutomationForgeHub-0.2.5-UE5.8-Win64.zip",
+          "size": 333527,
+          "sha256": "7b32badf66dcbaa82b5e07f2640686b13fa0b8f2958358b7edd462d5f9c45c2e",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/automationforgehub-v0.2.5/AutomationForgeHub-0.2.5-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-10-04T22:38:23Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/automationforgehub-v0.2.5"
+        },
         {
           "version": "0.2.4",
           "engine": "5.8",
