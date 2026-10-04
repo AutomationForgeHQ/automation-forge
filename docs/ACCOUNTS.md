@@ -94,7 +94,7 @@ not where a client fetches it. Signing out deletes the file; the account site
 and other machines are untouched.
 
 Providers are switched on for the project: Google, GitHub, email and password.
-The project is Firebase `automation-forge-hq`; the account API is
+The project is Firebase `kovatidev` (`automation-forge-hq` until 2026-10-04); the account API is
 `website/functions/` (its README has the routes); the site's public
 configuration is in `website/account/.env`.
 
@@ -103,7 +103,7 @@ configuration is in `website/account/.env`.
 A plugin bought on Fab is linked from inside Unreal Editor — *Automation Forge
 → Link my Fab purchases* — through Epic's own ownership check (`PluginWarden`,
 which asks the Epic Games Launcher). The link is designed (HUB_PLAN.md §4) and
-not built yet; until it is, send the Fab order id to bojan@blackcode.ch and
+not built yet; until it is, send the Fab order id to bojan@kovati.dev and
 the plugin is added to the account by hand. There is no seller-side Fab API,
 so the launcher, once, is the only way Epic sanctions.
 

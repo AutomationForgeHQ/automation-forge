@@ -8,10 +8,10 @@
   -->
   <PropertyGroup>
     <VersionPrefix>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)VERSION').Trim())</VersionPrefix>
-    <Company>Blackcode SA</Company>
-    <Authors>Blackcode SA</Authors>
+    <Company>Bojan Andrejek / MetaWorx LLC</Company>
+    <Authors>Bojan Andrejek</Authors>
     <Product>Automation Forge</Product>
-    <Copyright>© Blackcode SA</Copyright>
+    <Copyright>© Bojan Andrejek / MetaWorx LLC</Copyright>
     <RepositoryUrl>https://github.com/AutomationForgeHQ/automation-forge</RepositoryUrl>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>

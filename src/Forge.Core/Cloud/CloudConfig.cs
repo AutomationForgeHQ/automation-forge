@@ -7,7 +7,7 @@ namespace Forge.Core.Cloud;
 /// </summary>
 public static class CloudConfig
 {
-    public const string ProjectId = "automation-forge-hq";
+    public const string ProjectId = "kovatidev";
 
     public static string ApiKey =>
         Environment.GetEnvironmentVariable("FORGE_FIREBASE_API_KEY") ?? DefaultApiKey;
@@ -19,7 +19,7 @@ public static class CloudConfig
     /// <summary>
     /// The account API: claims, downloads, checkout. Served on the app's own origin
     /// under /api. FORGE_API_URL points it at the emulator
-    /// (http://127.0.0.1:5001/automation-forge-hq/europe-west1/api).
+    /// (http://127.0.0.1:5001/kovatidev/europe-west1/api).
     /// </summary>
     public static string ApiUrl =>
         (Environment.GetEnvironmentVariable("FORGE_API_URL") ?? $"{AppUrl}/api").TrimEnd('/');
@@ -49,6 +49,7 @@ public static class CloudConfig
 
     public static bool Configured => ApiKey.Length > 0;
 
-    // From `firebase apps:sdkconfig WEB` for automation-forge-hq (web app 1:642032747874:web:d3615136271bfda1bb983b).
-    private const string DefaultApiKey = "AIzaSyBjrX8iTq1sTx4NFbnj4eu06oPYu_2olLc";
+    // From `firebase apps:sdkconfig WEB` for kovatidev (web app 1:235456295406:web:d71451e1d71d9a24ca1eff).
+    // Was automation-forge-hq until 2026-10-04; a hub built before then signs in to that project.
+    private const string DefaultApiKey = "AIzaSyC5gJrJTjyuxqmsuKk_7u3pMKdx_Q5HQQY";
 }

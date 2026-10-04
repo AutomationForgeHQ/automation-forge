@@ -22,7 +22,7 @@ the "what is this and why" half; that README is the "how do I drive it" half.
 **Automation Forge** is a family of Unreal Engine 5.8 plugins built around
 **PlayableOps** — turning creative intent into content a game can actually
 play, review, trace and safely replace. It is developed by **Kovati**
-(founded by **MetaWorx LLC**, backed and currently run by **Blackcode SA**),
+(founded by **MetaWorx LLC**, which holds its IP and runs its infrastructure),
 and dogfooded inside a real production, Colony Origins. Every plugin is
 **open** (source here, free), **Fab** (free, source stays private) or
 **paid** (bought through [the account app](https://app.kovati.dev)) — never

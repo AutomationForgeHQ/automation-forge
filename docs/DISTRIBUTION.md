@@ -28,11 +28,10 @@ paid one is bought once. See [GETTING-STARTED.md](GETTING-STARTED.md) and
 ## Who's behind it
 
 - **Kovati** — the product brand.
-- **MetaWorx LLC** — founded Kovati and holds its IP.
-- **Blackcode SA** (Switzerland) — backs Kovati and currently runs the
-  infrastructure the account, the site and the plugins' cloud services sit
-  on. This is the entity your account data actually sits with today; it
-  moves only if the infrastructure does.
+- **MetaWorx LLC** — founded Kovati, holds its IP (© Bojan Andrejek /
+  MetaWorx LLC) and runs the infrastructure the account, the site and the
+  plugins' cloud services sit on, so it is also the entity your account
+  data sits with.
 - **Colony Origins** — the real Unreal Engine production Automation Forge
   is built and proven inside, before anything ships.
 
