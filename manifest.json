@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-04T23:04:52Z",
+  "generatedAt": "2026-10-04T23:06:44Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1417,6 +1417,18 @@
       "dependencies": [],
       "source": "https://github.com/AutomationForgeHQ/MeshWeightRemap",
       "versions": [
+        {
+          "version": "0.1.3",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshweightremap-v0.1.3/MeshWeightRemap-0.1.3-UE5.8-Win64.zip",
+          "size": 164744,
+          "sha256": "e0bb4e1b3cc730b3cd1dc6e76fc3080f9dc0516e67dc32ee24b78d589420681d",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshweightremap-v0.1.3/MeshWeightRemap-0.1.3-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-10-04T23:06:08Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshweightremap-v0.1.3"
+        },
         {
           "version": "0.1.2",
           "engine": "5.8",
