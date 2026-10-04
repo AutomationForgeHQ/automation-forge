@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-22T13:03:17Z",
+  "generatedAt": "2026-10-04T21:57:46Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -241,6 +241,11 @@
       ],
       "changelog": [
         {
+          "version": "0.2.5",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.2.4",
           "date": "2026-09-22",
           "body": "### Changed\n- **On in every project, with nothing to set up.** Installed into an engine, the menu now appears in\n  every project on that engine. Until now a project had to name the plugin in its `.uproject` first,\n  so the menu you use to switch the other plugins on was itself switched off. To leave it out of one\n  project, untick it in that project's Plugins window.\n- **Nothing reaches a packaged game.** The keys registry is now built for the editor only, so a game\n  packaged from any of those projects, for any platform, carries no part of this plugin.\n\n### Added\n- The package includes this changelog."
@@ -363,6 +368,11 @@
       ],
       "changelog": [
         {
+          "version": "0.1.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.1.1",
           "date": "2026-09-08",
           "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- The package now carries its Apache-2.0 LICENSE, which earlier zips omitted.\n- `GetToolsetVersion()` answers this plugin's real version; it had drifted from the descriptor."
@@ -444,6 +454,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.2.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.2.2",
           "date": "2026-09-11",
@@ -532,6 +547,11 @@
       ],
       "changelog": [
         {
+          "version": "0.2.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright notices now name Bojan Andrejek / MetaWorx LLC."
+        },
+        {
           "version": "0.2.2",
           "date": "2026-09-08",
           "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them.\n- `Config/ForgeMachine.json` reaches an installed copy for the first time, so the hub's Keys and Runners pages are no longer empty for it.\n- The `Runner/` folder ships, so the container this plugin resolves from its own installed directory can finally be built from a release."
@@ -589,6 +609,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
@@ -649,6 +674,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.2.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.2.1",
           "date": "2026-09-08",
@@ -739,6 +769,11 @@
       ],
       "changelog": [
         {
+          "version": "0.2.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.2.2",
           "date": "2026-09-11",
           "body": "### Changed\n- `CloneFaceBankForLanguage` records the source face bank on the clone. That is what lets the\n  clone's clips follow the source-language performance underneath a dub instead of guessing the\n  acting from audio.\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry."
@@ -823,6 +858,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.3.1",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.3.0",
           "date": "2026-09-21",
@@ -952,6 +992,11 @@
       ],
       "changelog": [
         {
+          "version": "0.2.1",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The licence now names Bojan Andrejek / MetaWorx LLC as the licensor, and questions about it go to bojan@kovati.dev. The terms are otherwise unchanged."
+        },
+        {
           "version": "0.2.0",
           "date": "2026-09-21",
           "body": "### Added\n- **A character in MeshForge\u2019s Mesh tab.** Installing this plugin adds a *Character* control to the\n  bar above the mesh preview, whatever the definition is and whether or not it has any post-processing\n  at all. Off to begin with. Turn it on and a body stands inside the garment, so a shirt is judged on\n  somebody rather than on its own. Pick *the one this definition fits* and it follows the fit step\u2019s\n  Target Character, so one garment definition after another is shown on the body it was actually\n  wrapped around; or pick any skeletal mesh in the project, to see how a garment fitted to one body\n  sits on another. **The answer is kept per definition**, so it is still there the next time that\n  definition is opened, and a definition never asked about draws nobody \u2014 turning a character on for\n  a shirt does not stand one inside the next crate you open. The last few picked by hand stay in the\n  menu, which is shared, since a project dresses the same few bodies whichever garment is open. The\n  face found beside the body is drawn too, so a collar is judged against a neck rather than a capped\n  hole; that can be turned off.\n\n  **With a character on, nothing in the viewer is centred, turned or scaled.** Every mesh is drawn at\n  its own origin, at its own size, with its own pivot \u2014 what a level would show with all of them\n  dropped at 0, 0, 0. A garment this plugin wrapped is already in that character\u2019s space, so it lands\n  on the body exactly as the chain left it, with no arithmetic anywhere. One that has not been wrapped\n  hangs wrong, at the wrong size, in the wrong place, which is the answer rather than a fault in the\n  picture \u2014 and the reason to wrap it. *Align* is unavailable while a character is shown: it exists to\n  throw away size and position, which are the two things being checked.\n- **The Garment Studio.** *Pose and place...* on the garment fit step is now *Open Garment Studio...*,\n  with two more modes. **Sculpt**: the same tools as Sculpt mesh, on the garment where you placed it,\n  against the body as you bent it. The wrap starts from the sculpt. It is kept with the definition as a\n  plain file, not an asset, and a sculpt made on a garment that has since been regenerated is refused\n  with the reason. *Back to the original* throws it away. A changed sculpt marks the step stale.\n  **Wrap**: runs the fit in the window, from your sculpt or the original, with the step's settings, and\n  shows the result on the body; wrap again after changing anything, and the studio says when the result\n  on screen is out of date. The wrapped garment can be sculpted too. The last wrap is kept with the\n  sculpt. **Finish** saves the wrap as an asset and hands it to the chain as the step's output. Save\n  also saves the definition, and closing with unsaved changes asks first.\n- **A finished garment is handed on as it is.** A chain run over a finished fit step uses the finished\n  garment without wrapping again, in about a second, so a sculpt made after the wrap is never lost. If the\n  garment changed since, the studio opens and the chain waits for it. A step never finished wraps by\n  itself as before.\n- An agent can work the Garment Studio through Send Interactive Step Command on the fit step: open,\n  mode, place, pose, tool, stroke, keep, options, wrap with settings, save, finish, unfinish, close. `help`\n  lists them. Other plugins can drive it through `GarmentStudio.h`: its status, its commands, and captures of\n  its viewport from named angles around the character, written to PNG. MeshForge Garment Toolset builds the\n  tools for agents that can see on it.\n- A **Garment for a character** Mesh Workflow: Concept off, the fit and skinning steps, and an import\n  that keeps the fitted origin and builds no collision. Choose a mesh provider and the target\n  character, and a new definition is ready to run.\n- **Bone profiles** for wardrobe skinning: choose which of the body's bones a garment follows, so a\n  vest follows the chest and not the arms, and trousers the hips and legs and not the spine. Thirteen\n  ship: Head, Shirt / jacket, T-shirt, Vest, Arms only, Hands and feet, Pants, Pants and feet, Shorts,\n  Full bodysuit, Full bodysuit and head, Backpack and Belt. They are editable assets, and new ones are\n  made from the Content Browser. Leave the skinning step's profile empty and it skins exactly as before.\n- **Sculpt mesh - in the editor**, a post step you finish by hand without leaving Unreal, for any static\n  mesh anywhere in a chain. It opens the mesh, with its Reference Meshes locked beside it (a MetaHuman\n  body brings its face), in a window with Epic's Vertex Sculpt, Smooth, Lattice and Bend / twist tools,\n  which only move vertices. UV seams are welded while you sculpt. *Finish edit* hands the edited asset to\n  the chain as the step's output with nothing exported or re-imported; closing the window or the editor\n  keeps the sculpt, and the step carries on from where it stood. The plugin now enables Epic's Mesh\n  Modeling Toolset, where the tools come from.\n- **Sculpt in pose...**, under Advanced on the wardrobe skinning step, opens the skinned garment in the Skeletal Mesh\n  Editor with the target body and its MetaHuman face beside it, following the garment's pose, so a\n  garment can be sculpted in a pose or given a pose corrective.\n- An agent can work the sculpt window one command at a time through MeshForge Toolset's Send\n  Interactive Step Command, or from the console with `MeshForgeGarment.Sculpt`.\n\n### Changed\n- *Save and fit* is gone. **Finish** takes its place and records the garment the studio shows, instead of\n  running the whole chain, which could open other steps' windows first.\n- A sculpt command's stroke that starts beside the mesh now says so. It used to report success and\n  sculpt nothing.\n\n### Fixed\n- **Lattice and Bend / twist can be moved again.** Both drew their handles in the Sculpt mesh window\n  and the Garment Studio, but not the gizmo that moves them: a selected lattice control point had\n  nothing to drag it with, and Bend / twist showed the handles that set how far it bends without the\n  one that aims it. Both now carry the full translate / rotate / scale gizmo.\n- Reopening **Pose and place** after the fit has run shows the garment where it was placed. It used\n  to load the fit's own result, which was already sized and positioned, and apply the placement to it\n  a second time, so the garment appeared shrunk and floating above the character. The panel now\n  shows the mesh the fit step starts from. The saved placement was never affected.\n- Wardrobe skinning no longer shows \"Ensure condition failed: Solver->bSucceeded()\" on AI garments\n  whose skin came out fine. An attempt that would leave part of the garment with nothing to inpaint\n  from is now skipped before the engine runs it, and the log says why.\n\n### Compatibility\n- Needs MeshForge 0.3.0 or later.\n\n### Known issues\n- Smooth relaxes the whole garment. At its default strength it shrinks a garment noticeably and pulls\n  hems up, enough to change how skinning matches it to the body. Lower the steps, or use the Sculpt\n  tool's Shift-smooth on one area."
@@ -993,6 +1038,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.1",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.1.0",
           "date": "2026-09-21",
@@ -1072,6 +1122,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.3.1",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.3.0",
           "date": "2026-09-21",
@@ -1213,6 +1268,11 @@
       ],
       "changelog": [
         {
+          "version": "0.0.4",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.0.3",
           "date": "2026-09-21",
           "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n\n### Compatibility\n- Rebuilt against MeshForge 0.3.0 and MeshForgeTrellis 0.0.3, which it needs."
@@ -1276,6 +1336,11 @@
       ],
       "changelog": [
         {
+          "version": "0.1.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.1.2",
           "date": "2026-09-08",
           "body": "- Packaging fix: the release now carries everything the register allows. `BuildPlugin`'s filter excludes `Config/` and every `public_extra` path, so earlier zips shipped without them."
@@ -1328,6 +1393,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
@@ -1386,6 +1456,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.1.2",
           "date": "2026-09-08",
@@ -1451,6 +1526,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.1.2",
           "date": "2026-09-08",
@@ -1562,6 +1642,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.4.1",
+          "date": "2026-10-04",
+          "body": "### Fixed\n- The library's price for a selection, and the definition window's Generate button, now say when a\n  price is a provider's published rate rather than one you entered, as the cost lines already did. The\n  library's footer and its confirmation name the rate; the button reads \"at list price\" and its\n  tooltip says whose.\n\n### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.4.0",
           "date": "2026-09-22",
@@ -1708,6 +1793,11 @@
       ],
       "changelog": [
         {
+          "version": "0.5.1",
+          "date": "2026-10-04",
+          "body": "### Fixed\n- Renting a GPU without a Runpod key or a Hugging Face token now says where to add one: the Keys page,\n  or Editor Preferences \u25b8 Automation Forge \u25b8 MotionForge Kimodo \u25b8 Credentials. It named a Project\n  Settings page that does not exist, and so did the README, SETUP and REMOTE_SETUP, which now point at\n  Project Settings \u25b8 Automation Forge \u25b8 MotionForge Kimodo for the runner, the bone map and the defaults.\n\n### Changed\n- Copyright notices now name Bojan Andrejek / MetaWorx LLC."
+        },
+        {
           "version": "0.5.0",
           "date": "2026-09-22",
           "body": "### Added\n- Kimodo's own settings on every definition: model, seed, diffusion steps, postprocess, beat splitting, and - under Advanced - separated guidance (`cfg_text`, `cfg_constraint`) and where poses come from.\n- **Direct**, in the definition window: a plain guide to beats, poses at moments, guidance and seeds, and actions beside it - *Pin a pose from an animation* at the start, the end, both or a moment; *Show what will be sent*; *Clear authored poses*; *Measure the imported clip*.\n- Generate starts a stopped local runner - Docker first if it is closed - and waits for the text encoder, instead of refusing.\n- The Kimodo Runner panel gains **Another machine**: point the project at a studio workstation's runner, with its token kept in this computer's vault and the commands to start it there.\n- **Llama 3 access is measured**, not assumed: Hugging Face is asked whether the stored token can read the gated model, and the answer - granted, not granted yet, token refused - is shown with the link to request it.\n- Setup steps for Get started: where it runs, Docker, the token, Llama 3 access, the image, the runner, and renting a GPU instead.\n\n### Changed\n- Cost follows where it runs: free on this machine or another, per hour on a rented GPU, which bills while the pod is up whether or not anything generates.\n- The character's route and actions come from Kimodo: *Build Kimodo rig* for IK on the feet, *Import directly instead* to skip it.\n- Building a Kimodo rig marks the character as Kimodo's. Left universal, it could be offered to another provider, which would then have retargeted its own clips through Kimodo's rig.\n\n### Fixed\n- Poses keyed only on the prompt timeline reach the runner.\n- A rotation a little off orthonormal no longer fires an engine ensure while a clip is read.\n- The README and the plugin's own messages name the real console commands: `Kimodo.PreviewConstraints`, `Kimodo.Measure`, `Kimodo.Diagnose`.\n\n### Compatibility\n- Needs MotionForge 0.4.0 or later.\n\n### Known issues\n- The runner's compose file publishes port 8757 on every network interface, while its comments describe a loopback-only desktop runner. Set `KIMODO_API_TOKEN` on any machine the network can reach."
@@ -1833,6 +1923,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.3.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.3.2",
           "date": "2026-09-22",
@@ -1979,6 +2074,11 @@
       ],
       "changelog": [
         {
+          "version": "0.1.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.1.2",
           "date": "2026-09-22",
           "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n\n### Compatibility\n- Rebuilt against MotionForgeQuality 0.1.2, which it needs."
@@ -2056,6 +2156,11 @@
       ],
       "changelog": [
         {
+          "version": "0.3.1",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.3.0",
           "date": "2026-09-22",
           "body": "### Added\n- Create Motion Definition, a draft without generating; Preview Motion Request, exactly what Generate would send, what it would cost and what would stop it.\n- Set Motion Provider, List Pipeline Options and Set Motion Pipeline Option: each provider's own settings by their own names.\n- Find Characters For Provider, Get Provider Setup Steps, and Open MotionForge Window, which shows a person Get started or the library.\n- Choose And Import Take, Hide Take, Get Clip Users, Cancel Motion Definition, Get Motion Activity and Migrate Motion Definitions.\n\n### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- Generate Motions stops at review and its description says what it costs per provider; Update Motion Definition reports the settings it refused and changes only the sampler settings you set, where setting one used to reset the others; Estimate Download Cost prices fetching only.\n- A pipeline option's range is text, empty where there is no bound, instead of zero.\n- The skill states each provider's facts for that provider - it had presented Uthana's billing as\n  everyone's - and covers review, provider settings, poses and first-time setup.\n\n### Compatibility\n- Needs MotionForge 0.4.0 or later."
@@ -2126,6 +2231,11 @@
       ],
       "changelog": [
         {
+          "version": "0.2.1",
+          "date": "2026-10-04",
+          "body": "### Fixed\n- Moving billing settings over from MotionForge's old page no longer puts the old currency on Uthana's\n  published price. A project whose old rate was zero, in a currency other than USD, was shown 0.10 of\n  that currency a second - nobody's price, and without the note that marks the published one. The\n  currency now moves only with a rate. A project already moved by 0.2.0 keeps what it was given, so\n  check the rate and currency on Project Settings \u25b8 Automation Forge \u25b8 MotionForge Uthana.\n\n### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.2.0",
           "date": "2026-09-22",
           "body": "### Added\n- A settings page for the plan - pay as you go or subscription - its rates and currency, carried over from MotionForge's old billing settings. Every price in the editor comes from it. A pay-as-you-go rate starts at Uthana's published price, $0.10 a generated second, and every price says it is that until you enter your own - including on a project whose old rate was zero, which meant seconds only.\n- Uthana's own settings on every definition: the model and prompt rewriting.\n- Setup steps for Get started - the key, the plan, a character on Uthana, the connection - and the character's actions: *Upload*, with its options, and *Import Uthana's rig*.\n- On pay as you go, takes play in the editor before choosing, because fetching one is free. On a subscription the viewer link, and an import that says what quota it will use and asks.\n\n### Compatibility\n- Needs MotionForge 0.4.0 or later."
@@ -2164,6 +2274,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The licence now names Bojan Andrejek / MetaWorx LLC as the licensor, and questions about it go to bojan@kovati.dev. The terms are otherwise unchanged."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
@@ -2212,6 +2327,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
@@ -2295,6 +2415,11 @@
       ],
       "changelog": [
         {
+          "version": "0.2.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.2.2",
           "date": "2026-09-11",
           "body": "### Added\n- **Authoring Language Code** (default `en`). A bank carries no language of its own, and leaving a\n  dub's source language to detection \u2014 which guesses from a few seconds of audio \u2014 dubbed fluent\n  nonsense whenever it guessed wrong. Every dub now states its source language explicitly.\n- Two seams a localisation add-on can fill: a bank can describe where each line's audio came from,\n  and can produce a whole bank its own way. The Speech Library's Origin column and its Generate All\n  button defer to them, so a specialised bank behaves correctly in the panel with no change here.\n\n### Fixed\n- Speech bank queries now search subclasses. Without that, a specialised bank was invisible to the\n  localisation status and to the line-home index \u2014 present in the project, absent from the UI."
@@ -2345,6 +2470,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The licence now names Bojan Andrejek / MetaWorx LLC as the licensor, and questions about it go to bojan@kovati.dev. The terms are otherwise unchanged."
+        },
         {
           "version": "0.1.2",
           "date": "2026-09-11",
@@ -2398,6 +2528,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed.\n- Dubbing a dry voice line now drops background audio, states the line's source language, and reads back what the dub says from its transcript."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
@@ -2471,6 +2606,11 @@
       ],
       "changelog": [
         {
+          "version": "0.2.3",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
+        {
           "version": "0.2.2",
           "date": "2026-09-11",
           "body": "### Added\n- `ProduceSpeechBank` \u2014 produce a whole bank the bank's own way, the agent-side twin of the Speech\n  Library's Generate All. On a plain bank that generates what is missing or stale; on a localised\n  bank it generates the synthesis-sourced lines, dubs the performed ones, and points the face banks\n  serving it at the new audio.\n\n### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry."
@@ -2526,6 +2666,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
@@ -2670,6 +2815,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.2",
+          "date": "2026-10-04",
+          "body": "### Changed\n- The version this toolset reports to an agent is now read from the plugin's own\n  descriptor rather than repeated in C++, so it can no longer answer a number the\n  installed package does not carry.\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
+        },
         {
           "version": "0.1.1",
           "date": "2026-09-08",
