@@ -14,7 +14,7 @@ Rule of thumb, from the [manifesto](MANIFESTO.md): **if it runs on your own
 machine and costs us nothing to operate, it stays open and useful on its
 own.** Paid value begins only where we operate something on your behalf —
 today that's chiefly the production-grade plugins (Performance Forge, the
-fitted-garment pipeline); tomorrow it's the shared workspace the whitepaper
+fitted-garment pipeline, TerrainForge); tomorrow it's the shared workspace the whitepaper
 calls Kovati Pro. Fab-only plugins sit in between: free to use, but their
 implementation is closed — usually because they wrap a provider's own SDK
 or container image, or because they were written from the start as a paid
@@ -141,7 +141,7 @@ Performance Forge is the first plugin priced from day one, and
 take ledgers, a fitted-garment solve and voice-over localisation are all
 production-layer work, not prototyping — see the whitepaper's "from indie
 tool to studio layer". The agent surface stays open regardless: Performance
-Forge and MeshForgeGarment each keep a dedicated Toolset sibling open on
+Forge, MeshForgeGarment and TerrainForge each keep a dedicated Toolset sibling open on
 purpose (the toolset is the MCP surface, and publishing the surface is the
 point even when the implementation behind it is sold), and SpeechForgeDeepL
 needs no equivalent move — it has no toolset of its own, and was already
@@ -153,6 +153,17 @@ nothing — which is a gap rather than a licence, and it is the sort of thing
 only somebody reading the zip would notice. An open plugin carries Apache-2.0
 in the same place. A Fab plugin carries neither: it is free, closed, and
 governed by the terms of wherever you obtained it.
+
+### TerrainForge
+
+| Plugin | Role | Distribution | Repo |
+|---|---|---|---|
+| TerrainForge | core | **Paid** | — |
+| TerrainForgeToolset | toolset | Open | [TerrainForgeToolset](https://github.com/AutomationForgeHQ/TerrainForgeToolset) |
+
+TerrainForge is paid for the same reason as Performance Forge: terrain
+authoring is production-layer work. It is free for now, on purpose, while it
+is in preview. Its toolset is open like every other.
 
 ### Tools
 

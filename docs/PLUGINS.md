@@ -330,6 +330,42 @@ MatFuse on your own GPU), `SurfaceForgePatina` (hosted, metered), a toolset.
 
 ---
 
+## TerrainForge — terrain, real or imagined, built where the level lives
+
+**Goal:** a terrain authored as a node graph inside Unreal, or started from a
+real place on a map, becomes a World Partition level with its paint layers,
+lakes and rivers.
+
+- Build terrain as a graph in the editor — landforms, masks, erosion, water
+  and colour — and watch a preview follow your edits.
+- Simulate rather than paint: rivers cutting into rising rock, glaciers
+  carving troughs and cirques, rockfall building scree, snow drifting and
+  avalanching, all in metres and years.
+- Start from somewhere real: search a place, pick a square, and bring in the
+  best published elevation for it (national lidar in France, Switzerland, the
+  Netherlands, England, Norway, North Rhine-Westphalia and the United States;
+  worldwide data elsewhere) with land cover and OpenStreetMap features as
+  masks. A site check says, before you commit, whether the place can become a
+  level and what would be filled in. Each source's licence and credit line is
+  recorded with the terrain.
+- Run the heaviest simulation on the GPU, with a CPU path for every step that
+  has a GPU one.
+- Keep every build as a take — heightmap, paint weights, data maps, biome and
+  PCG masks, lake and river geometry — and import the one you want as a new
+  World Partition level, with engine water bodies and Nanite. The largest
+  maps import headless, one region at a time.
+
+**Status:** preview — the first release. Paid, and free for now while it is
+in preview. The first landscape material is flat colour per paint layer and
+water uses the engine's default look; a build stops if the editor closes.
+The core has no public source; the agent toolset is open, for the same
+reason every toolset is.
+
+**Members:** `TerrainForge` (paid core, with the GPU module and real-world
+data built in), `TerrainForgeToolset`.
+
+---
+
 ## PerformanceForge — one performance, end to end
 
 **Goal:** a miniature performance stage inside Unreal — record microphone
