@@ -9,7 +9,7 @@ the ones that apply. A version that has not shipped says `unreleased` in place o
 is tagged. Versions up to 0.4.2 have their notes on the
 [releases page](https://github.com/AutomationForgeHQ/automation-forge/releases).
 
-## 0.4.3 — unreleased
+## 0.4.3 — 2026-10-28
 
 ### Fixed
 - **C++ builds work again on an engine you installed plugins into.** The hub used to put engine installs in
