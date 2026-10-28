@@ -52,12 +52,20 @@ public sealed class Installer
         var (plugin, version, target) = (req.Plugin, req.Version, req.Target);
         var dest = target.PluginDir(plugin.Id);
 
+        // An older hub's installs move to the current root first, so a current one is not downloaded again.
+        if (target.LegacyRoot is not null && Directory.Exists(target.LegacyRoot) && IsWritable(target.Root))
+            MoveLegacyEngineInstalls(target);
+
         var existing = _state.Find(target, plugin.Id);
         if (!force && existing is not null && existing.Version == version.Version && Directory.Exists(dest))
             return new InstallResult { Plugin = plugin.Id, Version = version.Version, Path = dest, Outcome = "already-current" };
 
         if (!IsWritable(target.Root))
             throw new UnauthorizedAccessException($"{target.Root} is not writable. Run elevated to install into this engine, or install into a project instead.");
+
+        // A copy that could not move would sit beside the new one, and Unreal refuses two plugins of one name.
+        if (target.LegacyPluginDir(plugin.Id) is { } stuck && Directory.Exists(stuck))
+            throw new IOException($"{plugin.Id} is still in {target.LegacyRoot} and could not be moved — Unreal Editor has it loaded. Close the editor and try again.");
 
         // The manifest's URL is where the backend finds the package, never where a
         // client fetches it: every download is issued by the account service, for
@@ -109,14 +117,62 @@ public sealed class Installer
 
     public bool Uninstall(InstallTarget target, string plugin)
     {
-        var dest = target.PluginDir(plugin);
-        if (!Directory.Exists(dest)) { _state.Forget(target, plugin); return false; }
+        var dirs = new[] { target.PluginDir(plugin), target.LegacyPluginDir(plugin) }
+            .OfType<string>().Where(Directory.Exists).ToList();
+        if (dirs.Count == 0) { _state.Forget(target, plugin); return false; }
         if (!IsWritable(target.Root))
             throw new UnauthorizedAccessException($"{target.Root} is not writable. Run elevated to uninstall from this engine.");
-        Directory.Delete(dest, recursive: true);
+        foreach (var dir in dirs)
+        {
+            Directory.Delete(dir, recursive: true);
+            _log($"uninstalled: {plugin} from {dir}");
+        }
         _state.Forget(target, plugin);
-        _log($"uninstalled: {plugin} from {dest}");
         return true;
+    }
+
+    /// <summary>
+    /// Move what a hub before 0.4.3 installed into Engine/Plugins/AutomationForge over to the current root,
+    /// Engine/Plugins/Marketplace/AutomationForge (see EngineInstall.PluginRoot). Each plugin is one folder
+    /// rename on the same volume, so it moves whole or stays where it was; a folder the editor has loaded
+    /// stays and is named. Receipts follow their folders. Needs the same rights as an install.
+    /// Returns how many plugin folders are still in the legacy root.
+    /// </summary>
+    public int MoveLegacyEngineInstalls(InstallTarget target)
+    {
+        if (target.LegacyRoot is null || !Directory.Exists(target.LegacyRoot)) return 0;
+        var left = 0;
+        foreach (var from in Directory.GetDirectories(target.LegacyRoot))
+        {
+            var name = Path.GetFileName(from);
+            var to = target.PluginDir(name);
+            if (Directory.Exists(to))
+            {
+                _log($"not moved: {name} — {to} already exists, so there are two copies; uninstall it and install it again.");
+                left++;
+                continue;
+            }
+            try
+            {
+                Directory.CreateDirectory(target.Root);
+                Directory.Move(from, to);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _log($"not moved: {name} — Unreal Editor has it loaded, or the folder is open elsewhere. Close the editor and try again. ({ex.Message})");
+                left++;
+                continue;
+            }
+            _state.Moved(target.LegacyRoot, target.Root, name, to);
+            _log($"moved: {name} → {to}");
+        }
+        if (left == 0)
+        {
+            // Only the now-empty folder is removed; anything else in it (a stray file) keeps it.
+            try { Directory.Delete(target.LegacyRoot); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        }
+        return left;
     }
 
     private async Task<string> DownloadAsync(string url, string plugin, VersionInfo version, IProgress<double>? progress, CancellationToken ct)

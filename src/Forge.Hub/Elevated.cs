@@ -8,7 +8,7 @@ using Forge.Core.Releases;
 namespace Forge.Hub;
 
 /// <summary>
-/// The headless half of the hub. `Forge.Hub --elevated install|uninstall
+/// The headless half of the hub. `Forge.Hub --elevated install|uninstall|migrate
 /// &lt;ids…&gt; --engine &lt;path&gt;` runs under UAC, writes what it did to a log
 /// file the windowed hub reads back, and exits 0 on success.
 /// </summary>
@@ -44,6 +44,12 @@ public static class Elevated
             {
                 foreach (var id in ids) if (!installer.Uninstall(target, id)) Say($"not installed: {id}");
                 return Finish(0);
+            }
+
+            if (verb == "migrate")
+            {
+                var left = installer.MoveLegacyEngineInstalls(target);
+                return Finish(left == 0 ? 0 : 1);
             }
 
             var (manifest, _) = new ManifestClient(http).GetAsync().GetAwaiter().GetResult();

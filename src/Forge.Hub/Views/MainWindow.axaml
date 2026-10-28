@@ -534,12 +534,14 @@
             </ItemsControl>
           </ScrollViewer>
         </Border>
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="28,9,20,9">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" Margin="28,9,20,9">
           <ProgressBar Grid.Column="0" IsIndeterminate="True" IsVisible="{Binding Busy}" Width="64" Height="2" Margin="0,0,14,0" Foreground="{StaticResource AmberBrush}" Background="{StaticResource LineBrush}" VerticalAlignment="Center" />
           <TextBlock Grid.Column="1" Classes="stamp" Text="{Binding Status}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-          <Button Grid.Column="2" Classes="link amber" Content="{Binding HubUpdateLabel}" Command="{Binding ApplyHubUpdateCommand}" IsVisible="{Binding HasHubUpdate}" Margin="0,0,10,0" />
-          <TextBlock Grid.Column="3" Classes="stamp" Text="{Binding InstalledCount, StringFormat='{}{0} installed'}" Margin="0,0,18,0" VerticalAlignment="Center" />
-          <Button Grid.Column="4" Classes="link" Content="Details" Command="{Binding ToggleDetailsCommand}" />
+          <Button Grid.Column="2" Classes="link amber" Content="move plugins to the engine's Marketplace folder" Command="{Binding MoveLegacyInstallsCommand}" IsVisible="{Binding HasLegacyInstalls}" Margin="0,0,10,0"
+                  ToolTip.Tip="Plugins installed by an older hub sit in Engine/Plugins/AutomationForge, where they stop C++ builds on this engine. Moving them needs administrator rights and a closed Unreal Editor." />
+          <Button Grid.Column="3" Classes="link amber" Content="{Binding HubUpdateLabel}" Command="{Binding ApplyHubUpdateCommand}" IsVisible="{Binding HasHubUpdate}" Margin="0,0,10,0" />
+          <TextBlock Grid.Column="4" Classes="stamp" Text="{Binding InstalledCount, StringFormat='{}{0} installed'}" Margin="0,0,18,0" VerticalAlignment="Center" />
+          <Button Grid.Column="5" Classes="link" Content="Details" Command="{Binding ToggleDetailsCommand}" />
         </Grid>
       </StackPanel>
     </Border>

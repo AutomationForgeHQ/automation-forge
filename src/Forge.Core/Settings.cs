@@ -30,7 +30,7 @@ public sealed class Settings
     /// <summary>
     /// One more folder of plugins to look at for keys and runners, beside the engines.
     ///
-    /// The hub sees what it installed: plugins under an engine's Plugins/AutomationForge, downloaded
+    /// The hub sees what it installed: plugins under an engine's Plugins/Marketplace/AutomationForge, downloaded
     /// from a release. That is right for everybody who uses it and wrong for whoever is *writing*
     /// the plugin, whose copy lives in a working tree and whose declarations therefore cannot appear
     /// here until they ship. This is the way in - point it at that tree.

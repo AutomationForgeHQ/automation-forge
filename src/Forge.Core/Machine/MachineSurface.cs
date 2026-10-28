@@ -152,7 +152,7 @@ public static class MachineSurface
     /// <summary>
     /// Every declaration under the given plugin roots, in plugin-name order.
     ///
-    /// A root is an engine's Engine/Plugins/AutomationForge — which is the whole of what the hub can
+    /// A root is an engine's Engine/Plugins/Marketplace/AutomationForge (or the older Engine/Plugins/AutomationForge) — which is the whole of what the hub can
     /// see. A plugin dropped by hand into one project's Plugins folder is invisible here, and the
     /// surfaces built on this have to say so where somebody would otherwise wait for it to appear.
     /// </summary>
