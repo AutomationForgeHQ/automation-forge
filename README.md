@@ -95,6 +95,7 @@ forge install montageforge          a set, or a plugin, dependencies first
 forge install MotionForge --project C:\Games\MyGame   into a project instead
 forge update                        everything on a target to its latest
 forge uninstall MontageForge
+forge migrate                       move an older hub's engine installs into Marketplace
 forge enable MontageForge --project C:\Games\MyGame   the .uproject edit
 forge channel [stable|nightly]      the channel both surfaces follow
 forge claim <set|plugin>            add free plugins to your account, without installing
@@ -107,8 +108,13 @@ site. Signing in opens that site in the browser; when you say yes there, the
 session is handed to this machine over the loopback and kept under DPAPI — no
 password passes through the desktop.
 Creating an account, signing the hub in, and how it all works:
-[docs/ACCOUNTS.md](docs/ACCOUNTS.md). A target under Program Files makes the CLI
-relaunch itself elevated once. The hub (`src/Forge.Hub`, Avalonia) is the same
+[docs/ACCOUNTS.md](docs/ACCOUNTS.md). In an engine, plugins go to
+`Engine/Plugins/Marketplace/AutomationForge`, beside what Fab installs: on a launcher
+engine that is the only folder whose build rules UnrealBuildTool compiles on demand,
+and a plugin anywhere else in `Engine/Plugins` stops every C++ build on that engine.
+Hubs before 0.4.3 used `Engine/Plugins/AutomationForge`; install, update, uninstall
+and `forge migrate` move those installs over, and the hub offers it in its footer.
+A target under Program Files makes the CLI relaunch itself elevated once. The hub (`src/Forge.Hub`, Avalonia) is the same
 core with a window, and it is resident: an icon by the clock, a check every four
 hours over every engine and project it installed into, a Windows notification
 when something new appears, and it replaces itself through the installer when a
@@ -189,7 +195,8 @@ decodes as mojibake.
 
 ### Where it looks, and what it deliberately does not do
 
-Three roots: **every engine's** `Plugins/AutomationForge`, **everywhere the hub
+Three roots: **every engine's** `Plugins/Marketplace/AutomationForge` (and the
+older `Plugins/AutomationForge` until it is moved), **everywhere the hub
 has installed** (from its own receipts, which covers project installs), and **one
 folder named in Settings** — for whoever is writing a plugin, whose working tree
 is not a release and never will be one.

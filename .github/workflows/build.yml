@@ -46,6 +46,24 @@ jobs:
           if ($h -ne '${{ inputs.version }}') { throw "hub --version wrote '$h', expected '${{ inputs.version }}'" }
           Get-Content dist/SHA256SUMS.txt
 
+      # A stable release publishes its CHANGELOG.md section, the heading that starts with its version, so the
+      # notes Discord copies are the ones written with the change. A nightly, or a version with no section yet,
+      # keeps GitHub's generated notes.
+      - name: Release notes
+        id: notes
+        shell: pwsh
+        run: |
+          $found = $false
+          if ('${{ inputs.prerelease }}' -ne 'true' -and (Test-Path CHANGELOG.md)) {
+            $v = [regex]::Escape('${{ inputs.version }}')
+            $m = [regex]::Match((Get-Content CHANGELOG.md -Raw), "(?ms)^## $v\b[^\n]*\n(.*?)(?=^## |\z)")
+            if ($m.Success -and $m.Groups[1].Value.Trim()) {
+              Set-Content -Path release-notes.md -Value $m.Groups[1].Value.Trim() -Encoding utf8
+              $found = $true
+            }
+          }
+          "found=$($found.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+
       - name: Release
         id: release
         uses: softprops/action-gh-release@v2
@@ -53,7 +71,8 @@ jobs:
           tag_name: ${{ inputs.tag }}
           name: ${{ inputs.prerelease && format('Nightly {0}', inputs.version) || format('Automation Forge {0}', inputs.version) }}
           prerelease: ${{ inputs.prerelease }}
-          generate_release_notes: true
+          body_path: ${{ steps.notes.outputs.found == 'true' && 'release-notes.md' || '' }}
+          generate_release_notes: ${{ steps.notes.outputs.found != 'true' }}
           fail_on_unmatched_files: true
           files: |
             dist/AutomationForge-Setup.exe

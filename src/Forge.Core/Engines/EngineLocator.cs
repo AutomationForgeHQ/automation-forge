@@ -7,8 +7,20 @@ namespace Forge.Core.Engines;
 /// <summary>An Unreal Engine installation the hub can install plugins into.</summary>
 public sealed record EngineInstall(string Version, string FullVersion, string Path, bool IsLauncherBuild)
 {
-    /// <summary>Engine/Plugins/AutomationForge — the same convention Fab uses with Engine/Plugins/Marketplace.</summary>
-    public string PluginRoot => System.IO.Path.Combine(Path, "Engine", "Plugins", Core.Paths.PluginFolder);
+    /// <summary>
+    /// Engine/Plugins/Marketplace/AutomationForge, beside what Fab installs. On a launcher engine
+    /// UnrealBuildTool compiles the build rules of plugins under Engine/Plugins/Marketplace when a build
+    /// needs them; every other engine plugin must already be in the engine's precompiled rules. A plugin
+    /// installed anywhere else in Engine/Plugins stopped every C++ build on that engine, project or
+    /// BuildPlugin, with "Expecting to find a type ... named 'ForgeKeys'" (RulesCompiler.cs).
+    /// </summary>
+    public string PluginRoot => System.IO.Path.Combine(Path, "Engine", "Plugins", "Marketplace", Core.Paths.PluginFolder);
+
+    /// <summary>
+    /// Engine/Plugins/AutomationForge, where hubs before 0.4.3 installed. Still read, so those installs
+    /// count as installed, and emptied by <see cref="Installs.Installer.MoveLegacyEngineInstalls"/>.
+    /// </summary>
+    public string LegacyPluginRoot => System.IO.Path.Combine(Path, "Engine", "Plugins", Core.Paths.PluginFolder);
 
     public override string ToString() => $"UE {FullVersion} at {Path}" + (IsLauncherBuild ? "" : " (source build)");
 }

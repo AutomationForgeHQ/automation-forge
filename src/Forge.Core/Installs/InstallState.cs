@@ -3,10 +3,21 @@ using System.Text.Json.Serialization;
 
 namespace Forge.Core.Installs;
 
-/// <summary>Where a plugin goes: an engine's plugin root, or a project's.</summary>
-public sealed record InstallTarget(string Kind, string Root, string Label)
+/// <summary>
+/// Where a plugin goes: an engine's plugin root, or a project's. LegacyRoot is where an older hub put
+/// the same target's plugins (an engine's Engine/Plugins/AutomationForge); its receipts still belong here.
+/// </summary>
+public sealed record InstallTarget(string Kind, string Root, string Label, string? LegacyRoot = null)
 {
-    public static InstallTarget Engine(Engines.EngineInstall e) => new("engine", e.PluginRoot, $"UE {e.FullVersion}");
+    public static InstallTarget Engine(Engines.EngineInstall e) => new("engine", e.PluginRoot, $"UE {e.FullVersion}", e.LegacyPluginRoot);
+
+    /// <summary>A receipt's root belongs to this target: the current root, or the legacy one.</summary>
+    public bool Holds(string root) =>
+        string.Equals(root, Root, StringComparison.OrdinalIgnoreCase)
+        || (LegacyRoot is not null && string.Equals(root, LegacyRoot, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>The plugin's folder under the legacy root, or null when the target has none.</summary>
+    public string? LegacyPluginDir(string plugin) => LegacyRoot is null ? null : Path.Combine(LegacyRoot, plugin);
 
     /// <summary>
     /// A project by its .uproject or the folder holding one. A path that is not
@@ -66,11 +77,23 @@ public sealed class InstallState
     }
 
     public InstalledPlugin? Find(InstallTarget target, string plugin) =>
-        Items.FirstOrDefault(i => string.Equals(i.TargetRoot, target.Root, StringComparison.OrdinalIgnoreCase)
+        Items.FirstOrDefault(i => target.Holds(i.TargetRoot)
                                && string.Equals(i.Plugin, plugin, StringComparison.OrdinalIgnoreCase));
 
     public IEnumerable<InstalledPlugin> On(InstallTarget target) =>
-        Items.Where(i => string.Equals(i.TargetRoot, target.Root, StringComparison.OrdinalIgnoreCase));
+        Items.Where(i => target.Holds(i.TargetRoot));
+
+    /// <summary>A plugin folder moved from one root to another: its receipt follows it.</summary>
+    public void Moved(string fromRoot, string toRoot, string plugin, string path)
+    {
+        foreach (var i in Items.Where(i => string.Equals(i.TargetRoot, fromRoot, StringComparison.OrdinalIgnoreCase)
+                                         && string.Equals(i.Plugin, plugin, StringComparison.OrdinalIgnoreCase)))
+        {
+            i.TargetRoot = toRoot;
+            i.Path = path;
+        }
+        Save();
+    }
 
     public void Record(InstalledPlugin item)
     {
@@ -82,7 +105,7 @@ public sealed class InstallState
 
     public void Forget(InstallTarget target, string plugin)
     {
-        Items.RemoveAll(i => string.Equals(i.TargetRoot, target.Root, StringComparison.OrdinalIgnoreCase)
+        Items.RemoveAll(i => target.Holds(i.TargetRoot)
                           && string.Equals(i.Plugin, plugin, StringComparison.OrdinalIgnoreCase));
         Save();
     }

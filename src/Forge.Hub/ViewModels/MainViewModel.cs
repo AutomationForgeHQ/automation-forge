@@ -78,6 +78,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _startWithWindows;
     [ObservableProperty] private string _hubUpdateLine = "";
     [ObservableProperty] private bool _hasHubUpdate;
+    [ObservableProperty] private bool _hasLegacyInstalls;
 
     /// <summary>Which tab is on screen. Two of them, so a bool is the honest shape.</summary>
     [ObservableProperty] private bool _isRunnersTab;
@@ -435,7 +436,8 @@ public partial class MainViewModel : ViewModelBase
     /// </summary>
     public void RefreshMachineSurface()
     {
-        var roots = Engines.Select(e => e.PluginRoot).ToList();
+        // The legacy root too: plugins an older hub installed declare their keys until they are moved.
+        var roots = Engines.SelectMany(e => new[] { e.PluginRoot, e.LegacyPluginRoot }).ToList();
 
         // Everywhere the hub has ever installed, not only the engines. It already installs into
         // projects on request, and a plugin it put there declares the same keys as one in an
@@ -702,6 +704,45 @@ public partial class MainViewModel : ViewModelBase
         SelectedSet = Sets.FirstOrDefault(s => s.Id == keep) ?? Sets.FirstOrDefault();
         UpdatesCount = Sets.Sum(s => s.UpdateCount);
         InstalledCount = Sets.Sum(s => s.InstalledCount);
+        HasLegacyInstalls = LegacyInstallCount() > 0;
+    }
+
+    /// <summary>Plugin folders an older hub left in Engine/Plugins/AutomationForge of the selected engine.</summary>
+    private int LegacyInstallCount()
+    {
+        var root = SelectedEngine?.LegacyPluginRoot;
+        try { return root is not null && Directory.Exists(root) ? Directory.GetDirectories(root).Length : 0; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return 0; }
+    }
+
+    /// <summary>
+    /// Move an older hub's installs to Engine/Plugins/Marketplace/AutomationForge, where they no longer stop
+    /// C++ builds on this engine. Asks for administrator rights when the engine needs them.
+    /// </summary>
+    [RelayCommand]
+    private async Task MoveLegacyInstallsAsync()
+    {
+        if (Target is null || SelectedEngine is null) return;
+        Busy = true;
+        try
+        {
+            WarnIfEditorRuns();
+            if (Installer.IsWritable(Target.Root))
+            {
+                var left = new Installer(_http, _state, _entitlements, Say).MoveLegacyEngineInstalls(Target);
+                if (left > 0) Say($"{left} plugin folder(s) could not move; see Details.");
+            }
+            else
+            {
+                await RunElevatedAsync("migrate", []);
+            }
+        }
+        finally
+        {
+            _state.Reload();
+            Rebuild();
+            Busy = false;
+        }
     }
 
     internal Task InstallAsync(PluginRow row) =>
@@ -806,7 +847,8 @@ public partial class MainViewModel : ViewModelBase
             if (File.Exists(Elevated.LogPath)) File.Delete(Elevated.LogPath);
             using var p = Process.Start(psi);
             if (p is null) { Say("Could not start the elevated helper."); return; }
-            Status = $"{(verb == "install" ? "Installing" : "Removing")} {string.Join(", ", ids)}…";
+            Status = verb == "migrate" ? "Moving plugins to the engine's Marketplace folder…"
+                : $"{(verb == "install" ? "Installing" : "Removing")} {string.Join(", ", ids)}…";
             await p.WaitForExitAsync();
             if (File.Exists(Elevated.LogPath))
                 foreach (var line in await File.ReadAllLinesAsync(Elevated.LogPath)) Say(line);

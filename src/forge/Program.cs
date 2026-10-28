@@ -226,6 +226,31 @@ uninstall.SetAction(parse =>
 });
 root.Subcommands.Add(uninstall);
 
+// ── migrate ───────────────────────────────────────────────────────────────
+// Hubs before 0.4.3 installed into Engine/Plugins/AutomationForge, which stops C++ builds on that engine;
+// this moves those installs to Engine/Plugins/Marketplace/AutomationForge. Install, update and uninstall
+// do the same on the way, so this is for an engine where nothing else is about to change.
+var migrate = new Command("migrate", "Move plugins an older hub installed into an engine to the engine's Marketplace folder.");
+migrate.Options.Add(engineOpt);
+migrate.SetAction(parse =>
+{
+    var target = ResolveTarget(parse.GetValue(engineOpt), null);
+    if (target.target.LegacyRoot is null || !Directory.Exists(target.target.LegacyRoot))
+    {
+        Console.WriteLine($"Nothing to move: {target.target.Label} has no {Paths.PluginFolder} folder outside Marketplace.");
+        return 0;
+    }
+    if (!Installer.IsWritable(target.target.Root) && !parse.GetValue(noElevate) && !Elevation.IsElevated())
+    {
+        var code = Elevation.RelaunchElevated(args);
+        if (code is null) { Console.Error.WriteLine("Elevation was declined; nothing moved."); return 3; }
+        return code.Value;
+    }
+    var left = installer.MoveLegacyEngineInstalls(target.target);
+    return left == 0 ? 0 : 1;
+});
+root.Subcommands.Add(migrate);
+
 // ── enable / disable ──────────────────────────────────────────────────────
 foreach (var (verb, enabled) in new[] { ("enable", true), ("disable", false) })
 {
