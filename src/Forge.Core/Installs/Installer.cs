@@ -89,16 +89,7 @@ public sealed class Installer
                 throw new InvalidDataException($"The package has no {plugin.Id}.uplugin at its root.");
 
             var outcome = Directory.Exists(dest) ? "updated" : "installed";
-            if (Directory.Exists(dest))
-            {
-                try { Directory.Delete(dest, recursive: true); }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                {
-                    throw new IOException($"{plugin.Id} is in use — Unreal Editor has it loaded. Close the editor and try again. ({ex.Message})");
-                }
-            }
-            Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
-            Directory.Move(folder, dest);
+            Place(folder, descriptor, dest, plugin.Id);
 
             _state.Record(new InstalledPlugin
             {
@@ -113,6 +104,77 @@ public sealed class Installer
         {
             if (Directory.Exists(staging)) Directory.Delete(staging, recursive: true);
         }
+    }
+
+    /// <summary>
+    /// Put an unpacked plugin folder at dest. The package is unpacked under %LOCALAPPDATA%, and a folder only
+    /// renames within one drive, so for a project or engine on another drive it is copied over instead. Either
+    /// way it is built beside dest without its descriptor — Unreal does not see a folder with no .uplugin, so a
+    /// copy cut short is never a second plugin of the same name — and the descriptor goes in last. The installed
+    /// version is set aside rather than deleted until the new one is in place, so an update that fails leaves it.
+    /// </summary>
+    private static void Place(string folder, string descriptor, string dest, string plugin)
+    {
+        var root = Path.GetDirectoryName(dest)!;
+        Directory.CreateDirectory(root);
+        foreach (var stale in Directory.GetDirectories(root, $".{plugin}.forge-*"))
+            TryDelete(stale, plugin);
+
+        var name = Path.GetFileName(descriptor);
+        var heldDescriptor = Path.Combine(Path.GetDirectoryName(folder)!, name);
+        File.Move(descriptor, heldDescriptor);
+
+        var ready = Path.Combine(root, $".{plugin}.forge-partial-{Guid.NewGuid():N}");
+        string? old = null;
+        try
+        {
+            // Same drive is one rename. Another drive fails here, also when the drive letter matches but a
+            // junction points elsewhere, which a comparison of path roots would miss.
+            try { Directory.Move(folder, ready); }
+            catch (IOException) { CopyTree(folder, ready); }
+
+            // The installed version steps aside in one rename, which fails whole when the editor holds any of
+            // its files — deleting it outright would get partway and leave a plugin with pieces missing.
+            if (Directory.Exists(dest))
+            {
+                old = Path.Combine(root, $".{plugin}.forge-old-{Guid.NewGuid():N}");
+                try { Directory.Move(dest, old); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    old = null;
+                    throw new IOException($"{plugin} is in use — Unreal Editor has it loaded. Close the editor and try again. ({ex.Message})");
+                }
+            }
+            Directory.Move(ready, dest);
+        }
+        catch
+        {
+            if (old is not null && !Directory.Exists(dest)) Directory.Move(old, dest);
+            if (Directory.Exists(ready)) TryDelete(ready, plugin);
+            throw;
+        }
+        File.Copy(heldDescriptor, Path.Combine(dest, name));
+        if (old is not null) TryDelete(old, plugin);
+    }
+
+    /// <summary>Remove a set-aside folder, its descriptor first: whatever else is left, Unreal must not see a second copy.</summary>
+    private static void TryDelete(string dir, string plugin)
+    {
+        try
+        {
+            File.Delete(Path.Combine(dir, $"{plugin}.uplugin"));
+            Directory.Delete(dir, recursive: true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+    }
+
+    private static void CopyTree(string from, string to)
+    {
+        Directory.CreateDirectory(to);
+        foreach (var dir in Directory.EnumerateDirectories(from, "*", SearchOption.AllDirectories))
+            Directory.CreateDirectory(Path.Combine(to, Path.GetRelativePath(from, dir)));
+        foreach (var file in Directory.EnumerateFiles(from, "*", SearchOption.AllDirectories))
+            File.Copy(file, Path.Combine(to, Path.GetRelativePath(from, file)));
     }
 
     public bool Uninstall(InstallTarget target, string plugin)

@@ -12,6 +12,17 @@ The file started with 0.4.3. The notes for 0.4.1 and 0.4.2 are copied from their
 to 0.4.0 were released without notes, so their sections were written afterwards from the commits that went into
 each one.
 
+## 0.4.4 — 2026-11-01
+
+### Fixed
+- **Installing into a project or engine on another drive works.** When your project or engine was on a different
+  drive from Windows (for example `D:` or `E:`), every install stopped with *"Source and destination path must have
+  identical roots. Move will not work across volumes."* and nothing was installed. The hub unpacks downloads on
+  your Windows drive, and it now copies the plugin over when the destination is on another one.
+- **A failed update keeps the version you had.** If an update could not finish, for example because Unreal Editor
+  had the plugin loaded, the hub could already have deleted part of the installed version. Now the installed
+  version stays exactly as it was until the new one is completely in place.
+
 ## 0.4.3 — 2026-10-28
 
 ### Fixed
