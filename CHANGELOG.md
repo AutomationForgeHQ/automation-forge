@@ -12,7 +12,7 @@ The file started with 0.4.3. The notes for 0.4.1 and 0.4.2 are copied from their
 to 0.4.0 were released without notes, so their sections were written afterwards from the commits that went into
 each one.
 
-## 0.4.4 — unreleased
+## 0.4.4 — 2026-11-01
 
 ### Fixed
 - **Installing into a project or engine on another drive works.** When your project or engine was on a different
