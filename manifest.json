@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-19T00:15:13Z",
+  "generatedAt": "2026-11-19T00:20:05Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -1012,6 +1012,18 @@
       ],
       "source": null,
       "versions": [
+        {
+          "version": "0.4.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgecloud-v0.4.0/MeshForgeCloud-0.4.0-UE5.8-Win64.zip",
+          "size": 496053,
+          "sha256": "e938f7954b9690180ad8475b2f692bb75c8b3b5c12e19956b52519733c1bb347",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/meshforgecloud-v0.4.0/MeshForgeCloud-0.4.0-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-11-19T00:19:53Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/meshforgecloud-v0.4.0"
+        },
         {
           "version": "0.3.0",
           "engine": "5.8",
