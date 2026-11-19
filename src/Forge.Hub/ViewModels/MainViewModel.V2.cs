@@ -73,6 +73,7 @@ public partial class MainViewModel
         if (Catalogue is null) Say($"Could not read the list of tracks. {CatalogueLoader.LastError}");
         CurrentPage = new HomePageViewModel(this);
         _ = LoadAccountCatalogueAsync();
+        _ = FetchCatalogueAsync();
     }
 
     private async Task LoadAccountCatalogueAsync()

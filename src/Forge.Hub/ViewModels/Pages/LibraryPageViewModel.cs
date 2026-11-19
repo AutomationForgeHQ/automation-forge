@@ -158,16 +158,20 @@ public sealed partial class LibraryPageViewModel : PageViewModel
         }
 
         // Engines whose tool is not installed, and components the catalogue does not know.
-        var rest = inputs.Installed.Keys.Where(id => !claimed.Contains(id) && !cat.Always.Any(a => a.Plugin == id)).OrderBy(x => x).ToList();
+        var rest = inputs.Installed.Keys.Where(id => !claimed.Contains(id) && cat.FoundationOf(id) is null).OrderBy(x => x).ToList();
         var loose = rest.Select(id => cat.ProductOfComponent(id) is { } p
                 ? InstalledRowModel.For(this, p, id, inputs, p.Plugins.Contains(id) ? p.Name : "Agent access", p.Name, 0)
                 : InstalledRowModel.For(this, null, id, inputs, id, "Not in the catalogue yet", 0))
             .Where(r => Match(r.Name)).ToList();
         if (loose.Count > 0) InstalledGroups.Add(new InstalledGroupModel("MORE", loose));
 
-        var always = cat.Always.Where(a => inputs.Installed.ContainsKey(a.Plugin))
-            .Select(a => InstalledRowModel.For(this, null, a.Plugin, inputs, a.Name, a.Line, 0)).Where(r => Match(r.Name)).ToList();
-        if (always.Count > 0) InstalledGroups.Add(new InstalledGroupModel("ALWAYS", always));
+        // The Kovati foundation (catalogue `always`): every piece and its agent access that is installed here.
+        var always = cat.Always
+            .SelectMany(a => new[] { (id: a.Plugin, name: a.Name, line: a.Line) }
+                .Concat(a.AgentPlugins.Select(x => (id: x, name: $"Agent access for {a.Name}", line: ""))))
+            .Where(x => inputs.Installed.ContainsKey(x.id) && !claimed.Contains(x.id))
+            .Select(x => InstalledRowModel.For(this, null, x.id, inputs, x.name, x.line, 0)).Where(r => Match(r.Name)).ToList();
+        if (always.Count > 0) InstalledGroups.Add(new InstalledGroupModel("KOVATI FOUNDATION", always));
 
         InstalledTabLabel = inputs.Installed.Count > 0 ? $"Installed {inputs.Installed.Count}" : "Installed";
     }

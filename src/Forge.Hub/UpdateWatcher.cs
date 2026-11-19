@@ -39,6 +39,9 @@ public sealed class UpdateWatcher : IDisposable
     /// <summary>Every completed check.</summary>
     public event Action<WatchResult>? Checked;
 
+    /// <summary>The catalogue fetched with this check was new and was written to the cache (12.5).</summary>
+    public event Action? CatalogueUpdated;
+
     /// <summary>A check that found versions not announced before. The list is their keys (plugin@version, hub@version).</summary>
     public event Action<WatchResult, IReadOnlyList<string>>? NewFindings;
 
@@ -78,6 +81,11 @@ public sealed class UpdateWatcher : IDisposable
         await _gate.WaitAsync(ct);
         try
         {
+            // The catalogue rides on the same rhythm; it never fails the check.
+            if (ViewModels.MainViewModel.CatalogueFetchEnabled
+                && await new Forge.Core.Catalogue.CatalogueClient(_http).FetchAsync(ct) == Forge.Core.Catalogue.CatalogueFetch.Updated)
+                CatalogueUpdated?.Invoke();
+
             var (manifest, _) = await _manifest.GetAsync(ct: ct);
             await _releases.MergeIntoAsync(manifest, ct: ct);
             var state = new InstallState();

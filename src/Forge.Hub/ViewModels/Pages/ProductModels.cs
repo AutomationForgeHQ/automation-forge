@@ -116,7 +116,7 @@ public sealed partial class PosterModel
     public bool IsUtility => Product.Type == "Utility";
     public string SpineText { get; }
 
-    private static bool MediaFound(string? path) => Controls.MediaImage.Resolve(path) is not null;
+    private static bool MediaFound(string? path) => Controls.MediaImage.Available(path);
 
     [RelayCommand] private void Open() => _hub.OpenProduct(Product.Slug);
 

@@ -13,8 +13,11 @@ public class CatalogueTests
         Assert.Equal(["characters", "animation", "worldbuilding", "storytelling"], c.TracksInOrder.Select(t => t.Slug));
         Assert.Equal(44, c.Products.Count);
         Assert.Equal(8, c.HeroOrder.Count);
-        Assert.Equal("AutomationForgeHub", c.Always.Single().Plugin);
-        Assert.Equal("Kovati Hub link", c.Always.Single().Name);
+        Assert.Equal(["AutomationForgeHub", "AutomationForge"], c.Always.Select(a => a.Plugin));
+        Assert.Equal("Kovati Hub link", c.Always[0].Name);
+        Assert.Equal(["AutomationForgeToolset"], c.Always[1].AgentPlugins);
+        Assert.All(c.Always, a => Assert.False(string.IsNullOrWhiteSpace(a.Line)));
+        Assert.Equal("Agent access for Kovati ledger", c.FoundationName("AutomationForgeToolset"));
         Assert.Equal("Early experiments: they work for us, may break, and get no support yet.", c.LabsLine);
         Assert.Contains("Marvelous Designer", c.Product("marvelous-designer-playbook")!.Software);
     }
@@ -45,7 +48,7 @@ public class CatalogueTests
         var paths = c.Tracks.SelectMany(t => new[] { t.Media.Door, t.Media.Hero, t.Film?.Poster }.Concat(t.Capabilities.Select(x => x.Media.Poster)))
             .Concat(c.Products.SelectMany(p => new[] { p.Media.Card, p.Media.Hero, p.Page?.Film?.Poster }))
             .OfType<string>().Select(Catalogue.Catalogue.LocalMediaPath).Distinct().ToList();
-        Assert.Equal(69, paths.Count);
+        Assert.Equal(71, paths.Count);
         foreach (var p in paths) Assert.True(File.Exists(Path.Combine(root, p)), p);
     }
 

@@ -455,7 +455,7 @@ async Task<int> InstallTrackAsync(ParseResult parse, string trackName, Cancellat
     {
         var what = item.Role switch
         {
-            PlanRole.Always => catalogue.Always.FirstOrDefault()?.Name ?? "",
+            PlanRole.Always => catalogue.FoundationName(item.Id) ?? (item.NeededBy is { } by ? $"needed by {by}" : "Kovati foundation"),
             PlanRole.Agent => $"agent access for {catalogue.Product(item.Product)?.Name}",
             PlanRole.Engine => $"engine for {track.Capability(item.Capability)?.Name}",
             PlanRole.Dependency => $"needed by {item.NeededBy}",

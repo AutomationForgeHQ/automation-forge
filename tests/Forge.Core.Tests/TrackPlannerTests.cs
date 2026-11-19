@@ -3,60 +3,66 @@ using Xunit;
 
 namespace Forge.Core.Tests;
 
-/// <summary>The planner against the spec's own numbers (section 7, slice 1 acceptance check 5 and 6).</summary>
+/// <summary>
+/// The planner against the spec's own numbers (section 7, slice 1 acceptance check 5 and 6), with the Kovati
+/// foundation of slice 5 in front: AutomationForgeHub and the AutomationForge ledger on every engine install, and
+/// with agent access on, the ledger's agent tools (AutomationForgeToolset, which needs AutomationForgePipelines).
+/// </summary>
 public class TrackPlannerTests
 {
     [Fact]
-    public void Animation_default_is_the_five_components_in_order()
+    public void Animation_default_is_the_foundation_and_four_components_in_order()
     {
         var plan = Fixtures.DefaultPlan("animation", Fixtures.Inputs());
-        Assert.Equal(["AutomationForgeHub", "MotionForge", "MotionForgeKimodo", "MotionForgeUthana", "MontageForge"], plan.Ids);
-        Assert.Equal("2 capabilities · 5 components", plan.Summary);
+        Assert.Equal(["AutomationForgeHub", "AutomationForge", "MotionForge", "MotionForgeKimodo", "MotionForgeUthana", "MontageForge"], plan.Ids);
+        Assert.Equal("2 capabilities · 6 components", plan.Summary);
         Assert.Equal("12 MB", Words.Size(plan.Size));
     }
 
     [Fact]
-    public void Animation_with_agents_adds_the_three_toolsets()
+    public void Animation_with_agents_adds_the_three_toolsets_and_the_ledgers_agent_tools()
     {
         var plan = Fixtures.DefaultPlan("animation", Fixtures.Inputs(agents: true));
-        Assert.Equal(["AutomationForgeHub", "MotionForge", "MotionForgeKimodo", "MotionForgeUthana", "MontageForge",
+        Assert.Equal(["AutomationForgeHub", "AutomationForge", "AutomationForgePipelines", "AutomationForgeToolset",
+                      "MotionForge", "MotionForgeKimodo", "MotionForgeUthana", "MontageForge",
                       "MotionForgeToolset", "MotionForgeKimodoToolset", "MontageForgeToolset"], plan.Ids);
-        Assert.Equal("2 capabilities · 8 components", plan.Summary);
-        Assert.Equal("13 MB", Words.Size(plan.Size));
-        Assert.All(plan.Items.Where(i => i.Id.EndsWith("Toolset")), i => Assert.Equal(PlanRole.Agent, i.Role));
+        Assert.Equal("2 capabilities · 11 components", plan.Summary);
+        Assert.Equal("14 MB", Words.Size(plan.Size));
+        Assert.All(plan.Items.Where(i => i.Id.EndsWith("Toolset") && !i.Id.StartsWith("AutomationForge")), i => Assert.Equal(PlanRole.Agent, i.Role));
+        Assert.All(plan.Items.Take(4), i => Assert.Equal(PlanRole.Always, i.Role));
     }
 
     [Fact]
     public void Characters_default_is_meshforge_and_its_cloud_engine()
     {
         var plan = Fixtures.DefaultPlan("characters", Fixtures.Inputs());
-        Assert.Equal(["AutomationForgeHub", "MeshForge", "MeshForgeCloud"], plan.Ids);
-        Assert.Equal("1 capability · 3 components", plan.Summary);
-        Assert.Equal("2.4 MB", Words.Size(plan.Size));
+        Assert.Equal(["AutomationForgeHub", "AutomationForge", "MeshForge", "MeshForgeCloud"], plan.Ids);
+        Assert.Equal("1 capability · 4 components", plan.Summary);
+        Assert.Equal("2.6 MB", Words.Size(plan.Size));
 
         var agents = Fixtures.DefaultPlan("characters", Fixtures.Inputs(agents: true));
-        Assert.Equal(["AutomationForgeHub", "MeshForge", "MeshForgeCloud", "MeshForgeToolset"], agents.Ids);
-        Assert.Equal("2.6 MB", Words.Size(agents.Size));
+        Assert.Equal(["AutomationForgeHub", "AutomationForge", "AutomationForgePipelines", "AutomationForgeToolset", "MeshForge", "MeshForgeCloud", "MeshForgeToolset"], agents.Ids);
+        Assert.Equal("3.7 MB", Words.Size(agents.Size));
     }
 
     [Fact]
     public void Worldbuilding_default()
     {
         var plan = Fixtures.DefaultPlan("worldbuilding", Fixtures.Inputs());
-        Assert.Equal(["AutomationForgeHub", "MeshForge", "MeshForgeCloud", "SurfaceForge", "SurfaceForgeLocal", "SurfaceForgePatina"], plan.Ids);
-        Assert.Equal("2 capabilities · 6 components", plan.Summary);
-        Assert.Equal("3.1 MB", Words.Size(plan.Size));
-        Assert.Equal("2 capabilities · 8 components", Fixtures.DefaultPlan("worldbuilding", Fixtures.Inputs(agents: true)).Summary);
+        Assert.Equal(["AutomationForgeHub", "AutomationForge", "MeshForge", "MeshForgeCloud", "SurfaceForge", "SurfaceForgeLocal", "SurfaceForgePatina"], plan.Ids);
+        Assert.Equal("2 capabilities · 7 components", plan.Summary);
+        Assert.Equal("3.3 MB", Words.Size(plan.Size));
+        Assert.Equal("2 capabilities · 11 components", Fixtures.DefaultPlan("worldbuilding", Fixtures.Inputs(agents: true)).Summary);
     }
 
     [Fact]
     public void Storytelling_default()
     {
         var plan = Fixtures.DefaultPlan("storytelling", Fixtures.Inputs());
-        Assert.Equal(["AutomationForgeHub", "SpeechForge", "SpeechForgeElevenLabs", "FaceForge", "FaceForgeMetaHuman"], plan.Ids);
-        Assert.Equal("2 capabilities · 5 components", plan.Summary);
-        Assert.Equal("2.7 MB", Words.Size(plan.Size));
-        Assert.Equal("2 capabilities · 7 components", Fixtures.DefaultPlan("storytelling", Fixtures.Inputs(agents: true)).Summary);
+        Assert.Equal(["AutomationForgeHub", "AutomationForge", "SpeechForge", "SpeechForgeElevenLabs", "FaceForge", "FaceForgeMetaHuman"], plan.Ids);
+        Assert.Equal("2 capabilities · 6 components", plan.Summary);
+        Assert.Equal("2.9 MB", Words.Size(plan.Size));
+        Assert.Equal("2 capabilities · 10 components", Fixtures.DefaultPlan("storytelling", Fixtures.Inputs(agents: true)).Summary);
     }
 
     [Theory]
@@ -82,7 +88,7 @@ public class TrackPlannerTests
     }
 
     [Fact]
-    public void Unticking_gameplay_and_uthana_leaves_one_capability_and_three_components()
+    public void Unticking_gameplay_and_uthana_leaves_one_capability_and_four_components()
     {
         var inputs = Fixtures.Inputs();
         var track = inputs.Catalogue.Track("animation")!;
@@ -90,8 +96,8 @@ public class TrackPlannerTests
             .With("gameplay", false)
             .WithEngine("motion", "motionforge-uthana", false);
         var plan = TrackPlanner.Plan(track, selection, inputs);
-        Assert.Equal("1 capability · 3 components", plan.Summary);
-        Assert.Equal(["AutomationForgeHub", "MotionForge", "MotionForgeKimodo"], plan.Ids);
+        Assert.Equal("1 capability · 4 components", plan.Summary);
+        Assert.Equal(["AutomationForgeHub", "AutomationForge", "MotionForge", "MotionForgeKimodo"], plan.Ids);
     }
 
     [Fact]
@@ -167,11 +173,11 @@ public class TrackPlannerTests
     {
         var installed = new Dictionary<string, string>
         {
-            ["AutomationForgeHub"] = "0.2.5", ["MotionForge"] = "0.4.1", ["MotionForgeKimodo"] = "0.5.1",
+            ["AutomationForgeHub"] = "0.2.5", ["AutomationForge"] = "0.1.1", ["MotionForge"] = "0.4.1", ["MotionForgeKimodo"] = "0.5.1",
         };
         var plan = Fixtures.DefaultPlan("animation", Fixtures.Inputs(installed: installed));
         Assert.Equal(["MotionForgeUthana", "MontageForge"], plan.Ids);
-        Assert.Equal(3, plan.AlreadyHere);
+        Assert.Equal(4, plan.AlreadyHere);
         Assert.Equal("2 capabilities · 2 components", plan.Summary);
         Assert.Equal(2, plan.NewCapabilityCount);
     }
@@ -220,18 +226,19 @@ public class TrackPlannerTests
         var track = cat.Track("storytelling")!;
         var selection = new TrackSelection(["translation"], new Dictionary<string, IReadOnlyCollection<string>>());
         var plan = TrackPlanner.Plan(track, selection, inputs);
-        Assert.Equal(["AutomationForgeHub", "SpeechForge", "SpeechForgeDeepL"], plan.Ids);
+        Assert.Equal(["AutomationForgeHub", "AutomationForge", "SpeechForge", "SpeechForgeDeepL"], plan.Ids);
         var dep = plan.Items.Single(i => i.Id == "SpeechForge");
         Assert.Equal(PlanRole.Dependency, dep.Role);
         Assert.Equal("SpeechForge DeepL", dep.NeededBy);
     }
 
     [Fact]
-    public void A_project_target_does_not_carry_the_editor_plugin()
+    public void A_project_target_does_not_carry_the_foundation()
     {
         var inputs = Fixtures.Inputs() with { TargetKind = "project" };
         var plan = Fixtures.DefaultPlan("animation", inputs);
         Assert.DoesNotContain("AutomationForgeHub", plan.Ids);
+        Assert.DoesNotContain("AutomationForge", plan.Ids);
         Assert.Equal(4, plan.ComponentCount);
     }
 }

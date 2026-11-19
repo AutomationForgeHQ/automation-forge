@@ -298,12 +298,15 @@ public static class TrackPlanner
 
         var kept = order.Where(o => !dropped.Contains(o.id)).ToList();
 
-        // 7: the editor plugin first, on an engine.
-        var hubId = cat.Always.FirstOrDefault()?.Plugin ?? Manifest.Manifest.HubPlugin;
-        if (inputs.TargetKind == "engine" && kept.Count > 0 && m.Plugin(hubId) is { } hub && hub.Latest(inputs.Engine, inputs.Channel) is not null)
+        // 7: the foundation first, on an engine (catalogue `always`): the editor plugin, the shared ledger, and
+        // with agent access on their agent components, each with what it needs. A piece that cannot be had for
+        // this engine (no build, paid and not owned) is left out quietly, with whatever needs it.
+        if (inputs.TargetKind == "engine" && kept.Count > 0)
         {
-            kept.RemoveAll(o => string.Equals(o.id, hubId, StringComparison.OrdinalIgnoreCase));
-            kept.Insert(0, (hub.Id, PlanRole.Always, null, null, null));
+            var foundation = FoundationItems(inputs);
+            var ids = new HashSet<string>(foundation.Select(f => f.id), StringComparer.OrdinalIgnoreCase);
+            kept.RemoveAll(o => ids.Contains(o.id));
+            kept.InsertRange(0, foundation);
         }
 
         // 8: install, update or current, by the receipts. A pinned component that is installed is current.
@@ -319,6 +322,32 @@ public static class TrackPlanner
         }).ToList();
 
         return new TrackPlan { Track = track.Slug, Items = items, Drops = drops, Capabilities = passed };
+    }
+
+    /// <summary>
+    /// The foundation components for this engine, dependencies first: each `always` entry, and its agent
+    /// components when agent access is on. With no `always` list, the editor plugin alone.
+    /// </summary>
+    public static List<(string id, PlanRole role, string? cap, string? product, string? neededBy)> FoundationItems(PlanInputs inputs)
+    {
+        var cat = inputs.Catalogue;
+        var m = inputs.Manifest;
+        var entries = cat.Always.Count > 0 ? cat.Always : [new AlwaysEntry { Plugin = Manifest.Manifest.HubPlugin, Name = "Kovati Hub link" }];
+        var list = new List<(string id, PlanRole role, string? cap, string? product, string? neededBy)>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        bool CanHave(PluginInfo p) =>
+            p.Latest(inputs.Engine, inputs.Channel) is not null
+            && !(p.IsPaid && !inputs.Owned.Contains(p.Id) && !inputs.Installed.ContainsKey(p.Id));
+        foreach (var a in entries)
+            foreach (var id in new[] { a.Plugin }.Concat(inputs.AgentAccess ? a.AgentPlugins : []))
+            {
+                if (m.Plugin(id) is not { } plugin) continue;
+                var closure = m.Closure(plugin);
+                if (!closure.All(CanHave)) continue;
+                foreach (var p in closure)
+                    if (seen.Add(p.Id)) list.Add((p.Id, PlanRole.Always, null, null, string.Equals(p.Id, id, StringComparison.OrdinalIgnoreCase) ? null : a.Name));
+            }
+        return list;
     }
 
     private static string? NameOf(Catalogue cat, string? slug) => slug is null ? null : cat.Product(slug)?.Name;

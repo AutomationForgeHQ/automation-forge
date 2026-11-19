@@ -113,10 +113,10 @@ public static class UpdatePlanner
         foreach (var (id, have) in inputs.Installed)
         {
             if (claimed.Contains(id) || cat.Products.Any(p => p.Plugins.Contains(id, StringComparer.OrdinalIgnoreCase) || p.AgentPlugins.Contains(id, StringComparer.OrdinalIgnoreCase))) continue;
-            if (cat.Always.Any(a => string.Equals(a.Plugin, id, StringComparison.OrdinalIgnoreCase)))
+            if (cat.FoundationName(id) is { } foundationName)
             {
                 if (TrackPlanner.NewerVersion(id, noPins) is { } hubTo)
-                    rows.Add(new ProductUpdate(null, null, cat.Always.First(a => string.Equals(a.Plugin, id, StringComparison.OrdinalIgnoreCase)).Name, id,
+                    rows.Add(new ProductUpdate(null, null, foundationName, id,
                         [new UpdatePart(id, id, have, hubTo, m.Plugin(id)?.Latest(inputs.Engine, inputs.Channel)?.Size ?? 0)],
                         false, pins.ContainsKey(id), pins.GetValueOrDefault(id), false));
                 continue;

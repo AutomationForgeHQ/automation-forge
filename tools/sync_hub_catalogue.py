@@ -1,6 +1,11 @@
 """Copy the catalogue and the installer's set of stills into src/Forge.Hub/catalogue (spec 12.4, 13).
 
-    python tools/sync_hub_catalogue.py <catalogue.json> <website v2/public folder>
+    python tools/sync_hub_catalogue.py [<catalogue.json> <website v2/public folder>]
+
+Without arguments it takes the website's generated file, ../AutomationForge-website/v2/public/hub/catalogue.json
+(written by `npm run hub-catalogue` in v2/), and that site's public folder. The installed Hub fetches the same file
+from https://kovati.dev/hub/catalogue.json on its own; the copy made here is only what a fresh install shows before
+its first fetch, or offline. A new product never needs this script or a Hub release.
 
 The catalogue is copied as catalogue/catalogue.json. Every still it names for the tracks (door, hero, film
 poster), the capabilities (poster) and the products (card, hero, page film poster) is copied from the website's
@@ -34,10 +39,14 @@ def stills(cat):
 
 
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) == 1:
+        public = HERE.parent / "AutomationForge-website" / "v2" / "public"
+        src_cat = public / "hub" / "catalogue.json"
+    elif len(sys.argv) == 3:
+        src_cat, public = Path(sys.argv[1]), Path(sys.argv[2])
+    else:
         print(__doc__)
         return 2
-    src_cat, public = Path(sys.argv[1]), Path(sys.argv[2])
     cat = json.loads(src_cat.read_text(encoding="utf-8"))
     OUT.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src_cat, OUT / "catalogue.json")

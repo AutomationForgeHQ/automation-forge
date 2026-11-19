@@ -45,6 +45,11 @@ public partial class App : Application
             _watcher = new UpdateWatcher(_settings);
             _watcher.Checked += r => Dispatcher.UIThread.Post(() => OnChecked(r));
             _watcher.NewFindings += (r, _) => Dispatcher.UIThread.Post(() => Announce(r, force: false));
+            _watcher.CatalogueUpdated += () => Dispatcher.UIThread.Post(() =>
+            {
+                _catalogue = null;
+                if (_window?.DataContext is MainViewModel vm) vm.TakeNewerCatalogue();
+            });
 
             SetupTray();
             SingleInstance.ListenForShow(() => Dispatcher.UIThread.Post(ShowWindow));

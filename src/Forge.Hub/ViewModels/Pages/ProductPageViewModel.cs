@@ -52,7 +52,7 @@ public sealed partial class ProductPageViewModel : PageViewModel
     public string Name => Product.Name;
     public string VersionLine => State?.LatestVersion is { } v ? $"v{v}" : "";
     public string? Picture => Product.Media.Hero ?? Product.Media.Card;
-    public bool HasPicture => Controls.MediaImage.Resolve(Picture) is not null;
+    public bool HasPicture => Controls.MediaImage.Available(Picture);
     public string Mark => Product.Mark ?? Product.Name;
     public string Slug => Product.Slug;
     public bool HasFilm => Product.Page?.Film is not null || Cat.Track(Product.Track)?.Film is not null;
@@ -132,7 +132,7 @@ public sealed partial class ProductPageViewModel : PageViewModel
 
         Shots.Clear();
         foreach (var s in Product.Page?.Shots?.Items ?? [])
-            if (Controls.MediaImage.Resolve(s.Src) is not null) Shots.Add(new ShotModel(this, s, Shots.Count));
+            if (Controls.MediaImage.Available(s.Src)) Shots.Add(new ShotModel(this, s, Shots.Count));
 
         var plugin = Product.MainComponent is { } main ? Hub.Manifest?.Plugin(main) : null;
         var entries = plugin?.Changelog ?? [];

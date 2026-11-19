@@ -5,7 +5,8 @@ namespace Forge.Core.Catalogue;
 /// beside the program, and FORGE_CATALOGUE (a file, for local work). The newest generatedAt whose schema this
 /// build understands wins; a newer schema is ignored, never half-read.
 ///
-/// Slice 1 fetches nothing from the network: the network source arrives with the catalogue's public address.
+/// The network copy reaches this through the cache: <see cref="CatalogueClient"/> writes what the site serves
+/// to <see cref="CachePath"/>, and the next Load weighs it against the bundled copy like any other.
 /// </summary>
 public static class CatalogueLoader
 {
@@ -32,9 +33,18 @@ public static class CatalogueLoader
         {
             var c = TryRead(path, source);
             if (c is null) continue;
-            if (best is null || string.CompareOrdinal(c.GeneratedAt, best.GeneratedAt) > 0) best = c;
+            if (best is null || IsNewer(c.GeneratedAt, best.GeneratedAt)) best = c;
         }
         return best;
+    }
+
+    /// <summary>generatedAt a is later than b: as times when both read as times, else by their text.</summary>
+    public static bool IsNewer(string? a, string? b)
+    {
+        var styles = System.Globalization.DateTimeStyles.AssumeUniversal;
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        if (DateTimeOffset.TryParse(a, inv, styles, out var ta) && DateTimeOffset.TryParse(b, inv, styles, out var tb)) return ta > tb;
+        return string.CompareOrdinal(a ?? "", b ?? "") > 0;
     }
 
     /// <summary>One file, or null when it is missing, unreadable, or of a schema this build does not understand.</summary>

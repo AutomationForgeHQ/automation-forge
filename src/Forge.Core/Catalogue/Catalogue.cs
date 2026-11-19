@@ -38,6 +38,17 @@ public sealed class Catalogue
 
     public IEnumerable<Track> TracksInOrder => Tracks.OrderBy(t => t.Order);
 
+    /// <summary>The foundation entry a component is, or gives agent access for; null for anything else.</summary>
+    public AlwaysEntry? FoundationOf(string componentId) =>
+        Always.FirstOrDefault(a => string.Equals(a.Plugin, componentId, StringComparison.OrdinalIgnoreCase))
+        ?? Always.FirstOrDefault(a => a.AgentPlugins.Contains(componentId, StringComparer.OrdinalIgnoreCase));
+
+    /// <summary>A component's name as a foundation piece: "Kovati Hub link", "Agent access for Kovati ledger"; null when it is not one.</summary>
+    public string? FoundationName(string componentId) =>
+        FoundationOf(componentId) is not { } a ? null
+        : string.Equals(a.Plugin, componentId, StringComparison.OrdinalIgnoreCase) ? a.Name
+        : $"Agent access for {a.Name}";
+
     /// <summary>
     /// The product a component belongs to: the first product that installs it, else the first that offers it
     /// as agent access. If two products claim one component the first in the file owns it (13.2).
@@ -120,12 +131,16 @@ public sealed class CatalogueLabels
     public string LabsLine { get; set; } = "";
 }
 
-/// <summary>A component every engine install gets: the editor plugin.</summary>
+/// <summary>
+/// A piece of the Kovati foundation: a component every engine install gets (the editor plugin and the keys, the
+/// shared ledger), with one plain line saying why. Its agent access follows the agents switch like a product's.
+/// </summary>
 public sealed class AlwaysEntry
 {
     public string Plugin { get; set; } = "";
     public string Name { get; set; } = "";
     public string Line { get; set; } = "";
+    public List<string> AgentPlugins { get; set; } = [];
 }
 
 public sealed class Track

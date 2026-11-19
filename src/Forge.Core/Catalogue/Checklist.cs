@@ -125,7 +125,9 @@ public static class ChecklistBuilder
     public static IReadOnlyList<string> TrackComponents(Track track, Catalogue cat, IReadOnlyDictionary<string, string> installed)
     {
         var ids = new List<string>();
-        foreach (var a in cat.Always) if (installed.ContainsKey(a.Plugin)) ids.Add(a.Plugin);
+        foreach (var a in cat.Always)
+            foreach (var id in new[] { a.Plugin }.Concat(a.AgentPlugins))
+                if (installed.ContainsKey(id) && !ids.Contains(id, StringComparer.OrdinalIgnoreCase)) ids.Add(id);
         foreach (var cap in track.Capabilities)
             foreach (var slug in new[] { cap.Product }.Concat(cap.Engines.Select(e => e.Product)))
                 if (cat.Product(slug) is { } p)

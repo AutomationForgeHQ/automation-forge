@@ -275,7 +275,7 @@ public sealed partial class TrackPageViewModel : PageViewModel
         var product = item?.Product is { } slug ? cat?.Product(slug) : cat?.ProductOfComponent(id);
         return item?.Role switch
         {
-            PlanRole.Always => cat?.Always.FirstOrDefault(a => string.Equals(a.Plugin, id, StringComparison.OrdinalIgnoreCase))?.Name ?? "Kovati Hub link",
+            PlanRole.Always => cat?.FoundationName(id) ?? cat?.ProductOfComponent(id)?.Name ?? id,
             PlanRole.Agent => $"Agent access for {product?.Name ?? id}",
             PlanRole.Engine => $"{(product is null || cat is null ? id : cat.ShortName(product))} engine",
             PlanRole.Dependency => cat?.ProductOfComponent(id)?.Name ?? id,
@@ -458,9 +458,13 @@ public sealed partial class TrackPageViewModel : PageViewModel
         var always = _plan.Items.Where(i => i.Role == PlanRole.Always).ToList();
         if (always.Count > 0)
         {
-            ComponentGroupModel group = new("ALWAYS", false);
+            // The Kovati foundation: what every engine install carries, each with its one line from the catalogue.
+            ComponentGroupModel group = new("ALWAYS · KOVATI FOUNDATION", false);
             foreach (var i in always)
-                group.Items.Add(ComponentLineModel.From(i, cat.Always.FirstOrDefault()?.Name is { } n ? $"{n}: the Kovati menu inside Unreal" : null, muted: i.Action == PlanAction.Current));
+                group.Items.Add(ComponentLineModel.From(i,
+                    cat.FoundationOf(i.Id) is { } a ? (string.Equals(a.Plugin, i.Id, StringComparison.OrdinalIgnoreCase) ? a.Line : $"Agent access for {a.Name}")
+                    : i.NeededBy is { } by ? $"needed by {by}" : null,
+                    muted: i.Action == PlanAction.Current));
             ComponentGroups.Add(group);
         }
         var agents = _planWithAgents.Items.Where(i => i.Role == PlanRole.Agent).ToList();
