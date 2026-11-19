@@ -66,7 +66,7 @@ public sealed partial class LibraryPageViewModel : PageViewModel
     [RelayCommand] private void ShowInstalledTab() => Tab = LibraryTab.Installed;
     [RelayCommand] private void ShowAccountTab() => Tab = LibraryTab.Account;
     [RelayCommand] private void EverythingOnThisMachine() => Hub.ShowComponents();
-    [RelayCommand] private Task CheckNow() => Hub.RefreshCommand.ExecuteAsync(null);
+    [RelayCommand] private Task CheckNow() => Hub.CheckNowCommand.ExecuteAsync(null);
     [RelayCommand] private Task SignIn() => Hub.SignInCommand.ExecuteAsync(null);
     [RelayCommand] private void ManageAccount() => Hub.OpenUrl(Hub.Catalogue?.Links.Account ?? "https://app.kovati.dev");
     [RelayCommand] private Task UpdateHub() => Hub.ApplyHubUpdateCommand.ExecuteAsync(null);

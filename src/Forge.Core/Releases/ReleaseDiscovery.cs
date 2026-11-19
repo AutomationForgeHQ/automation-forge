@@ -26,7 +26,11 @@ public sealed class ReleaseDiscovery
         _cache = new GitHubJsonCache(http, "releases", cacheDir);
     }
 
-    public sealed record Result(int Releases, int Merged, bool FromCache, DateTimeOffset CheckedAt);
+    public sealed record Result(int Releases, int Merged, bool FromCache, DateTimeOffset CheckedAt)
+    {
+        /// <summary>The release list differed from the cached copy (a new or edited release).</summary>
+        public bool Changed { get; init; }
+    }
 
     public async Task<Result> MergeIntoAsync(Manifest.Manifest manifest, bool offline = false, CancellationToken ct = default)
     {
@@ -85,6 +89,6 @@ public sealed class ReleaseDiscovery
         }
         foreach (var p in manifest.Plugins)
             p.Versions.Sort((x, y) => string.CompareOrdinal(y.ReleasedAt, x.ReleasedAt));
-        return new Result(releases, merged, fromCache, DateTimeOffset.UtcNow);
+        return new Result(releases, merged, fromCache, DateTimeOffset.UtcNow) { Changed = _cache.LastChanged };
     }
 }

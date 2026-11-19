@@ -15,7 +15,7 @@ namespace Forge.Hub;
 public static class Elevated
 {
     public const string Flag = "--elevated";
-    public static string LogPath => Path.Combine(Paths.DataDir, "elevated.log");
+    public static string LogPath => Path.Combine(Paths.DataDir, HubIdentity.ElevatedLog);
 
     public static int Run(string[] args)
     {

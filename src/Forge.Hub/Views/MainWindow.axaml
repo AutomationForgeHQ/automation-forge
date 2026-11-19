@@ -14,7 +14,7 @@
         ExtendClientAreaToDecorationsHint="True"
         WindowDecorations="BorderOnly"
         ExtendClientAreaTitleBarHeightHint="-1"
-        Title="Kovati Hub">
+        Title="Kovati Hub (beta)">
 
   <Design.DataContext>
     <vm:MainViewModel />
@@ -41,6 +41,10 @@
             <TextBlock Text="Kovati" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
             <Border Classes="chip" BorderBrush="{StaticResource RingMidBrush}" VerticalAlignment="Center" Margin="2,1,0,0">
               <TextBlock Classes="chip" Text="HUB" FontSize="10" Foreground="{StaticResource MuteBrush}" />
+            </Border>
+            <Border Classes="chip" BorderBrush="{StaticResource AmberBrush}" VerticalAlignment="Center" Margin="-4,1,0,0" IsVisible="{Binding IsBeta}"
+                    ToolTip.Tip="{Binding BetaLine}">
+              <TextBlock Classes="chip" Text="BETA" FontSize="10" Foreground="{StaticResource AmberBrush}" />
             </Border>
           </StackPanel>
         </Button>
@@ -89,6 +93,12 @@
             <Button.Flyout>
               <Flyout Placement="BottomEdgeAlignedRight">
                 <StackPanel Width="288" Margin="6">
+                  <Button Classes="menurow" Click="MenuRow_Click" Command="{Binding CheckNowCommand}">
+                    <StackPanel Spacing="2">
+                      <TextBlock Text="Check now" FontSize="14" FontWeight="Medium" />
+                      <TextBlock Classes="small" Text="{Binding CheckNowLine}" TextWrapping="Wrap" />
+                    </StackPanel>
+                  </Button>
                   <Button Classes="menurow" Click="MenuRow_Click" Command="{Binding ShowKeysCommand}">
                     <Grid ColumnDefinitions="*,Auto">
                       <StackPanel Spacing="2">
@@ -175,6 +185,12 @@
                   </StackPanel>
                   <Border Classes="hairline" />
                   <StackPanel Margin="6">
+                    <Button Classes="menurow" Click="MenuRow_Click" Command="{Binding CheckNowCommand}">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="Check now" FontSize="14" FontWeight="Medium" />
+                        <TextBlock Classes="small" Text="{Binding CheckNowLine}" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Button>
                     <Button Classes="menurow" Click="MenuRow_Click" Command="{Binding OpenAccountCommand}">
                       <StackPanel Spacing="2">
                         <TextBlock Text="Your account" FontSize="14" FontWeight="Medium" />
@@ -476,7 +492,13 @@
 
             <StackPanel Spacing="10">
               <TextBlock Classes="label" Text="KOVATI HUB" />
-              <TextBlock Classes="mono" Text="{Binding HubVersion}" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Classes="mono" Text="{Binding HubVersion}" VerticalAlignment="Center" />
+                <Border Classes="chip" BorderBrush="{StaticResource AmberBrush}" VerticalAlignment="Center" IsVisible="{Binding IsBeta}">
+                  <TextBlock Classes="chip" Text="BETA" FontSize="10" Foreground="{StaticResource AmberBrush}" />
+                </Border>
+              </StackPanel>
+              <TextBlock Classes="small" Text="{Binding BetaLine}" TextWrapping="Wrap" IsVisible="{Binding IsBeta}" />
               <TextBlock Classes="small" Text="{Binding InstallLocation}" TextWrapping="Wrap" />
               <CheckBox IsChecked="{Binding CheckForUpdates, Mode=TwoWay}">
                 <TextBlock Text="Look for a newer Kovati Hub at start" FontSize="13" />
@@ -535,7 +557,7 @@
             </ItemsControl>
           </ScrollViewer>
         </Border>
-        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" Height="32" Margin="16,0,18,0">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto" Height="32" Margin="16,0,18,0">
           <ComboBox Grid.Column="0" Classes="footer" ItemsSource="{Binding Engines}" SelectedItem="{Binding SelectedEngine}" IsVisible="{Binding HasManyEngines}" VerticalAlignment="Center" MaxWidth="300">
             <ComboBox.ItemTemplate>
               <DataTemplate x:DataType="eng:EngineInstall">
@@ -552,7 +574,10 @@
           <Button Grid.Column="3" Classes="link amber smalltext" Content="Move tools to the engine's Marketplace folder" Command="{Binding MoveLegacyInstallsCommand}" IsVisible="{Binding HasLegacyInstalls}" Margin="0,0,16,0" FontSize="12" VerticalAlignment="Center"
                   ToolTip.Tip="Tools installed by an older Hub sit in Engine/Plugins/AutomationForge, where they stop C++ builds on this engine. Moving them needs administrator rights and a closed Unreal Editor." />
           <Button Grid.Column="4" Classes="link amber smalltext" Content="{Binding HubUpdateLabel}" Command="{Binding ApplyHubUpdateCommand}" IsVisible="{Binding HasHubUpdate}" Margin="0,0,16,0" FontSize="12" VerticalAlignment="Center" />
-          <Button Grid.Column="5" Classes="link smalltext" Content="Details" Command="{Binding ToggleDetailsCommand}" FontSize="12" VerticalAlignment="Center" />
+          <!-- When the Hub last looked (watcher, start, Check now): always shown once there has been a look. -->
+          <TextBlock Grid.Column="5" Classes="mono" Text="{Binding CheckedLine}" IsVisible="{Binding HasCheckedLine}" FontSize="11" Foreground="{StaticResource DimBrush}"
+                     VerticalAlignment="Center" Margin="0,0,16,0" ToolTip.Tip="{Binding WatchLine}" />
+          <Button Grid.Column="6" Classes="link smalltext" Content="Details" Command="{Binding ToggleDetailsCommand}" FontSize="12" VerticalAlignment="Center" />
         </Grid>
       </StackPanel>
     </Border>

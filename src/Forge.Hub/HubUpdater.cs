@@ -14,8 +14,8 @@ namespace Forge.Hub;
 /// </summary>
 public static class HubUpdater
 {
-    /// <summary>Must match AppId in installer/AutomationForge.iss.</summary>
-    public const string AppId = "{4F0B9C7E-2A6D-4B1F-9E3C-7D5A1F0C8B21}";
+    /// <summary>Must match AppGuid in installer/AutomationForge.iss. The beta's own: 0.4.x is {4F0B9C7E-...}.</summary>
+    public const string AppId = HubIdentity.AppId;
 
     public static string? InstallDir { get; } = FindInstallDir();
 
@@ -42,7 +42,7 @@ public static class HubUpdater
     {
         if (release.InstallerUrl is null) throw new InvalidOperationException($"{release.Tag} has no installer.");
         Directory.CreateDirectory(Paths.DownloadDir);
-        var file = Path.Combine(Paths.DownloadDir, $"AutomationForge-Setup-{release.Version}.exe");
+        var file = Path.Combine(Paths.DownloadDir, $"{HubIdentity.DownloadPrefix}{release.Version}.exe");
 
         if (!(File.Exists(file) && release.InstallerSha256 is not null && Checksums.Matches(file, release.InstallerSha256)))
         {

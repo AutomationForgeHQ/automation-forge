@@ -100,7 +100,7 @@ public partial class App : Application
 
     private void SetupTray()
     {
-        var open = new NativeMenuItem("Open Kovati Hub");
+        var open = new NativeMenuItem($"Open {HubIdentity.DisplayName}");
         open.Click += (_, _) => ShowWindow();
         var check = new NativeMenuItem("Check for updates now");
         check.Click += async (_, _) =>
@@ -122,7 +122,7 @@ public partial class App : Application
         _tray = new TrayIcon
         {
             Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://AutomationForgeHub/Assets/forge.ico"))),
-            ToolTipText = "Kovati Hub",
+            ToolTipText = HubIdentity.DisplayName,
             Menu = menu,
             IsVisible = true,
         };
@@ -135,12 +135,22 @@ public partial class App : Application
         if (_tray is null) return;
         _tray.ToolTipText = Updates(r).Count switch
         {
-            0 => "Kovati Hub: up to date",
-            1 => "Kovati Hub: 1 update",
-            var n => $"Kovati Hub: {n} updates",
+            0 => $"{HubIdentity.DisplayName}: up to date",
+            1 => $"{HubIdentity.DisplayName}: 1 update",
+            var n => $"{HubIdentity.DisplayName}: {n} updates",
         };
-        if (_window?.DataContext is MainViewModel vm) _ = vm.RefreshQuietlyAsync();
+        // Every 15 minutes: the pages are rebuilt only when the check found something the window does not show yet,
+        // so a page somebody is reading does not redraw under them for nothing. The time of the check always moves.
+        var changed = r.SourcesChanged || (_lastCheckKey is not null && r.Key != _lastCheckKey);
+        _lastCheckKey = r.Key;
+        if (_window?.DataContext is MainViewModel vm)
+        {
+            if (changed) _ = vm.RefreshQuietlyAsync(r.CheckedAt);
+            else vm.MarkChecked(r.CheckedAt);
+        }
     }
+
+    private string? _lastCheckKey;
 
     private void Announce(WatchResult r, bool force)
     {

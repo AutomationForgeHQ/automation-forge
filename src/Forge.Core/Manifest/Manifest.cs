@@ -134,14 +134,33 @@ public sealed class ManifestClient
     private static readonly JsonSerializerOptions Json = new() { PropertyNameCaseInsensitive = true };
     private readonly HttpClient _http;
     private readonly string _cachePath;
+    private readonly string _etagPath;
 
     public string Url { get; }
+
+    /// <summary>Whether the last fetch brought a manifest different from the cached one.</summary>
+    public bool LastChanged { get; private set; }
 
     public ManifestClient(HttpClient http, string? url = null, string? cacheDir = null)
     {
         _http = http;
         Url = url ?? Environment.GetEnvironmentVariable("FORGE_MANIFEST_URL") ?? DefaultUrl;
         _cachePath = Path.Combine(cacheDir ?? Paths.DataDir, "manifest.json");
+        _etagPath = Path.Combine(cacheDir ?? Paths.DataDir, "manifest.etag");
+    }
+
+    /// <summary>The cached ETag, when it was stored with this very copy.</summary>
+    private string? ReadEtag(string cachedText)
+    {
+        try
+        {
+            if (!File.Exists(_etagPath)) return null;
+            var lines = File.ReadAllText(_etagPath).Split('\n', 2);
+            return lines.Length == 2 && lines[0].Trim() is { Length: > 0 } etag
+                   && string.Equals(lines[1].Trim(), Checksums.Sha256Text(cachedText), StringComparison.OrdinalIgnoreCase)
+                ? etag : null;
+        }
+        catch (IOException) { return null; }
     }
 
     /// <summary>Fresh from the network when possible; the cached copy otherwise. Throws only when there is neither.</summary>
@@ -154,16 +173,32 @@ public sealed class ManifestClient
                         ?? throw new InvalidDataException("The manifest file is empty.");
             return (local, false);
         }
+        LastChanged = false;
         if (!offline)
         {
             try
             {
-                using var resp = await _http.GetAsync(Url, ct);
+                // Conditional (12.5): the update check runs every 15 minutes, and an unchanged manifest is a 304.
+                // The ETag is kept with a hash of the copy it belongs to: the CLI and an older Hub rewrite
+                // manifest.json without knowing about the ETag, and a tag for some other copy must not be sent.
+                var cachedText = File.Exists(_cachePath) ? await File.ReadAllTextAsync(_cachePath, ct) : null;
+                using var req = new HttpRequestMessage(HttpMethod.Get, Url);
+                if (cachedText is not null && ReadEtag(cachedText) is { } etag)
+                    req.Headers.TryAddWithoutValidation("If-None-Match", etag);
+                using var resp = await _http.SendAsync(req, ct);
+                if (resp.StatusCode == System.Net.HttpStatusCode.NotModified && cachedText is not null)
+                {
+                    var same = JsonSerializer.Deserialize<Manifest>(cachedText, Json) ?? throw new InvalidDataException("Cached manifest is unreadable.");
+                    return (same, false);
+                }
                 resp.EnsureSuccessStatusCode();
                 var text = await resp.Content.ReadAsStringAsync(ct);
                 var fresh = JsonSerializer.Deserialize<Manifest>(text, Json) ?? throw new InvalidDataException("Empty manifest.");
+                LastChanged = text != cachedText;
                 Directory.CreateDirectory(Path.GetDirectoryName(_cachePath)!);
-                await File.WriteAllTextAsync(_cachePath, text, ct);
+                Catalogue.CatalogueClient.WriteAtomically(_cachePath, text);
+                if (resp.Headers.ETag is { } tag) Catalogue.CatalogueClient.WriteAtomically(_etagPath, $"{tag}\n{Checksums.Sha256Text(text)}");
+                else if (File.Exists(_etagPath)) File.Delete(_etagPath);
                 return (fresh, false);
             }
             catch (Exception) when (File.Exists(_cachePath))

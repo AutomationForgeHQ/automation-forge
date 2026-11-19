@@ -8,13 +8,14 @@ namespace Forge.Hub;
 /// </summary>
 public static class SingleInstance
 {
-    // The names stay as 0.4.4 has them (spec 10.2): the installer asks the running Hub to quit through them.
+    // The beta's own names (HubIdentity.InstanceBase, Local\KovatiHub), so it runs beside a 0.4.x Hub, which uses
+    // Local\AutomationForgeHub: neither raises nor quits the other, and each installer asks only its own Hub to quit.
     // FORGE_HUB_INSTANCE gives a development build names of its own, so it runs beside an installed Hub
     // instead of raising it and leaving.
     private static readonly string Suffix = Environment.GetEnvironmentVariable("FORGE_HUB_INSTANCE") is { Length: > 0 } s ? "." + s : "";
-    public static readonly string MutexName = @"Local\AutomationForgeHub" + Suffix;
-    private static readonly string ShowEvent = @"Local\AutomationForgeHub" + Suffix + ".Show";
-    private static readonly string QuitEvent = @"Local\AutomationForgeHub" + Suffix + ".Quit";
+    public static readonly string MutexName = Forge.Core.HubIdentity.InstanceBase + Suffix;
+    private static readonly string ShowEvent = Forge.Core.HubIdentity.InstanceBase + Suffix + ".Show";
+    private static readonly string QuitEvent = Forge.Core.HubIdentity.InstanceBase + Suffix + ".Quit";
 
     public static void SignalShow() => Signal(ShowEvent);
 

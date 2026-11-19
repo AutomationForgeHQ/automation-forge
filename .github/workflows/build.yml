@@ -41,7 +41,7 @@ jobs:
           $v = (& dist/cli/forge.exe --version | Out-String).Trim()
           if ($v -ne '${{ inputs.version }}') { throw "forge --version printed '$v', expected '${{ inputs.version }}'" }
           # A windowed exe returns to the shell at once; wait for it, then read what it wrote.
-          Start-Process -FilePath dist/hub/AutomationForgeHub.exe -ArgumentList '--version' -Wait -NoNewWindow
+          Start-Process -FilePath dist/hub/KovatiHub.exe -ArgumentList '--version' -Wait -NoNewWindow
           $h = (Get-Content hub-version.txt -Raw).Trim()
           if ($h -ne '${{ inputs.version }}') { throw "hub --version wrote '$h', expected '${{ inputs.version }}'" }
           Get-Content dist/SHA256SUMS.txt
@@ -75,9 +75,8 @@ jobs:
           generate_release_notes: ${{ steps.notes.outputs.found != 'true' }}
           fail_on_unmatched_files: true
           files: |
-            dist/AutomationForge-Setup.exe
             dist/KovatiHub-Setup.exe
-            dist/AutomationForge-Hub-win-x64.zip
+            dist/KovatiHub-win-x64.zip
             dist/forge-win-x64.zip
             dist/SHA256SUMS.txt
 
@@ -90,8 +89,8 @@ jobs:
         with:
           name: automation-forge-${{ inputs.version }}
           path: |
-            dist/AutomationForge-Setup.exe
-            dist/AutomationForge-Hub-win-x64.zip
+            dist/KovatiHub-Setup.exe
+            dist/KovatiHub-win-x64.zip
             dist/forge-win-x64.zip
             dist/SHA256SUMS.txt
           retention-days: 7

@@ -12,12 +12,16 @@
     tools/publish.ps1 -Version 0.3.0-nightly.20260901
     tools/publish.ps1 -SkipInstaller        without Inno Setup
 
-  Output, all in dist/:
-    AutomationForge-Setup.exe               the installer (Kovati Hub + CLI, per-user); installed Hubs update from this name
-    KovatiHub-Setup.exe                     the same installer under the new name (spec 10.2)
-    AutomationForge-Hub-win-x64.zip         the hub, portable
+  Output, all in dist/ (or -OutDir):
+    KovatiHub-Setup.exe                     the installer (Kovati Hub (beta) + CLI, per-user), beside the
+                                            Automation Forge Hub 0.4.x; the beta updates from this name only
+    KovatiHub-win-x64.zip                   the hub, portable (KovatiHub.exe)
     forge-win-x64.zip                       the CLI alone
     SHA256SUMS.txt
+
+  The beta does not build AutomationForge-Setup.exe: that name is what 0.4.x Hubs update from.
+  The hub's assembly stays AutomationForgeHub (its avares:// resources are addressed by it); only
+  the published program file is renamed to KovatiHub.exe, so neither installer closes the other Hub.
 #>
 param(
   [string]$Version,
@@ -50,6 +54,9 @@ $publishArgs = @(
 Write-Host "== hub $Version"
 dotnet publish (Join-Path $root 'src/Forge.Hub') @publishArgs -o (Join-Path $OutDir 'hub')
 if ($LASTEXITCODE) { throw 'hub publish failed' }
+# The program file gets the beta's own name (HubIdentity.ExeName). A single-file bundle carries its
+# assembly inside, so the rename changes the image name and nothing else.
+Move-Item (Join-Path $OutDir 'hub/AutomationForgeHub.exe') (Join-Path $OutDir 'hub/KovatiHub.exe') -Force
 
 Write-Host "== forge $Version"
 dotnet publish (Join-Path $root 'src/forge') @publishArgs -o (Join-Path $OutDir 'cli')
@@ -59,7 +66,7 @@ if ($LASTEXITCODE) { throw 'forge publish failed' }
 Get-ChildItem $OutDir -Recurse -Filter *.pdb | Remove-Item -Force
 
 Write-Host '== portable zips'
-Compress-Archive -Path (Join-Path $OutDir 'hub/*') -DestinationPath (Join-Path $OutDir 'AutomationForge-Hub-win-x64.zip') -CompressionLevel Optimal
+Compress-Archive -Path (Join-Path $OutDir 'hub/*') -DestinationPath (Join-Path $OutDir 'KovatiHub-win-x64.zip') -CompressionLevel Optimal
 Compress-Archive -Path (Join-Path $OutDir 'cli/forge.exe'), (Join-Path $OutDir 'cli/catalogue') -DestinationPath (Join-Path $OutDir 'forge-win-x64.zip') -CompressionLevel Optimal
 
 if (-not $SkipInstaller) {
@@ -73,8 +80,7 @@ if (-not $SkipInstaller) {
   if (-not $iscc) { throw 'Inno Setup 6 was not found. Install it (winget install JRSoftware.InnoSetup) or pass -SkipInstaller.' }
   & $iscc /Q "/DAppVersion=$Version" "/DFileVersion=$fileVersion" "/DSourceDir=$OutDir" "/O$OutDir" (Join-Path $root 'installer/AutomationForge.iss')
   if ($LASTEXITCODE) { throw 'installer build failed' }
-  # The same file under the new name; the old one stays, because installed Hubs look for it by name.
-  Copy-Item (Join-Path $OutDir 'AutomationForge-Setup.exe') (Join-Path $OutDir 'KovatiHub-Setup.exe')
+  if (-not (Test-Path (Join-Path $OutDir 'KovatiHub-Setup.exe'))) { throw 'installer build did not write KovatiHub-Setup.exe' }
 }
 
 Write-Host '== checksums'

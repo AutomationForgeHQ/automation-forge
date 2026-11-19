@@ -111,6 +111,21 @@ internal static class Screens
         Shot(window, "hub_drawer_keys");
         vm.ClosePanels();
 
+        if (Want("hub_menu_gear"))
+        {
+            // The gear menu with "Check now" on top (beta).
+            var gear = window.FindControl<Button>("GearButton")!;
+            gear.Flyout!.ShowAt(gear);
+            Snap.Pump(400);
+            Shot(window, "hub_menu_gear");
+            // Click the row: its command runs (MenuRow_Click closes the menu only afterwards) and ends on "Checked HH:mm".
+            window.MouseDown(new Point(850, 80), MouseButton.Left);
+            window.MouseUp(new Point(850, 80), MouseButton.Left);
+            for (var i = 0; i < 40 && !vm.Status.StartsWith("Checked ", StringComparison.Ordinal); i++) Snap.Pump(250);
+            Console.WriteLine($"  check now from the gear menu: status '{vm.Status}', footer '{vm.CheckedLine}', menu open: {gear.Flyout.IsOpen}");
+            if (gear.Flyout.IsOpen) gear.Flyout.Hide();
+        }
+
         window.Close();
     }
 

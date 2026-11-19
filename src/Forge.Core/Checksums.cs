@@ -10,6 +10,9 @@ public static class Checksums
         return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
     }
 
+    public static string Sha256Text(string text) =>
+        Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text))).ToLowerInvariant();
+
     public static bool Matches(string file, string? expected) =>
         string.IsNullOrEmpty(expected) || string.Equals(Sha256Of(file), expected, StringComparison.OrdinalIgnoreCase);
 }

@@ -11,11 +11,17 @@ public sealed record PendingUpdate(string Plugin, string From, string To, string
 
 public sealed record WatchResult(IReadOnlyList<PendingUpdate> Plugins, HubRelease? Hub, DateTimeOffset CheckedAt)
 {
+    /// <summary>The manifest or the release list differed from the cached copy: the window has something to rebuild.</summary>
+    public bool SourcesChanged { get; init; }
+
+    /// <summary>What was found, as one string: two checks with the same key found the same things.</summary>
+    public string Key => string.Join("|", Plugins.Select(p => $"{p.Plugin}@{p.To}@{p.Where}").Order()) + "|hub@" + Hub?.Version;
+
     public int Count => Plugins.Select(p => p.Plugin).Distinct().Count() + (Hub is null ? 0 : 1);
 }
 
 /// <summary>
-/// Looks, every few hours, at what the receipts say is installed — on every
+/// Looks, every 15 minutes, at what the receipts say is installed — on every
 /// engine and every project the hub installed into — against what the releases
 /// say is newest on the chosen channel, and at the hub's own releases. Installs
 /// nothing. Announces a given version once; a check that finds only what has
@@ -23,14 +29,20 @@ public sealed record WatchResult(IReadOnlyList<PendingUpdate> Plugins, HubReleas
 /// </summary>
 public sealed class UpdateWatcher : IDisposable
 {
-    public static readonly TimeSpan Interval = TimeSpan.FromHours(4);
+    // Every 15 minutes (it was 4 hours): the manifest, the release list and the catalogue are conditional requests (ETag), so
+    // a check that finds nothing new is four 304s, and GitHub does not count a 304 against the anonymous rate limit.
+    // Nothing installs by itself.
+    public static readonly TimeSpan Interval = TimeSpan.FromMinutes(15);
 
     private readonly Settings _settings;
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(2) };
     private readonly ManifestClient _manifest;
     private readonly ReleaseDiscovery _releases;
     private readonly HubReleases _hub;
-    private readonly string _notifiedFile = Path.Combine(Paths.DataDir, "notified.json");
+    // Its own file: 0.4.x rewrites notified.json whole from its own copy. Seeded from that file once, so the beta does not
+    // announce again what the older Hub already announced.
+    private readonly string _notifiedFile = Path.Combine(Paths.DataDir, HubIdentity.NotifiedFile);
+    private readonly string _sharedNotifiedFile = Path.Combine(Paths.DataDir, "notified.json");
     private readonly SemaphoreSlim _gate = new(1, 1);
     private CancellationTokenSource? _cts;
 
@@ -87,7 +99,8 @@ public sealed class UpdateWatcher : IDisposable
                 CatalogueUpdated?.Invoke();
 
             var (manifest, _) = await _manifest.GetAsync(ct: ct);
-            await _releases.MergeIntoAsync(manifest, ct: ct);
+            var found = await _releases.MergeIntoAsync(manifest, ct: ct);
+            var sourcesChanged = _manifest.LastChanged || found.Changed;
             var state = new InstallState();
             var pending = new List<PendingUpdate>();
 
@@ -106,7 +119,7 @@ public sealed class UpdateWatcher : IDisposable
             HubRelease? hub = null;
             if (_settings.CheckForUpdates) hub = await _hub.NewerThanAsync(AppInfo.SemVer, _settings.Channel, ct: ct);
 
-            var result = new WatchResult(pending, hub, DateTimeOffset.Now);
+            var result = new WatchResult(pending, hub, DateTimeOffset.Now) { SourcesChanged = sourcesChanged };
             Last = result;
             Checked?.Invoke(result);
 
@@ -140,8 +153,9 @@ public sealed class UpdateWatcher : IDisposable
     {
         try
         {
-            if (File.Exists(_notifiedFile))
-                return JsonSerializer.Deserialize<HashSet<string>>(File.ReadAllText(_notifiedFile)) ?? [];
+            var file = File.Exists(_notifiedFile) ? _notifiedFile : _sharedNotifiedFile;
+            if (File.Exists(file))
+                return JsonSerializer.Deserialize<HashSet<string>>(File.ReadAllText(file)) ?? [];
         }
         catch (Exception ex) when (ex is JsonException or IOException) { }
         return [];

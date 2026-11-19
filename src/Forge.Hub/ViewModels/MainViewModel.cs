@@ -99,8 +99,27 @@ public partial class MainViewModel : ViewModelBase
 
     public bool CanAutostart => Autostart.Supported;
     public string WatchLine => _watcher?.Last is { } last
-        ? $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Last look {last.CheckedAt:HH:mm}. Nothing installs by itself."
-        : $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Nothing installs by itself.";
+        ? $"Looks every {UpdateWatcher.Interval.TotalMinutes:0} minutes across every engine and project it installed into. Last look {last.CheckedAt:HH:mm}. Nothing installs by itself."
+        : $"Looks every {UpdateWatcher.Interval.TotalMinutes:0} minutes across every engine and project it installed into. Nothing installs by itself.";
+
+    /// <summary>The footer's "Checked 14:05", always there once anything has been checked (the 0.4.x Hub showed it too).</summary>
+    public string CheckedLine => string.IsNullOrEmpty(CheckedAt) ? "" : $"Checked {CheckedAt}";
+    public bool HasCheckedLine => !string.IsNullOrEmpty(CheckedAt);
+
+    /// <summary>Under "Check now" in the menus.</summary>
+    public string CheckNowLine => string.IsNullOrEmpty(CheckedAt)
+        ? "Updates, the list of tools and your account"
+        : $"Updates, the list of tools and your account. Last {CheckedAt}";
+
+    partial void OnCheckedAtChanged(string value)
+    {
+        OnPropertyChanged(nameof(CheckedLine));
+        OnPropertyChanged(nameof(HasCheckedLine));
+        OnPropertyChanged(nameof(CheckNowLine));
+    }
+
+    public bool IsBeta => HubIdentity.IsBeta;
+    public string BetaLine => HubIdentity.BetaLine;
 
     partial void OnShowKeysPanelChanged(bool value)
     {
@@ -216,7 +235,7 @@ public partial class MainViewModel : ViewModelBase
                          ?? Engines.FirstOrDefault();
         InitV2();
         RefreshMachineSurface();
-        _ = RefreshAsync();
+        _ = RefreshAsync(loadOwned: true);
         if (_settings.CheckForUpdates) _ = CheckHubUpdateAsync(quiet: true);
     }
 
@@ -241,7 +260,7 @@ public partial class MainViewModel : ViewModelBase
     }
 
     /// <summary>Re-read receipts and releases without a word in the status line — the watcher found something.</summary>
-    public async Task RefreshQuietlyAsync()
+    public async Task RefreshQuietlyAsync(DateTimeOffset? checkedAt = null)
     {
         try
         {
@@ -250,9 +269,41 @@ public partial class MainViewModel : ViewModelBase
             _manifest = manifest;
             _state.Reload();
             Rebuild();
-            OnPropertyChanged(nameof(WatchLine));
         }
-        catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or InvalidDataException) { }
+        catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or InvalidDataException or System.Text.Json.JsonException) { }
+        MarkChecked(checkedAt ?? DateTimeOffset.Now);
+    }
+
+    /// <summary>The watcher looked and found nothing new: only the time moves.</summary>
+    public void MarkChecked(DateTimeOffset at)
+    {
+        CheckedAt = at.ToLocalTime().ToString("HH:mm");
+        OnPropertyChanged(nameof(WatchLine));
+    }
+
+    /// <summary>
+    /// "Check now", in the gear menu, the account menu and the Library: one action for everything that can be
+    /// stale. The release manifest and the releases (and the receipts), the catalogue from the website, the
+    /// account's profile and what it owns, and the Hub's own releases. Installs nothing. Ends with "Checked HH:mm".
+    /// </summary>
+    [RelayCommand]
+    private async Task CheckNowAsync()
+    {
+        Say("Checking for updates, the list of tools and your account…");
+        var catalogue = FetchCatalogueAsync();
+        var hub = _settings.CheckForUpdates ? CheckHubUpdateAsync(quiet: true) : Task.CompletedTask;
+        // The profile reload reads what the account owns as well, so the refresh does not read it twice.
+        await RefreshAsync(loadOwned: false);
+        if (_entitlements.IsSignedIn)
+        {
+            try { await LoadProfileAsync(); }
+            catch (Exception ex) when (ex is EntitlementException or HttpRequestException or TaskCanceledException) { Say($"Could not read your account: {ex.Message}"); }
+        }
+        try { await Task.WhenAll(catalogue, hub); }
+        catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException) { }
+        CheckedAt = DateTime.Now.ToString("HH:mm");
+        OnPropertyChanged(nameof(WatchLine));
+        Say($"Checked {CheckedAt}.");
     }
 
     partial void OnSelectedEngineChanged(EngineInstall? value) { Rebuild(); RememberTarget(); }
@@ -280,7 +331,9 @@ public partial class MainViewModel : ViewModelBase
     private InstallTarget? Target => SelectedEngine is null ? null : InstallTarget.Engine(SelectedEngine);
 
     [RelayCommand]
-    private async Task RefreshAsync()
+    private Task Refresh() => RefreshAsync(loadOwned: true);
+
+    private async Task RefreshAsync(bool loadOwned)
     {
         Busy = true;
         try
@@ -295,7 +348,7 @@ public partial class MainViewModel : ViewModelBase
             // and Refresh is what a person presses when they come back — without
             // this the row they just paid for still says Buy until the hub restarts.
             // LoadOwnedAsync rebuilds; only do it ourselves when signed out.
-            if (_entitlements.IsSignedIn) await LoadOwnedAsync(); else Rebuild();
+            if (_entitlements.IsSignedIn && loadOwned) await LoadOwnedAsync(); else Rebuild();
             Say(found.Merged > 0 ? $"Found {found.Merged} new release{(found.Merged == 1 ? "" : "s")}." : "Checked. Everything listed is current.");
         }
         catch (Exception ex)

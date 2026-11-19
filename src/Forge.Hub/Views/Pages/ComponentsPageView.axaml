@@ -21,7 +21,7 @@
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
           <TextBox Text="{Binding Filter, Mode=TwoWay}" PlaceholderText="Filter by id" Width="240" Height="36" FontSize="13" />
           <Button Classes="primary small" Content="Update all" Command="{Binding Hub.UpdateAllCommand}" IsVisible="{Binding Hub.HasUpdates}" />
-          <Button Classes="quiet small" Content="Check now" Command="{Binding Hub.RefreshCommand}" />
+          <Button Classes="quiet small" Content="Check now" Command="{Binding Hub.CheckNowCommand}" />
         </StackPanel>
       </Grid>
 

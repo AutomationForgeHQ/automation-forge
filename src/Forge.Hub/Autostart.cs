@@ -11,7 +11,8 @@ namespace Forge.Hub;
 public static class Autostart
 {
     private const string Key = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string Name = "AutomationForge";
+    // Not 0.4.x's "AutomationForge": each Hub turns only its own entry on and off.
+    private const string Name = Forge.Core.HubIdentity.AutostartValue;
 
     public static bool Supported => OperatingSystem.IsWindows() && Environment.ProcessPath is not null;
 

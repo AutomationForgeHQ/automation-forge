@@ -49,7 +49,7 @@ are not: the site has no WebP loops yet, so cards keep their stills and "The fil
    only what the site lacks (agent components, needs, a capability on a track). Its pictures go under `v2/public/media`.
 2. Its plugin must be in the release manifest (released the usual way); the Hub installs through the manifest.
 3. `npm run hub-catalogue` in `v2/`, commit the files it names, deploy the site. Hubs pick it up at their next start
-   or update check (every 4 hours).
+   or update check (every 15 minutes, with ETags: an unchanged catalogue is a 304).
 
 ### Switches for local work
 
@@ -66,12 +66,48 @@ are not: the site has no WebP loops yet, so cards keep their stills and "The fil
     $env:FORGE_MEDIA_URL = 'C:\UNREAL\AutomationForge-website\v2\public'   # optional: the products' interface shots
     & C:\UNREAL\AutomationForge\src\Forge.Hub\bin\Debug\net9.0-windows10.0.17763.0\AutomationForgeHub.exe
 
-Quit it from its tray icon, or with the same `FORGE_HUB_INSTANCE`: `AutomationForgeHub.exe --quit`.
+Quit it from its tray icon, or with the same `FORGE_HUB_INSTANCE`: `AutomationForgeHub.exe --quit`. Never run
+`--quit` without `FORGE_HUB_INSTANCE`: a bare one asks the installed beta (`Local\KovatiHub`) to quit.
+A build from source is still `AutomationForgeHub.exe` (the assembly keeps its name for the `avares://` resources);
+only `tools/publish.ps1` renames the published program file to `KovatiHub.exe`.
 Leave `FORGE_DATA_DIR` out to see your real receipts and sign-in (it then writes `hub-state.json` beside them; an
 older Hub ignores that file). `FORGE_ENGINES=<folder>` limits it to one engine folder, e.g. a throwaway one.
 
 Other switches for local work: `FORGE_CATALOGUE=<file>`, `FORGE_MANIFEST_URL=<file>`, `FORGE_RELEASES_API=off`,
 `FORGE_HUB_SNAPSHOT=<file.png>` (draws the window itself into a PNG eight seconds after it opens).
+
+## The beta beside the Automation Forge Hub (0.5.0-beta.1, 19 November 2026)
+
+v2 ships as **Kovati Hub (beta)**, installed beside the Automation Forge Hub 0.4.x, which keeps working. Every name
+the two could share is the beta's own, in `src/Forge.Core/HubIdentity.cs` (and its copy in the installer):
+
+| | Automation Forge Hub 0.4.x | Kovati Hub (beta) |
+|---|---|---|
+| Installer AppId | `{4F0B9C7E-2A6D-4B1F-9E3C-7D5A1F0C8B21}` | `{E13BC642-3BBA-4D78-88D9-8D3767887CAE}` |
+| Folder | `%LOCALAPPDATA%\Programs\Automation Forge` | `%LOCALAPPDATA%\Programs\Kovati Hub` |
+| Program file (what each installer closes) | `AutomationForgeHub.exe` | `KovatiHub.exe` |
+| Mutex, Show and Quit events | `Local\AutomationForgeHub` | `Local\KovatiHub` (+ `.<FORGE_HUB_INSTANCE>`) |
+| Start with Windows (HKCU Run value) | `AutomationForge`, on by default | `KovatiHub`, off by default |
+| forge on PATH | added by default | not added unless ticked |
+| Release tags, installer asset | `v<semver>`, `AutomationForge-Setup.exe` | `kovati-hub-v<semver>`, `KovatiHub-Setup.exe` |
+| Start menu | Automation Forge | Kovati Hub (beta) |
+| Toasts (the toolkit keys them by program path) | its path, "Automation Forge" | its path, "Kovati Hub (beta)" |
+| Beta-only files in the shared data folder | | `kovati-hub-notified.json`, `kovati-hub-releases.*`, `kovati-hub-elevated.log`, `hub-state.json` |
+
+Shared on purpose: `%LOCALAPPDATA%\AutomationForge` (receipts, sign-in, settings, caches) and the engines.
+`installed.json` is changed by reading it again under a lock file and writing it atomically; `settings.json` gets
+only the fields this Hub changed. A 0.4.x Hub reads the same release list and skips `kovati-hub-v*` tags (its
+`SemVer.TryParse` refuses them; `BetaSideBySideTests`).
+
+A beta release must be a GitHub **pre-release, not latest**: the website's download buttons use
+`releases/latest/download/AutomationForge-Setup.exe`. Never tag this branch `v*` (release.yml would build it as a
+0.4.x-line release).
+
+    tools/publish.ps1 -OutDir D:\UNREAL\ColonyDownloads\hub-beta    # KovatiHub-Setup.exe, KovatiHub-win-x64.zip, forge-win-x64.zip
+
+"Check now" (gear menu, account menu, Library, Components) refreshes the manifest and releases, the catalogue,
+the account's profile and what it owns, and the Hub's own releases, and ends on "Checked HH:mm"; the footer always
+shows when the Hub last looked.
 
 ## Checks
 

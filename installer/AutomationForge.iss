@@ -1,14 +1,22 @@
-; Kovati Hub: the Windows installer for Kovati Hub and the forge CLI.
+; Kovati Hub (beta): the Windows installer for Kovati Hub v2 and the forge CLI.
 ;
 ; Built by tools/publish.ps1 (locally or in CI), which passes:
-;   /DAppVersion=0.2.0            the version people see (may carry -nightly.yyyymmdd)
-;   /DFileVersion=0.2.0.0         the numeric version Windows file properties need
-;   /DSourceDir=<dist folder>     where hub\AutomationForgeHub.exe and cli\forge.exe are
+;   /DAppVersion=0.5.0-beta.1     the version people see (may carry -nightly.yyyymmdd)
+;   /DFileVersion=0.5.0.0         the numeric version Windows file properties need
+;   /DSourceDir=<dist folder>     where hub\KovatiHub.exe and cli\forge.exe are
 ;
-; Per-user, no administrator prompt: it lands in %LOCALAPPDATA%\Programs. The hub
+; Per-user, no administrator prompt: it lands in %LOCALAPPDATA%\Programs\Kovati Hub. The hub
 ; asks for elevation itself, once, only when it writes into a Program Files
 ; engine. Silent updates run with /VERYSILENT /LAUNCH=1 — the hub starts this
 ; installer and exits; the installer relaunches the hub when it is done.
+;
+; The beta installs BESIDE the Automation Forge Hub 0.4.x and never touches it. Everything Windows
+; tells installed programs apart by is its own: the AppId (0.4.x: 4F0B9C7E-...), the folder
+; (0.4.x: {userpf}\Automation Forge), the program file (0.4.x: AutomationForgeHub.exe, which is the
+; only image name 0.4.x's installer closes), the Run value (0.4.x: AutomationForge), the Start menu
+; entry and the setup file name. It closes only KovatiHub.exe, does not delete 0.4.x's shortcuts,
+; does not start with Windows and does not add forge to PATH unless those boxes are ticked.
+; Both Hubs share %LOCALAPPDATA%\AutomationForge (receipts, sign-in, settings, caches).
 
 #ifndef AppVersion
   #define AppVersion "0.0.0"
@@ -20,15 +28,13 @@
   #define SourceDir "..\dist"
 #endif
 
-#define AppName "Kovati Hub"
-; The install folder, the AppId, the executable and the output name keep their old names (spec 10.2):
-; installed Hubs update themselves by finding AutomationForge-Setup.exe and this AppId.
-#define LegacyName "Automation Forge"
+#define AppName "Kovati Hub (beta)"
+#define DirName "Kovati Hub"
 #define AppPublisher "Bojan Andrejek / MetaWorx LLC"
 #define AppURL "https://github.com/AutomationForgeHQ/automation-forge"
-#define HubExe "AutomationForgeHub.exe"
-; Must match HubUpdater.AppId in src/Forge.Hub/HubUpdater.cs.
-#define AppGuid "4F0B9C7E-2A6D-4B1F-9E3C-7D5A1F0C8B21"
+#define HubExe "KovatiHub.exe"
+; Must match HubIdentity.AppId in src/Forge.Core/HubIdentity.cs (read by HubUpdater.AppId).
+#define AppGuid "E13BC642-3BBA-4D78-88D9-8D3767887CAE"
 
 [Setup]
 AppId={{{#AppGuid}}
@@ -43,14 +49,13 @@ VersionInfoVersion={#FileVersion}
 VersionInfoCompany={#AppPublisher}
 VersionInfoProductName={#AppName}
 VersionInfoDescription={#AppName} setup
-DefaultDirName={userpf}\{#LegacyName}
+DefaultDirName={userpf}\{#DirName}
 DefaultGroupName={#AppName}
-; An upgrade from 0.4.x must not keep the old "Automation Forge" Start menu folder.
 UsePreviousGroup=no
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
 PrivilegesRequired=lowest
-OutputBaseFilename=AutomationForge-Setup
+OutputBaseFilename=KovatiHub-Setup
 SetupIconFile=..\src\Forge.Hub\Assets\forge.ico
 UninstallDisplayIcon={app}\{#HubExe}
 UninstallDisplayName={#AppName}
@@ -70,8 +75,9 @@ ChangesEnvironment=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "autostart"; Description: "Start {#AppName} with Windows, in the tray, so it can watch for updates"; GroupDescription: "Background:"; Check: not IsUpgrade
-Name: "addtopath"; Description: "Add the forge command line to PATH"; GroupDescription: "Command line:"
+; Both off by default: two Hubs watching from the tray, or two forge.exe on PATH, only when somebody asks for it.
+Name: "autostart"; Description: "Start {#AppName} with Windows, in the tray, so it can watch for updates"; GroupDescription: "Background:"; Flags: unchecked; Check: not IsUpgrade
+Name: "addtopath"; Description: "Add this forge command line to PATH (the Automation Forge Hub may already have put one there)"; GroupDescription: "Command line:"; Flags: unchecked
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
@@ -81,22 +87,19 @@ Source: "{#SourceDir}\cli\forge.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\hub\catalogue\*"; DestDir: "{app}\catalogue"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [InstallDelete]
-; The 0.4.x shortcuts, so the Start menu has one entry, "Kovati Hub".
-Type: files; Name: "{autoprograms}\{#LegacyName}\{#LegacyName}.lnk"
-Type: dirifempty; Name: "{autoprograms}\{#LegacyName}"
-Type: files; Name: "{autoprograms}\{#LegacyName}.lnk"
-Type: files; Name: "{autodesktop}\{#LegacyName}.lnk"
 ; The catalogue is replaced whole, so a picture the new one no longer names does not linger.
+; (Nothing of the Automation Forge Hub's is deleted: its shortcuts and folder stay as they are.)
 Type: filesandordirs; Name: "{app}\catalogue"
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\{#HubExe}"
+Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#HubExe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#HubExe}"; Tasks: desktopicon
 
 [Registry]
 Root: HKCU; Subkey: "Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; Tasks: addtopath; Check: NeedsAddPath(ExpandConstant('{app}'))
 ; First install only: on an upgrade the hub's own setting is the truth and stays untouched.
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "AutomationForge"; ValueData: """{app}\{#HubExe}"" --tray"; Tasks: autostart; Check: not IsUpgrade; Flags: uninsdeletevalue
+; Its own value (HubIdentity.AutostartValue); 0.4.x's is "AutomationForge".
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "KovatiHub"; ValueData: """{app}\{#HubExe}"" --tray"; Tasks: autostart; Check: not IsUpgrade; Flags: uninsdeletevalue
 
 [UninstallRun]
 Filename: "{app}\{#HubExe}"; Parameters: "--uninstall-toasts"; RunOnceId: "toasts"; Flags: runhidden
@@ -108,7 +111,8 @@ Filename: "{app}\{#HubExe}"; Description: "Launch {#AppName}"; Flags: nowait pos
 Filename: "{app}\{#HubExe}"; Flags: nowait; Check: RelaunchRequested
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{localappdata}\AutomationForge\downloads"
+; Only this Hub's downloaded installers: the download folder is shared with the Automation Forge Hub.
+Type: files; Name: "{localappdata}\AutomationForge\downloads\KovatiHub-Setup-*.exe"
 
 [Code]
 function NeedsAddPath(Param: string): boolean;
@@ -134,6 +138,7 @@ begin
     'Software\Microsoft\Windows\CurrentVersion\Uninstall\{' + '{#AppGuid}' + '}_is1');
 end;
 
+{ Only KovatiHub.exe. The Automation Forge Hub runs as AutomationForgeHub.exe and is never asked or stopped. }
 function IsHubRunning: Boolean;
 var
   ResultCode: Integer;
@@ -151,6 +156,7 @@ var
 begin
   Result := '';
   if not IsHubRunning then exit;
+  { This install's own KovatiHub.exe, which signals Local\KovatiHub.Quit: only the beta Hub listens to it. }
   Exe := ExpandConstant('{app}\{#HubExe}');
   if FileExists(Exe) then
     Exec(Exe, '--quit', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
