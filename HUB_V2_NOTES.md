@@ -21,8 +21,41 @@ The images are in `C:\UNREAL\Colony_NP24\.playwright-mcp\` (outside this reposit
 
 ## What is built (slices 1 to 4)
 
-Slice 5 (loops and the film overlay) and slice 6 (the cart, the offline strip, `kovatihub:`) are not started: the
-first waits on the website's WebP loops and a public catalogue address, the second on the account app's cart.
+Slice 5 is built for the catalogue and the stills (below); its loops (`LoopImage`) and the film overlay (web view)
+are not: the site has no WebP loops yet, so cards keep their stills and "The film" still opens kovati.dev. Slice 6
+(the cart, the offline strip, `kovatihub:`) is not started: it waits on the account app's cart.
+
+## Slice 5: the catalogue and its pictures from the website (19 November 2026, evening)
+
+- The website writes the catalogue: `npm run hub-catalogue` in `AutomationForge-website/v2` builds
+  `v2/public/hub/catalogue.json` from the site's own data (`lib/catalogue.ts`, the track files, `lib/tools/*`,
+  `lib/featured.ts`) plus `lib/hub.ts` (only what the site has no field for: capabilities, agent components, needs,
+  runners, `always`). It refuses a component the manifest lacks, a product claimed twice, a dangling capability.
+  It deploys with the site at `https://kovati.dev/hub/catalogue.json`.
+- The Hub fetches it when the window opens and with every update check (`CatalogueClient`, ETag, 30 s timeout),
+  keeps it in the data folder, and uses the newest `generatedAt` of that copy and the installer's. A newer copy
+  reopens the pages in place. Offline or failing, nothing changes and nothing is said.
+- Stills: dev folder, disk cache (`<data>\media`, keyed by the whole path with its `?v=`), installer's set, then
+  a download from the site's own host (`MediaCache`: images only, 12 MB a file, three at a time, 200 MB in all).
+- The Kovati foundation: `always` holds AutomationForgeHub (the menu and the keys) and AutomationForge (the
+  ledger), with the ledger's agent tools behind the agents switch. Every engine install carries them first;
+  Library and Components show them as KOVATI FOUNDATION.
+- `python tools/sync_hub_catalogue.py` (no arguments) copies the generated file and its stills into
+  `src/Forge.Hub/catalogue`: the first-run and offline copy only.
+
+### Adding a product or a kit, without a Hub release
+
+1. Website: add it to `v2/lib/catalogue.ts` (and its page in `v2/lib/tools/` if it has one); in `v2/lib/hub.ts` add
+   only what the site lacks (agent components, needs, a capability on a track). Its pictures go under `v2/public/media`.
+2. Its plugin must be in the release manifest (released the usual way); the Hub installs through the manifest.
+3. `npm run hub-catalogue` in `v2/`, commit the files it names, deploy the site. Hubs pick it up at their next start
+   or update check (every 4 hours).
+
+### Switches for local work
+
+    $env:FORGE_SITE_URL = 'http://localhost:3002'      # catalogue and pictures from the v2 dev server
+    $env:FORGE_CATALOGUE_URL = 'off'                   # or another address for the catalogue alone
+    $env:FORGE_HUB_OPEN = 'product:roads-kit'          # browse | library | components | track:<slug> | product:<slug>
 
 ## Run it beside the installed Hub
 
