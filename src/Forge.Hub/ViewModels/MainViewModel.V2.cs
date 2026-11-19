@@ -48,7 +48,7 @@ public partial class MainViewModel
     public string BackLabel => _back.Count == 0 ? "" : $"← {_back.Peek().Title}";
 
     public bool IsHomePlace => CurrentPage is HomePageViewModel;
-    public bool IsLibraryPlace => CurrentPage is ComponentsPageViewModel;
+    public bool IsLibraryPlace => CurrentPage is LibraryPageViewModel or ComponentsPageViewModel;
     public bool IsRunnersPlace => CurrentPage is RunnersPageViewModel;
 
     partial void OnCurrentPageChanged(PageViewModel? value)
@@ -112,6 +112,7 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(ShowLabsSetting));
         RunnerRow.MenuName = EditorMenuName();
         AnnounceAgentActions();
+        RecountPill();
         OnPropertyChanged(nameof(IsSignedIn));
         OnPropertyChanged(nameof(AccountInitial));
         CurrentPage?.Refresh();
@@ -298,12 +299,12 @@ public partial class MainViewModel
         CurrentPage = new HomePageViewModel(this);
     }
 
-    /// <summary>Library. In slice 1 it is the Components page, "Everything on this machine" (4.9).</summary>
+    /// <summary>Library (4.8): Updates, Installed, On your account. "Everything on this machine" is one link away.</summary>
     [RelayCommand]
     public void ShowLibrary()
     {
         _back.Clear();
-        CurrentPage = new ComponentsPageViewModel(this);
+        CurrentPage = new LibraryPageViewModel(this);
     }
 
     [RelayCommand]

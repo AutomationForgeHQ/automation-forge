@@ -664,7 +664,10 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private async Task UpdateAllAsync()
     {
-        var ids = Sets.SelectMany(s => s.Plugins).Where(r => r.HasUpdate).Select(r => r.Id).ToArray();
+        // Per product, without Labs and without pinned ones (8.2); the plain list when there is no catalogue.
+        var ids = Inputs() is { } inputs
+            ? Forge.Core.Catalogue.UpdatePlanner.Build(inputs).UpdateAllIds.ToArray()
+            : Sets.SelectMany(s => s.Plugins).Where(r => r.HasUpdate).Select(r => r.Id).ToArray();
         if (ids.Length > 0) await RunAsync(ids);
     }
 
@@ -744,15 +747,6 @@ public partial class MainViewModel : ViewModelBase
     }
 
     internal Task SignInFromRowAsync() => SignInAsync();
-
-    /// <summary>The release notes an update would bring, in a window over this one.</summary>
-    internal void ShowChanges(PluginRow row)
-    {
-        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime { MainWindow: { } owner }) return;
-        var window = new Views.ReleaseNotesWindow();
-        window.DataContext = new ReleaseNotesViewModel(row, window.Close);
-        _ = window.ShowDialog(owner);
-    }
 
     internal Task UninstallAsync(PluginRow row) => RunAsync([row.Id], uninstall: true);
 
@@ -937,7 +931,10 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
     public bool CanShowChanges => HasUpdate && (Changes.Count > 0 || Latest!.Notes?.StartsWith("https://", StringComparison.Ordinal) == true);
     public string ChangesTip => HasUpdate ? $"What changed since {Installed!.Version}" : "";
 
-    [RelayCommand] private void ShowChanges() => owner.ShowChanges(this);
+    /// <summary>What an update brings, read in place (8.5): the What's new window is gone.</summary>
+    [ObservableProperty] private bool _notesOpen;
+
+    [RelayCommand] private void ShowChanges() => NotesOpen = !NotesOpen;
 
     [RelayCommand(CanExecute = nameof(CanAct))]
     private Task Act() =>

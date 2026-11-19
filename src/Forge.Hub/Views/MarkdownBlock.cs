@@ -187,15 +187,15 @@ public sealed class MarkdownBlock : StackPanel
     }
 
     /// <summary>
-    /// Prose in the mono face, as every other sentence in the hub is. Not Archivo: the embedded
-    /// Archivo is a variable font whose default instance is weight 600, and every weight asked of it
-    /// draws that instance - a paragraph of it reads as shouting, and bold inside it cannot be seen.
+    /// Prose in Archivo (spec 8.5), mono only for code. Kovati Hub v2 embeds static cuts of Archivo
+    /// (Regular, Medium, SemiBold): the variable file drew every weight at 600, which is why 0.4.4 set
+    /// the notes in mono.
     /// </summary>
     private static TextBlock Body(string text) => new()
     {
-        FontFamily = Resource("MonoFont") as FontFamily ?? FontFamily.Default,
-        FontSize = 12.5,
-        LineHeight = 20,
+        FontFamily = Resource("DisplayFont") as FontFamily ?? FontFamily.Default,
+        FontSize = 14,
+        LineHeight = 21,
         TextWrapping = TextWrapping.Wrap,
         Inlines = Inlines(text),
     };
@@ -287,11 +287,14 @@ public sealed class MarkdownBlock : StackPanel
     private static Run Run(string text, bool bold, bool italic, bool code)
     {
         var run = new Run(text);
-        // Medium is the heaviest mono face embedded, and against Regular it is plainly bold.
-        if (bold) run.FontWeight = FontWeight.Medium;
+        if (bold) run.FontWeight = FontWeight.SemiBold;
         if (italic) run.FontStyle = FontStyle.Italic;
-        // The prose is mono already, so code is told apart by colour.
-        if (code) run.Foreground = Brush("AmberBrush");
+        if (code)
+        {
+            run.FontFamily = Resource("MonoFont") as FontFamily ?? FontFamily.Default;
+            run.FontSize = 12.5;
+            run.Foreground = Brush("AmberBrush");
+        }
         return run;
     }
 

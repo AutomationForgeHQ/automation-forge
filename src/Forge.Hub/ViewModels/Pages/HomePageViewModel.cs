@@ -134,6 +134,7 @@ public sealed partial class HomePageViewModel : PageViewModel
 
     [RelayCommand] private Task UpdateAll() => Hub.UpdateAllCommand.ExecuteAsync(null);
     [RelayCommand] private void SeeEverything() => Hub.ShowComponents();
+    [RelayCommand] private void SeeWhatChanged() => Hub.ShowUpdates();
 }
 
 /// <summary>One door on Home: number, chip, picture, subtitle, name; the promise on hover.</summary>

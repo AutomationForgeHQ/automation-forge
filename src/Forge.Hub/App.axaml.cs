@@ -49,7 +49,7 @@ public partial class App : Application
             SetupTray();
             SingleInstance.ListenForShow(() => Dispatcher.UIThread.Post(ShowWindow));
             SingleInstance.ListenForQuit(() => Dispatcher.UIThread.Post(Quit));
-            Toasts.OnActivated(() => Dispatcher.UIThread.Post(ShowWindow));
+            Toasts.OnActivated(() => Dispatcher.UIThread.Post(ShowUpdates));
 
             if (!(StartHidden && _settings.RunInBackground)) ShowWindow();
             _watcher.Start(StartHidden ? TimeSpan.FromSeconds(20) : TimeSpan.FromSeconds(60));
@@ -102,7 +102,7 @@ public partial class App : Application
             var r = await _watcher.CheckAsync();
             if (r is null) Toasts.Show("Kovati Hub", "Could not check for updates. Nothing changed.");
             else if (r.Count == 0) Toasts.Show("Kovati Hub", "Everything is up to date.");
-            else Announce(r, force: true);
+            else { Announce(r, force: true); ShowUpdates(); }
         };
         var quit = new NativeMenuItem("Quit");
         quit.Click += (_, _) => Quit();
@@ -127,7 +127,7 @@ public partial class App : Application
     private void OnChecked(WatchResult r)
     {
         if (_tray is null) return;
-        _tray.ToolTipText = r.Count switch
+        _tray.ToolTipText = Updates(r).Count switch
         {
             0 => "Kovati Hub: up to date",
             1 => "Kovati Hub: 1 update",
@@ -139,11 +139,44 @@ public partial class App : Application
     private void Announce(WatchResult r, bool force)
     {
         if (!force && !_settings.NotifyOnUpdates) return;
-        var names = r.Plugins.GroupBy(p => p.Plugin).Select(g => $"{g.Key} {g.First().To}").ToList();
-        if (r.Hub is { } hub) names.Add($"Kovati Hub {hub.Version}");
+        var names = Updates(r);
         if (names.Count == 0) return;
         var title = names.Count == 1 ? "1 update available" : $"{names.Count} updates available";
         var body = string.Join(" · ", names.Take(4)) + (names.Count > 4 ? $" · and {names.Count - 4} more" : "");
         Toasts.Show(title, body);
     }
+    /// <summary>The window on Library, Updates: where a notification or a tray check that found something lands (8.1).</summary>
+    public void ShowUpdates()
+    {
+        ShowWindow();
+        if (_window?.DataContext is MainViewModel vm) vm.ShowUpdates();
+    }
+
+    /// <summary>
+    /// Updates counted per product, not per component (8.1): "MotionForge 0.4.2 · SpeechForge 0.2.4 · Kovati Hub
+    /// 0.5.1". Across every target, Labs included, pinned components left out. A component the catalogue does not
+    /// know is named by its id.
+    /// </summary>
+    private List<string> Updates(WatchResult r)
+    {
+        _catalogue ??= Core.Catalogue.CatalogueLoader.Load();
+        var pins = Core.HubState.Load().Pins;
+        var names = r.Plugins
+            .Where(p => !pins.ContainsKey(p.Plugin))
+            .Select(p =>
+            {
+                var product = _catalogue?.ProductOfComponent(p.Plugin);
+                // An engine counts with the tool it extends.
+                if (product is { IsEngine: true } && _catalogue?.Product(product.Extends) is { } parent) product = parent;
+                var main = product?.MainComponent ?? p.Plugin;
+                var to = r.Plugins.FirstOrDefault(x => string.Equals(x.Plugin, main, StringComparison.OrdinalIgnoreCase))?.To ?? p.To;
+                return product is null ? $"{p.Plugin} {p.To}" : $"{product.Name} {to}";
+            })
+            .Distinct()
+            .ToList();
+        if (r.Hub is { } hub) names.Add($"Kovati Hub {hub.Version}");
+        return names;
+    }
+
+    private Core.Catalogue.Catalogue? _catalogue;
 }

@@ -1,0 +1,254 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:Forge.Hub.ViewModels.Pages"
+             xmlns:vm="using:Forge.Hub.ViewModels"
+             xmlns:views="using:Forge.Hub.Views"
+             xmlns:man="using:Forge.Core.Manifest"
+             xmlns:c="using:Forge.Hub.Controls"
+             x:Class="Forge.Hub.Views.Pages.LibraryPageView"
+             x:DataType="p:LibraryPageViewModel">
+
+  <UserControl.Resources>
+    <!-- The notes of one component, newest version first (8.5). -->
+    <DataTemplate x:Key="NotesBlock" x:DataType="p:NotesBlockModel">
+      <StackPanel Spacing="8" Margin="0,0,0,10">
+        <TextBlock Classes="label" Text="{Binding Heading}" IsVisible="{Binding HasHeading}" FontSize="10" />
+        <ItemsControl ItemsSource="{Binding Entries}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="man:ChangelogEntry">
+              <StackPanel Spacing="6" Margin="0,0,0,12">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Classes="title" Text="{Binding Version}" FontSize="15" />
+                  <TextBlock Classes="small" Text="{Binding Date}" VerticalAlignment="Center" />
+                </StackPanel>
+                <views:MarkdownBlock Markdown="{Binding Body}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <StackPanel IsVisible="{Binding !HasEntries}" Spacing="6">
+          <TextBlock Classes="small" Text="No notes were published with this version." />
+          <Button Classes="link smalltext" Content="Open the release page ↗" IsVisible="{Binding HasReleasePage}"
+                  Command="{Binding $parent[UserControl].((p:LibraryPageViewModel)DataContext).Hub.OpenUrlCommand}" CommandParameter="{Binding ReleasePage}" />
+        </StackPanel>
+      </StackPanel>
+    </DataTemplate>
+
+    <!-- One product's update (4.8): picture, capability, product, versions, What's new, Update, and the "…" menu. -->
+    <DataTemplate x:Key="UpdateRow" x:DataType="p:UpdateRowModel">
+      <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,12">
+        <StackPanel>
+          <Grid ColumnDefinitions="48,16,*,Auto,Auto,Auto,Auto">
+            <Border Width="48" Height="48" CornerRadius="8" ClipToBounds="True" Background="{StaticResource PlateBrush}">
+              <c:MediaImage Path="{Binding Picture}" DecodeWidth="48" />
+            </Border>
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Classes="title" Text="{Binding Title}" FontSize="15" />
+                <TextBlock Classes="small" Text="{Binding Subtitle}" VerticalAlignment="Center" />
+              </StackPanel>
+              <TextBlock Classes="small" Text="{Binding PartsLine}" IsVisible="{Binding HasParts}" TextTrimming="CharacterEllipsis" FontSize="12" />
+            </StackPanel>
+            <TextBlock Grid.Column="3" Classes="mono" Text="{Binding VersionLine}" VerticalAlignment="Center" Margin="16,0" />
+            <Button Grid.Column="4" Classes="link smalltext" Content="{Binding NotesLabel}" Command="{Binding ToggleNotesCommand}" VerticalAlignment="Center" Margin="0,0,16,0" />
+            <Button Grid.Column="5" Classes="primary small" Content="Update" Command="{Binding DoUpdateCommand}" VerticalAlignment="Center" />
+            <Button Grid.Column="6" Classes="link" Content="…" FontSize="18" Margin="14,0,0,0" VerticalAlignment="Center" AutomationProperties.Name="More">
+              <Button.Flyout>
+                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                  <MenuItem Header="Pin this version" Command="{Binding PinCommand}" />
+                  <MenuItem Header="Show components" Command="{Binding ShowComponentsCommand}" />
+                </MenuFlyout>
+              </Button.Flyout>
+            </Button>
+          </Grid>
+          <Border Classes="panel" Padding="20,16" Margin="64,12,0,0" IsVisible="{Binding NotesOpen}">
+            <StackPanel>
+              <TextBlock Text="Now Early access." IsVisible="{Binding LeavesLabs}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource AmberBrush}" Margin="0,0,0,10" />
+              <ItemsControl ItemsSource="{Binding Notes}" ItemTemplate="{StaticResource NotesBlock}" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="32,30,32,32" MaxWidth="1336">
+      <TextBlock Classes="display-l" Text="Library" />
+
+      <!-- Three tabs, and a quieter link at the right. -->
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" Margin="0,18,0,0">
+        <Button Classes="tab" Classes.selected="{Binding IsUpdates}" Content="{Binding UpdatesTabLabel}" Command="{Binding ShowUpdatesTabCommand}" Margin="0,0,28,0" />
+        <Button Grid.Column="1" Classes="tab" Classes.selected="{Binding IsInstalled}" Content="{Binding InstalledTabLabel}" Command="{Binding ShowInstalledTabCommand}" Margin="0,0,28,0" />
+        <Button Grid.Column="2" Classes="tab" Classes.selected="{Binding IsAccount}" Content="{Binding AccountTabLabel}" Command="{Binding ShowAccountTabCommand}" />
+        <Button Grid.Column="4" Classes="link smalltext" Content="Everything on this machine →" Command="{Binding EverythingOnThisMachineCommand}" VerticalAlignment="Center" />
+      </Grid>
+      <Border Classes="hairline" />
+
+      <!-- Updates. -->
+      <StackPanel IsVisible="{Binding IsUpdates}" Margin="0,20,0,0">
+        <Grid ColumnDefinitions="*,Auto,Auto" IsVisible="{Binding !NothingToUpdate}" Margin="0,0,0,18">
+          <TextBlock Text="{Binding SummaryLine}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <Button Grid.Column="1" Classes="link smalltext" Content="Copy the list" Command="{Binding CopyListCommand}" VerticalAlignment="Center" Margin="0,0,20,0" />
+          <Button Grid.Column="2" Classes="primary small" Content="Update all" Command="{Binding UpdateAllCommand}" ToolTip.Tip="{Binding UpdateAllTip}" IsEnabled="{Binding HasUpdates}" />
+        </Grid>
+
+        <!-- Kovati Hub's own update is the first row of all. -->
+        <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,1" Padding="0,12" IsVisible="{Binding HasHubUpdate}" Margin="0,0,0,18">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="title" Text="{Binding HubUpdateLine}" FontSize="15" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="primary small" Content="Update and restart" Command="{Binding UpdateHubCommand}" />
+          </Grid>
+        </Border>
+
+        <ItemsControl ItemsSource="{Binding Groups}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:UpdateGroupModel">
+              <StackPanel Margin="0,0,0,22">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                  <TextBlock Classes="label" Text="{Binding Label}" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="link smalltext" Content="{Binding UpdateLabel}" Command="{Binding UpdateCommand}" />
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource UpdateRow}" />
+                <Border Classes="hairline" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Labs: their own group, their own Update each, never in Update all (8.4). -->
+        <StackPanel IsVisible="{Binding HasLabs}" Margin="0,0,0,22">
+          <StackPanel Orientation="Horizontal" Spacing="14" Margin="0,0,0,8">
+            <TextBlock Classes="label" Text="LABS" Foreground="{StaticResource HotBrush}" VerticalAlignment="Center" />
+            <TextBlock Classes="small" Text="{Binding LabsLine}" VerticalAlignment="Center" />
+          </StackPanel>
+          <ItemsControl ItemsSource="{Binding LabsRows}" ItemTemplate="{StaticResource UpdateRow}" />
+          <Border Classes="hairline" />
+        </StackPanel>
+
+        <!-- Pinned (8.3). -->
+        <StackPanel IsVisible="{Binding HasPinned}" Margin="0,0,0,22">
+          <TextBlock Classes="label" Text="PINNED" Margin="0,0,0,8" />
+          <ItemsControl ItemsSource="{Binding PinnedRows}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="p:UpdateRowModel">
+                <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,12">
+                  <Grid ColumnDefinitions="48,16,*,Auto">
+                    <Border Width="48" Height="48" CornerRadius="8" ClipToBounds="True" Background="{StaticResource PlateBrush}">
+                      <c:MediaImage Path="{Binding Picture}" DecodeWidth="48" />
+                    </Border>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="3">
+                      <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Classes="title" Text="{Binding Title}" FontSize="15" />
+                        <TextBlock Classes="small" Text="{Binding Subtitle}" VerticalAlignment="Center" />
+                      </StackPanel>
+                      <TextBlock Classes="small" Text="{Binding PinnedLine}" />
+                    </StackPanel>
+                    <Button Grid.Column="3" Classes="quiet small" Content="Unpin" Command="{Binding UnpinCommand}" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Border Classes="hairline" />
+        </StackPanel>
+
+        <StackPanel IsVisible="{Binding NothingToUpdate}" Orientation="Horizontal" Spacing="16" Margin="0,6,0,0">
+          <TextBlock Text="{Binding QuietLine}" FontSize="15" VerticalAlignment="Center" />
+          <Button Classes="link smalltext" Content="Check now" Command="{Binding CheckNowCommand}" VerticalAlignment="Center" />
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Installed. -->
+      <StackPanel IsVisible="{Binding IsInstalled}" Margin="0,20,0,0">
+        <TextBox Text="{Binding Filter, Mode=TwoWay}" PlaceholderText="Filter installed" Width="260" Height="36" FontSize="13" HorizontalAlignment="Right" Margin="0,0,0,12" />
+        <ItemsControl ItemsSource="{Binding InstalledGroups}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:InstalledGroupModel">
+              <StackPanel Margin="0,0,0,22">
+                <TextBlock Classes="label" Text="{Binding Label}" Margin="0,0,0,8" />
+                <ItemsControl ItemsSource="{Binding Rows}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:InstalledRowModel">
+                      <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,10">
+                        <StackPanel>
+                          <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" Margin="{Binding IndentMargin}">
+                            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Classes.medium="{Binding IsChild}" />
+                              <TextBlock Classes="small" Text="{Binding Type}" VerticalAlignment="Center" />
+                              <ContentControl Content="{Binding Stage}" IsVisible="{Binding HasStage}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Version}" Foreground="{StaticResource MuteBrush}" VerticalAlignment="Center" Margin="16,0" MinWidth="60" />
+                            <TextBlock Grid.Column="2" Classes="small" Text="{Binding StateLine}" IsVisible="{Binding !HasUpdate}" VerticalAlignment="Center" MinWidth="110" />
+                            <Button Grid.Column="2" Classes="link amber smalltext" Content="{Binding StateLine}" Command="{Binding DoUpdateCommand}" IsVisible="{Binding HasUpdate}" VerticalAlignment="Center" MinWidth="110" />
+                            <Button Grid.Column="4" Classes="link" Content="…" FontSize="18" Margin="14,0,0,0" VerticalAlignment="Center" AutomationProperties.Name="More">
+                              <Button.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                  <MenuItem Header="What's new" Command="{Binding ToggleNotesCommand}" IsEnabled="{Binding HasNotes}" />
+                                  <MenuItem Header="Pin this version" Command="{Binding PinCommand}" IsVisible="{Binding CanPin}" />
+                                  <MenuItem Header="Unpin" Command="{Binding UnpinCommand}" IsVisible="{Binding CanUnpin}" />
+                                  <MenuItem Header="Show components" Command="{Binding ShowComponentsCommand}" />
+                                  <MenuItem Header="Remove" Command="{Binding RemoveCommand}" />
+                                </MenuFlyout>
+                              </Button.Flyout>
+                            </Button>
+                          </Grid>
+                          <ItemsControl ItemsSource="{Binding Notes}" IsVisible="{Binding NotesOpen}" Margin="28,10,0,0">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="man:ChangelogEntry">
+                                <StackPanel Spacing="6" Margin="0,0,0,12">
+                                  <TextBlock Classes="title" Text="{Binding Version}" FontSize="15" />
+                                  <views:MarkdownBlock Markdown="{Binding Body}" />
+                                </StackPanel>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Border Classes="hairline" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <!-- On your account. -->
+      <StackPanel IsVisible="{Binding IsAccount}" Margin="0,20,0,0" Spacing="12">
+        <StackPanel IsVisible="{Binding !SignedIn}" Spacing="12">
+          <TextBlock Text="Sign in to see what is on your account." FontSize="15" />
+          <Button Classes="primary small" Content="Sign in" Command="{Binding SignInCommand}" HorizontalAlignment="Left" />
+        </StackPanel>
+        <TextBlock Classes="small" Text="Everything on your account is installed here." FontSize="14">
+          <TextBlock.IsVisible>
+            <MultiBinding Converter="{x:Static BoolConverters.And}">
+              <Binding Path="SignedIn" />
+              <Binding Path="!HasAccountRows" />
+            </MultiBinding>
+          </TextBlock.IsVisible>
+        </TextBlock>
+        <ItemsControl ItemsSource="{Binding AccountRows}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:OwnedRowModel">
+              <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,12">
+                <Grid ColumnDefinitions="64,*,Auto">
+                  <Border CornerRadius="8" ClipToBounds="True" Width="64" Height="48" Background="{StaticResource PlateBrush}">
+                    <c:MediaImage Path="{Binding Picture}" DecodeWidth="64" />
+                  </Border>
+                  <StackPanel Grid.Column="1" Margin="14,0" VerticalAlignment="Center" Spacing="3">
+                    <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" />
+                    <TextBlock Classes="small" Text="{Binding Line}" />
+                  </StackPanel>
+                  <Button Grid.Column="2" Classes="primary small" Content="Install" Command="{Binding InstallCommand}" VerticalAlignment="Center" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Classes="link smalltext" Content="Manage your account on the web ↗" Command="{Binding ManageAccountCommand}" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

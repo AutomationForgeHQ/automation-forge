@@ -42,6 +42,7 @@ internal static class Screens
         SignedIn();
         Returning();
         Setup();
+        Updates();
         Console.WriteLine($"done: {outDir}");
     }
 
@@ -274,6 +275,38 @@ internal static class Screens
         public Core.Machine.DockerState Docker() => Core.Machine.DockerState.NotInstalled;
         public Core.Machine.ContainerState Runner(Core.Machine.DeclaredRunner runner) => Core.Machine.ContainerState.Missing;
         public bool? ProjectEnabled(string uproject, string plugin) => _live.ProjectEnabled(uproject, plugin);
+    }
+
+    /// <summary>Slice 3: MotionForge, its Kimodo engine and its agent access one version behind; a pinned and a Labs product.</summary>
+    private static void Updates()
+    {
+        var (window, vm) = Open("updates", receipts:
+        [
+            ("AutomationForgeHub", "0.2.5"), ("MotionForge", "0.4.0"), ("MotionForgeKimodo", "0.5.0"), ("MotionForgeToolset", "0.3.0"),
+            ("FaceForge", "0.2.2"), ("FaceForgeMetaHuman", "0.2.2"), ("MeshForge", "0.3.2"), ("MeshForgeTrellis", "0.0.2"),
+            ("SpeechForge", "0.2.3"), ("SpeechForgeElevenLabs", "0.1.2"),
+        ], prepare: (root, data) => File.WriteAllText(Path.Combine(data, "hub-state.json"),
+            """{ "schemaVersion": 1, "agentAccess": true, "pins": { "FaceForge": "0.2.2", "FaceForgeMetaHuman": "0.2.2" } }"""));
+        Console.WriteLine($"  pill: '{vm.PillLabel}' visible={vm.HasPill}");
+        vm.ShowLibrary();
+        Snap.Pump(600);
+        Shot(window, "hub_library_updates");
+        if (vm.CurrentPage is LibraryPageViewModel lib)
+        {
+            Console.WriteLine($"  update all: {lib.UpdateAllTip}");
+            var row = lib.Groups.SelectMany(g => g.Rows).First();
+            Console.WriteLine($"  row: {row.Title} · {row.PartsLine}; notes for {row.Notes.Count} parts, {row.Notes.Sum(n => n.Entries.Count)} versions");
+            row.NotesOpen = true;
+            Snap.Pump(500);
+            Shot(window, "hub_library_updates_notes");
+            lib.Tab = LibraryTab.Installed;
+            Snap.Pump(500);
+            Shot(window, "hub_library_installed");
+            lib.Tab = LibraryTab.Account;
+            Snap.Pump(300);
+            Shot(window, "hub_library_account_signed_out");
+        }
+        window.Close();
     }
 
     // ── helpers ──────────────────────────────────────────────────────────

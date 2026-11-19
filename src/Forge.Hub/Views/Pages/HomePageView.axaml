@@ -100,7 +100,7 @@
             <TextBlock Text="{Binding UpdatesLine}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
             <TextBlock Classes="small" Text="{Binding UpdatesByTrack}" FontSize="14" VerticalAlignment="Center" />
           </StackPanel>
-          <Button Grid.Column="1" Classes="link" Content="See what changed" Command="{Binding SeeEverythingCommand}" Margin="0,0,20,0" VerticalAlignment="Center" />
+          <Button Grid.Column="1" Classes="link" Content="See what changed" Command="{Binding SeeWhatChangedCommand}" Margin="0,0,20,0" VerticalAlignment="Center" />
           <Button Grid.Column="2" Classes="primary small" Content="Update all" Command="{Binding UpdateAllCommand}" />
         </Grid>
       </Border>

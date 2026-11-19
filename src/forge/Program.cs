@@ -184,7 +184,9 @@ claim.SetAction(async (parse, ct) =>
 root.Subcommands.Add(claim);
 
 // ── update ────────────────────────────────────────────────────────────────
-var update = new Command("update", "Update every installed plugin on a target to its latest version.");
+var includePinnedOpt = new Option<bool>("--include-pinned") { Description = "Update pinned components too (Kovati Hub's Pin this version)." };
+var update = new Command("update", "Update every installed plugin on a target to its latest version. Pinned components are left as they are.");
+update.Options.Add(includePinnedOpt);
 update.Options.Add(engineOpt); update.Options.Add(projectOpt); update.Options.Add(channelOpt); update.Options.Add(offlineOpt);
 update.SetAction(async (parse, ct) =>
 {
@@ -192,11 +194,18 @@ update.SetAction(async (parse, ct) =>
     var target = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
     var channel = parse.GetValue(channelOpt)!;
     var pending = new List<(PluginInfo p, VersionInfo v)>();
+    var pins = HubState.Load().Pins;
     foreach (var i in state.On(target.target))
     {
         var p = manifest.Plugin(i.Plugin); if (p is null) continue;
         var latest = p.Latest(i.Engine, channel);
-        if (latest is not null && latest.Version != i.Version) pending.Add((p, latest));
+        if (latest is null || latest.Version == i.Version) continue;
+        if (pins.TryGetValue(p.Id, out var at) && !parse.GetValue(includePinnedOpt))
+        {
+            Console.WriteLine($"  pinned: {p.Id} at {at}, {latest.Version} is out (forge update --include-pinned updates it)");
+            continue;
+        }
+        pending.Add((p, latest));
     }
     if (pending.Count == 0) { Console.WriteLine("Everything is current."); return 0; }
     if (!entitlements.IsSignedIn) { Console.Error.WriteLine($"  {AnonymousEntitlements.SignInMessage}  (forge login)"); return 4; }

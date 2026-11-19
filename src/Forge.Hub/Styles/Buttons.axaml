@@ -160,6 +160,24 @@
     <Setter Property="IsVisible" Value="True" />
   </Style>
 
+  <!-- The updates pill in the bar: amber wash, amber ring, hot text. -->
+  <Style Selector="Button.pill">
+    <Setter Property="Background" Value="{StaticResource AmberWashBrush}" />
+    <Setter Property="BorderBrush" Value="#66EBAA28" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{StaticResource HotBrush}" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="CornerRadius" Value="15" />
+    <Setter Property="Padding" Value="14,0" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+  <Style Selector="Button.pill:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#40EBAA28" />
+    <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource HotBrush}" />
+  </Style>
+
   <!-- Tabs inside a page (Library): text with a rule under the current one. -->
   <Style Selector="Button.tab">
     <Setter Property="Background" Value="Transparent" />
