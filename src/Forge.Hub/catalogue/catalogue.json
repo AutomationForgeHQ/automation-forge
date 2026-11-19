@@ -1895,8 +1895,8 @@
       "changelog": "https://docs.kovati.dev/docs/releases/meshforge/",
       "page": {
         "promise": "Props, gear and outfits, made in Unreal.",
-        "subline": "Describe it or show a picture. MeshForge draws the concept, has Meshy or Tripo build the mesh, and lands it in your level at its real size, with collision. Then fit outfits to your characters.",
-        "priceLine": "MeshForge and its engines are free; Meshy and Tripo bill your own account. The Garment pipeline, MetaHuman part included, is one paid product.",
+        "subline": "Describe it or show a picture. MeshForge draws the concept, has Meshy, Tripo or Aholo Lux3D build the mesh, and lands it in your level at its real size, with collision. Then fit outfits to your characters.",
+        "priceLine": "MeshForge and its engines are free; Meshy, Tripo and Aholo bill your own account. The Garment pipeline, MetaHuman part included, is one paid product.",
         "adds": [
           {
             "title": "From a prompt or a picture.",
@@ -1904,7 +1904,7 @@
           },
           {
             "title": "Every engine, one workshop.",
-            "line": "Tripo and Meshy in the cloud, on your own account. TRELLIS on your own graphics card, as an early preview in Labs."
+            "line": "Tripo, Meshy and Aholo Lux3D in the cloud, on your own account. TRELLIS on your own graphics card, as an early preview in Labs."
           },
           {
             "title": "The price, before you press the button.",
@@ -1996,7 +1996,7 @@
           },
           {
             "name": "An engine to generate with",
-            "line": "A Meshy or Tripo account, at their rates, or a graphics card for TRELLIS (24 GB; 16 GB works at draft quality), yours or rented. Your own meshes need neither."
+            "line": "A Meshy, Tripo or Aholo account, at their rates, or a graphics card for TRELLIS (24 GB; 16 GB works at draft quality), yours or rented. Your own meshes need neither."
           },
           {
             "name": "Blender, for garments",
@@ -2045,20 +2045,20 @@
       "name": "MeshForge Cloud",
       "type": "Add-on",
       "track": "worldbuilding",
-      "line": "Adds Meshy and Tripo as engines, on your own account. Each brings its own settings and prices a take before it runs.",
+      "line": "Adds Meshy, Tripo and Aholo Lux3D as engines, on your own account. Each brings its own settings and prices a take before it runs.",
       "price": "free",
       "belongsTo": "meshforge",
       "extends": "meshforge",
       "addonKind": "provider",
-      "runs": "Cloud · Meshy or Tripo account",
-      "vendor": "Meshy · Tripo",
+      "runs": "Cloud · Meshy, Tripo or Aholo account",
+      "vendor": "Meshy · Tripo · Aholo",
       "plugins": [
         "MeshForgeCloud"
       ],
       "needs": [
         {
           "kind": "account",
-          "name": "A Meshy or Tripo account",
+          "name": "A Meshy, Tripo or Aholo account",
           "line": "At their rates. Each take is priced before it runs."
         }
       ],
