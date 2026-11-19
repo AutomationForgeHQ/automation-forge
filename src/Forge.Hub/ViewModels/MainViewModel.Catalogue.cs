@@ -75,6 +75,31 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(CanGoBack));
         OnPropertyChanged(nameof(BackLabel));
         RecountPill();
+        OpenFromEnvironment();
+    }
+
+    private bool _openedFromEnvironment;
+
+    /// <summary>
+    /// FORGE_HUB_OPEN=browse | library | components | track:&lt;slug&gt; | product:&lt;slug&gt;: open that page as soon as the catalogue has it, once.
+    /// For checking a development build (with FORGE_HUB_SNAPSHOT); the door from the web (kovatihub:, slice 6)
+    /// will open pages the same way. A slug only a fetched catalogue has opens when that copy arrives.
+    /// </summary>
+    internal void OpenFromEnvironment()
+    {
+        if (_openedFromEnvironment || Catalogue is not { } cat) return;
+        if (Environment.GetEnvironmentVariable("FORGE_HUB_OPEN") is not { Length: > 0 } open) { _openedFromEnvironment = true; return; }
+        var (kind, slug) = open.IndexOf(':') is var i and > 0 ? (open[..i], open[(i + 1)..]) : (open, "");
+        switch (kind)
+        {
+            case "browse": ShowBrowse(); break;
+            case "library": ShowLibrary(); break;
+            case "components": ShowComponents(); break;
+            case "track" when cat.Track(slug) is not null: OpenTrack(slug); break;
+            case "product" when cat.Product(slug) is not null: OpenProduct(slug); break;
+            default: return; // not in this copy (yet)
+        }
+        _openedFromEnvironment = true;
     }
 
     private PageViewModel Reopen(PageViewModel page)

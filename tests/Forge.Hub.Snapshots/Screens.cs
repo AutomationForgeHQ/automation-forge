@@ -34,6 +34,9 @@ internal static class Screens
         var repo = FindRepo();
         Environment.SetEnvironmentVariable("FORGE_MANIFEST_URL", Path.Combine(repo, "manifest.json"));
         Environment.SetEnvironmentVariable("FORGE_RELEASES_API", "off");
+        // Fixed data: the bundled catalogue only, and no picture from any site (slice 5 fetches both otherwise).
+        Environment.SetEnvironmentVariable("FORGE_CATALOGUE_URL", "off");
+        Environment.SetEnvironmentVariable("FORGE_SITE_URL", "http://127.0.0.1:9");
         Environment.SetEnvironmentVariable("FORGE_API_URL", "http://127.0.0.1:9/api");
         Environment.SetEnvironmentVariable("FORGE_ACCOUNT_URL", "http://127.0.0.1:9");
 

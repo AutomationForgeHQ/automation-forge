@@ -24,6 +24,8 @@ public sealed class Catalogue
     public List<AlwaysEntry> Always { get; set; } = [];
     public List<string> HeroOrder { get; set; } = [];
     public List<string> Categories { get; set; } = [];
+    /// <summary>Each category's shelf title and line, in the site's words, by type ("Kit": "Kits", "Content and…").</summary>
+    public Dictionary<string, CategoryWords> CategoryInfo { get; set; } = [];
     public List<Track> Tracks { get; set; } = [];
     public List<Product> Products { get; set; } = [];
 
@@ -129,6 +131,12 @@ public sealed class CatalogueLabels
     public Dictionary<string, string> Stage { get; set; } = [];
     public Dictionary<string, string> AddonKind { get; set; } = [];
     public string LabsLine { get; set; } = "";
+}
+
+public sealed class CategoryWords
+{
+    public string Title { get; set; } = "";
+    public string Line { get; set; } = "";
 }
 
 /// <summary>

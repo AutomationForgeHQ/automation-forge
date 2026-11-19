@@ -12,8 +12,8 @@ namespace Forge.Hub.ViewModels.Pages;
 public sealed partial class BrowsePageViewModel : PageViewModel
 {
     /// <summary>
-    /// The site's one line per category (v2/lib/featured.ts). The sample catalogue does not carry them yet, so the
-    /// Hub keeps the site's words here until the generator adds `categoryLines` (listed in the report).
+    /// The site's one line per category (v2/lib/featured.ts). The catalogue carries them as `categoryInfo`; these
+    /// are only the words for a catalogue that predates it (an installer's copy from before slice 5).
     /// </summary>
     public static readonly IReadOnlyDictionary<string, string> CategoryLines = new Dictionary<string, string>
     {
@@ -49,7 +49,10 @@ public sealed partial class BrowsePageViewModel : PageViewModel
     [ObservableProperty] private string _category = "Tool";
     [ObservableProperty] private string _trackFilter;
 
-    public string CategoryLine => CategoryLines.GetValueOrDefault(Category, "");
+    public string CategoryLine => Hub.Catalogue?.CategoryInfo.GetValueOrDefault(Category)?.Line is { Length: > 0 } line ? line : CategoryLines.GetValueOrDefault(Category, "");
+
+    private string TitleOf(string type) =>
+        Hub.Catalogue?.CategoryInfo.GetValueOrDefault(type)?.Title is { Length: > 0 } title ? title : Plural.GetValueOrDefault(type, type);
     public bool IsGrouped => Category == "Add-on";
     public bool IsEmpty => Shelf.Count == 0 && Groups.Count == 0;
     public string LabsOnLine => $"Labs is on. {Hub.Catalogue?.LabsLine}";
@@ -67,7 +70,7 @@ public sealed partial class BrowsePageViewModel : PageViewModel
         var heroes = cat.HeroOrder.Select(cat.Product).OfType<Product>().ToList();
         for (var i = 0; i < heroes.Count; i++) Forges.Add(new ForgeCardModel(Hub, heroes[i], i + 1, heroes.Count));
         foreach (var type in cat.Categories)
-            Categories.Add(new CategoryModel(this, type, Plural.GetValueOrDefault(type, type), Visible(type).Count()));
+            Categories.Add(new CategoryModel(this, type, TitleOf(type), Visible(type).Count()));
         foreach (var c in Categories) c.Selected = c.Type == Category;
         BuildShelf();
         OnPropertyChanged(nameof(LabsOnLine));

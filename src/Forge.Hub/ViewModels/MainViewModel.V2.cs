@@ -74,6 +74,7 @@ public partial class MainViewModel
         CurrentPage = new HomePageViewModel(this);
         _ = LoadAccountCatalogueAsync();
         _ = FetchCatalogueAsync();
+        Dispatcher.UIThread.Post(OpenFromEnvironment);
     }
 
     private async Task LoadAccountCatalogueAsync()

@@ -59,13 +59,13 @@ public sealed partial class ComponentsPageViewModel : PageViewModel
         OnPropertyChanged(nameof(EmptyLine));
     }
 
-    /// <summary>The foundation's component ids, dependencies first, in the catalogue's order.</summary>
+    /// <summary>The foundation's component ids, dependencies first, in the catalogue's order; its agent tools only with agent access on.</summary>
     private List<string> FoundationIds()
     {
         var ids = new List<string>();
         if (Hub.Catalogue is not { } cat || Hub.Manifest is not { } m) return ids;
         foreach (var a in cat.Always)
-            foreach (var id in new[] { a.Plugin }.Concat(a.AgentPlugins))
+            foreach (var id in new[] { a.Plugin }.Concat(Hub.HubState.AgentsOn ? a.AgentPlugins : []))
                 if (m.Plugin(id) is { } p)
                     foreach (var x in m.Closure(p))
                         if (!ids.Contains(x.Id, StringComparer.OrdinalIgnoreCase)) ids.Add(x.Id);

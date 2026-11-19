@@ -13,6 +13,8 @@ public class CatalogueTests
         Assert.Equal(["characters", "animation", "worldbuilding", "storytelling"], c.TracksInOrder.Select(t => t.Slug));
         Assert.Equal(44, c.Products.Count);
         Assert.Equal(8, c.HeroOrder.Count);
+        Assert.Equal("Kits", c.CategoryInfo["Kit"].Title);
+        Assert.All(c.Categories, type => Assert.False(string.IsNullOrWhiteSpace(c.CategoryInfo[type].Line)));
         Assert.Equal(["AutomationForgeHub", "AutomationForge"], c.Always.Select(a => a.Plugin));
         Assert.Equal("Kovati Hub link", c.Always[0].Name);
         Assert.Equal(["AutomationForgeToolset"], c.Always[1].AgentPlugins);
