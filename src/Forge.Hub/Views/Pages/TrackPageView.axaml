@@ -128,6 +128,7 @@
                         <Button Classes="quiet small" Content="{Binding CartLabel}" Command="{Binding AddToCartCommand}" IsEnabled="{Binding CanBuy}" HorizontalAlignment="Right" />
                       </StackPanel>
                       <Button Classes="link smalltext" Content="{Binding SiteLabel}" Command="{Binding OpenSiteCommand}" IsVisible="{Binding IsComing}" HorizontalAlignment="Right" />
+                      <Button Classes="link smalltext" Content="Details →" Command="{Binding DetailsCommand}" IsVisible="{Binding HasDetails}" HorizontalAlignment="Right" />
                     </StackPanel>
                   </Grid>
                 </Border>

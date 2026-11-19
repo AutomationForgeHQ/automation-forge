@@ -75,6 +75,16 @@
     <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
   </Style>
 
+  <Style Selector="Button.quiet.chosen">
+    <Setter Property="Background" Value="{StaticResource BoneBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource BoneBrush}" />
+  </Style>
+  <Style Selector="Button.quiet.chosen:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource BoneBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+  </Style>
+
   <Style Selector="Button.link">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />

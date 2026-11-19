@@ -3,6 +3,8 @@
              x:Class="Forge.Hub.App"
              xmlns:local="using:Forge.Hub"
              xmlns:vm="using:Forge.Hub.ViewModels"
+             xmlns:pages="using:Forge.Hub.ViewModels.Pages"
+             xmlns:c="using:Forge.Hub.Controls"
              RequestedThemeVariant="Dark">
 
   <Application.DataTemplates>
@@ -13,6 +15,64 @@
               Classes.soon="{Binding IsSoon}" Classes.labs="{Binding IsLabs}" Classes.onpicture="{Binding OnPicture}">
         <TextBlock Classes="chip" Text="{Binding Text}" />
       </Border>
+    </DataTemplate>
+    <!-- A product poster (11.4): 3:4, the picture or the typographic poster, the type and the price at the top,
+         the track with the stage, the name, the line and the button at the bottom. -->
+    <DataTemplate DataType="pages:PosterModel">
+      <Button Classes="plain card" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding Name}" HorizontalAlignment="Stretch">
+        <c:Ratio Value="1.3333">
+          <Border Classes="glow">
+            <Panel>
+              <Border CornerRadius="16" ClipToBounds="True" Background="{StaticResource PlateBrush}">
+                <Panel>
+                  <c:TypographicPoster Mark="{Binding Mark}" Slug="{Binding Slug}" IsVisible="{Binding !HasPicture}" />
+                  <c:MediaImage Classes="pic" Path="{Binding Picture}" DecodeWidth="280" IsVisible="{Binding HasPicture}" />
+                  <Border>
+                    <Border.Background>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#0008090A" Offset="0.18" />
+                        <GradientStop Color="#E608090A" Offset="0.55" />
+                        <GradientStop Color="#FF08090A" Offset="1" />
+                      </LinearGradientBrush>
+                    </Border.Background>
+                  </Border>
+                  <!-- A playbook's spine. -->
+                  <Border IsVisible="{Binding IsPlaybook}" Width="36" HorizontalAlignment="Left" Background="#D908090A">
+                    <LayoutTransformControl VerticalAlignment="Center" HorizontalAlignment="Center">
+                      <LayoutTransformControl.LayoutTransform>
+                        <RotateTransform Angle="-90" />
+                      </LayoutTransformControl.LayoutTransform>
+                      <TextBlock Classes="chip" Text="{Binding SpineText}" Foreground="{StaticResource AmberBrush}" />
+                    </LayoutTransformControl>
+                  </Border>
+                  <!-- A utility's hairline frame. -->
+                  <Border IsVisible="{Binding IsUtility}" Margin="10" CornerRadius="8" BorderThickness="1" BorderBrush="#59EBAA28" />
+                </Panel>
+              </Border>
+              <Grid Margin="16,14" VerticalAlignment="Top" ColumnDefinitions="*,Auto">
+                <Border Classes="chip onpicture" HorizontalAlignment="Left" Margin="{Binding IsPlaybook, Converter={x:Static c:Converters.PlaybookInset}}">
+                  <TextBlock Classes="chip" Text="{Binding TypeLabel}" />
+                </Border>
+                <ContentControl Grid.Column="1" Content="{Binding PriceChip}" />
+              </Grid>
+              <StackPanel VerticalAlignment="Bottom" Margin="18,0,18,16" Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Classes="label amber" Text="{Binding TrackLine}" FontSize="10" LetterSpacing="1.6" VerticalAlignment="Center" />
+                  <ContentControl Content="{Binding StageChip}" IsVisible="{Binding HasStageChip}" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Classes="display-s cardname" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" MaxWidth="220" />
+                  <Path Data="M 1.5 6.5 L 5.5 10.5 L 12.5 2.5" Stroke="{StaticResource GoodBrush}" StrokeThickness="1.8" IsVisible="{Binding IsInstalled}" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock Text="{Binding Line}" FontSize="13" LineHeight="18" Foreground="{StaticResource Bone75Brush}" TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis" />
+                <Button Classes="primary small" Content="{Binding ButtonText}" Command="{Binding ActCommand}" IsEnabled="{Binding ButtonEnabled}" IsVisible="{Binding HasButton}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+                <TextBlock Text="Details →" FontSize="13" FontWeight="Medium" IsVisible="{Binding ShowDetailsOnly}" Margin="0,6,0,0" />
+              </StackPanel>
+              <Border Classes="ring" />
+            </Panel>
+          </Border>
+        </c:Ratio>
+      </Button>
     </DataTemplate>
   </Application.DataTemplates>
 

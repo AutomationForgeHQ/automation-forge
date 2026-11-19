@@ -50,12 +50,15 @@ public partial class MainViewModel
     public bool IsHomePlace => CurrentPage is HomePageViewModel;
     public bool IsLibraryPlace => CurrentPage is LibraryPageViewModel or ComponentsPageViewModel;
     public bool IsRunnersPlace => CurrentPage is RunnersPageViewModel;
+    public bool IsBrowsePlace => CurrentPage is BrowsePageViewModel;
 
     partial void OnCurrentPageChanged(PageViewModel? value)
     {
         OnPropertyChanged(nameof(IsHomePlace));
         OnPropertyChanged(nameof(IsLibraryPlace));
         OnPropertyChanged(nameof(IsRunnersPlace));
+        OnPropertyChanged(nameof(IsBrowsePlace));
+        if (ShowSearch) SearchText = "";
         OnPropertyChanged(nameof(CanGoBack));
         OnPropertyChanged(nameof(BackLabel));
         if (value is RunnersPageViewModel) _ = RefreshRentedAsync();

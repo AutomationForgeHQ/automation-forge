@@ -598,6 +598,8 @@ public sealed partial class CapabilityRowModel : ObservableObject
     [RelayCommand] private void AddToCart() { if (Product is not null && Page.Hub.PaymentsLive) Page.Hub.AddToCart(Product); }
     [RelayCommand] private void OpenSite() => Page.Hub.OpenUrl(Page.Hub.SiteUrl(Product?.Site ?? Page.Track.Site));
     [RelayCommand] private Task Update() => Page.InstallAsync(Capability.Id);
+    [RelayCommand] private void Details() { if (Product is not null) Page.Hub.OpenProduct(Product.Slug); }
+    public bool HasDetails => Product is not null && !IsComing;
 }
 
 /// <summary>One engine inside a capability: where it runs and what it costs, then whose it is.</summary>

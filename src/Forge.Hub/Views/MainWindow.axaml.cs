@@ -31,7 +31,9 @@ public partial class MainWindow : Window
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (Vm is not { } vm) return;
-        if (e.Key == Key.Escape && vm.ShowAnyPanel) { vm.ClosePanels(); e.Handled = true; }
+        if (e.Key == Key.K && e.KeyModifiers == KeyModifiers.Control) { SearchBox.Focus(); SearchBox.SelectAll(); e.Handled = true; }
+        else if (e.Key == Key.Escape && vm.ShowAnyPanel) { vm.ClosePanels(); e.Handled = true; }
+        else if (e.Key == Key.Escape && vm.ShowSearch) { vm.ClearSearch(); e.Handled = true; }
         else if (e.Key == Key.Left && e.KeyModifiers == KeyModifiers.Alt && vm.CanGoBack) { vm.GoBack(); e.Handled = true; }
     }
 
@@ -57,6 +59,14 @@ public partial class MainWindow : Window
     {
         AvatarButton.Flyout?.Hide();
         GearButton.Flyout?.Hide();
+    }
+
+    /// <summary>Enter opens the first result; Esc empties the field.</summary>
+    private void SearchBox_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (Vm is not { } vm) return;
+        if (e.Key == Key.Enter) { vm.OpenFirstResult(); e.Handled = true; }
+        else if (e.Key == Key.Escape) { vm.ClearSearch(); e.Handled = true; }
     }
 
     private void Minimize_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

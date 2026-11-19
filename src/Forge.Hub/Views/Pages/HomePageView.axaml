@@ -211,7 +211,7 @@
       </StackPanel>
       <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,26,0,0">
         <TextBlock Classes="small" Text="Already know what you need?" VerticalAlignment="Center" />
-        <Button Classes="link" Content="See everything on this machine →" Command="{Binding SeeEverythingCommand}" FontSize="13" />
+        <Button Classes="link" Content="Browse everything →" Command="{Binding Hub.ShowBrowseCommand}" FontSize="13" />
       </StackPanel>
     </StackPanel>
   </ScrollViewer>

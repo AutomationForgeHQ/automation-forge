@@ -1,0 +1,134 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:Forge.Hub.ViewModels.Pages"
+             xmlns:c="using:Forge.Hub.Controls"
+             x:Class="Forge.Hub.Views.Pages.BrowsePageView"
+             x:DataType="p:BrowsePageViewModel">
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="32,30,32,32" MaxWidth="1336">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Classes="display-l" Text="Browse" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+          <TextBlock Text="Show Labs" FontSize="14" VerticalAlignment="Center" />
+          <ToggleSwitch IsChecked="{Binding ShowLabs, Mode=TwoWay}" AutomationProperties.Name="Show Labs" />
+        </StackPanel>
+      </Grid>
+      <TextBlock Text="{Binding LabsOnLine}" IsVisible="{Binding ShowLabs}" FontSize="14" Foreground="{StaticResource HotBrush}" Margin="0,8,0,0" />
+
+      <!-- The Forges: the eight heroes, a rail that slides sideways. -->
+      <Grid ColumnDefinitions="*,Auto" Margin="0,26,0,12">
+        <TextBlock Classes="label" Text="THE FORGES" VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+          <Button Classes="round" Click="RailLeft_Click" AutomationProperties.Name="Previous">
+            <Path Data="M 6 0 L 0 6 L 6 12" Stroke="{StaticResource BoneBrush}" StrokeThickness="1.5" />
+          </Button>
+          <Button Classes="round" Click="RailRight_Click" AutomationProperties.Name="Next">
+            <Path Data="M 0 0 L 6 6 L 0 12" Stroke="{StaticResource BoneBrush}" StrokeThickness="1.5" />
+          </Button>
+        </StackPanel>
+      </Grid>
+      <ScrollViewer x:Name="Rail" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+        <ItemsControl ItemsSource="{Binding Forges}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="16" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:ForgeCardModel">
+              <Button Classes="plain card" Command="{Binding OpenCommand}" Width="210" Height="262" AutomationProperties.Name="{Binding Name}">
+                <Border Classes="glow">
+                  <Panel>
+                    <Border CornerRadius="16" ClipToBounds="True" Background="{StaticResource PlateBrush}">
+                      <Panel>
+                        <c:MediaImage Classes="pic" Path="{Binding Picture}" DecodeWidth="210" />
+                        <Border>
+                          <Border.Background>
+                            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                              <GradientStop Color="#8C08090A" Offset="0" />
+                              <GradientStop Color="#0008090A" Offset="0.25" />
+                              <GradientStop Color="#4D08090A" Offset="0.5" />
+                              <GradientStop Color="#F208090A" Offset="1" />
+                            </LinearGradientBrush>
+                          </Border.Background>
+                        </Border>
+                      </Panel>
+                    </Border>
+                    <Grid Margin="14,12" VerticalAlignment="Top" ColumnDefinitions="*,Auto">
+                      <ItemsControl ItemsSource="{Binding Chips}">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" ItemSpacing="4" LineSpacing="4" />
+                          </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                      </ItemsControl>
+                      <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Number}" FontSize="10" Foreground="{StaticResource Bone50Brush}" VerticalAlignment="Top" Margin="8,3,0,0" />
+                    </Grid>
+                    <StackPanel VerticalAlignment="Bottom" Margin="16,0,16,16" Spacing="6">
+                      <TextBlock Classes="label amber" Text="{Binding Tagline}" FontSize="10" LetterSpacing="1.6" />
+                      <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="display-s cardname" Text="{Binding Name}" />
+                        <Path Data="M 1.5 6.5 L 5.5 10.5 L 12.5 2.5" Stroke="{StaticResource GoodBrush}" StrokeThickness="1.8" IsVisible="{Binding IsInstalled}" VerticalAlignment="Center" />
+                      </StackPanel>
+                      <StackPanel Classes="hoverlines" Spacing="6">
+                        <TextBlock Text="{Binding Line}" FontSize="13" LineHeight="18" Foreground="{StaticResource Bone90Brush}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding SeeLine}" FontSize="13" FontWeight="Medium" />
+                      </StackPanel>
+                    </StackPanel>
+                    <Border Classes="ring" />
+                  </Panel>
+                </Border>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <!-- One shelf at a time, in the site's order, with counts; a track filter at the right. -->
+      <Grid ColumnDefinitions="*,Auto" Margin="0,34,0,8">
+        <ItemsControl ItemsSource="{Binding Categories}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="8" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:CategoryModel">
+              <Button Classes="quiet small" Classes.chosen="{Binding Selected}" Content="{Binding Label}" Command="{Binding ChooseCommand}" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <ComboBox Grid.Column="1" ItemsSource="{Binding Tracks}" SelectedItem="{Binding TrackFilter}" MinWidth="170" Height="34" VerticalAlignment="Center" />
+      </Grid>
+      <TextBlock Classes="small" Text="{Binding CategoryLine}" FontSize="14" Margin="0,4,0,18" />
+
+      <TextBlock Classes="small" Text="Nothing on this shelf for that track yet." IsVisible="{Binding IsEmpty}" FontSize="14" />
+
+      <ItemsControl ItemsSource="{Binding Shelf}" IsVisible="{Binding !IsGrouped}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="4" ColumnSpacing="20" RowSpacing="20" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+      </ItemsControl>
+
+      <ItemsControl ItemsSource="{Binding Groups}" IsVisible="{Binding IsGrouped}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:ShelfGroupModel">
+            <StackPanel Margin="0,0,0,26">
+              <TextBlock Classes="label" Text="{Binding Label}" Margin="0,0,0,12" />
+              <ItemsControl ItemsSource="{Binding Posters}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="4" ColumnSpacing="20" RowSpacing="20" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

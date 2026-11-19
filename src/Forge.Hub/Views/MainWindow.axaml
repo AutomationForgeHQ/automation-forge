@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Forge.Hub.ViewModels"
         xmlns:eng="using:Forge.Core.Engines"
+        xmlns:c="using:Forge.Hub.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="760"
@@ -57,6 +58,12 @@
               <Ellipse Classes="dot" Width="4" Height="4" Fill="{StaticResource AmberBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,-14" />
             </Panel>
           </Button>
+          <Button Classes="place" Classes.selected="{Binding IsBrowsePlace}" Command="{Binding ShowBrowseCommand}">
+            <Panel>
+              <TextBlock Text="Browse" VerticalAlignment="Center" />
+              <Ellipse Classes="dot" Width="4" Height="4" Fill="{StaticResource AmberBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,-14" />
+            </Panel>
+          </Button>
           <Button Classes="place" Classes.selected="{Binding IsRunnersPlace}" Command="{Binding ShowRunnersPageCommand}" IsVisible="{Binding HasRunners}">
             <Panel>
               <TextBlock Text="Runners" VerticalAlignment="Center" />
@@ -66,7 +73,12 @@
         </StackPanel>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="0,0,12,0">
-          <!-- The updates pill (3, 8.1): only when there are updates; it opens Library on Updates. -->
+          <!-- Search (4.11): Ctrl+K puts the cursor here; typing opens the panel under it. -->
+          <Panel Width="300" Height="36" Margin="0,0,6,0">
+            <TextBox x:Name="SearchBox" Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search tools, tracks and engines" CornerRadius="18"
+                     Height="36" MinHeight="36" Padding="16,0,64,0" VerticalContentAlignment="Center" FontSize="13" KeyDown="SearchBox_KeyDown" />
+            <TextBlock Classes="mono" Text="Ctrl K" FontSize="11" Foreground="{StaticResource DimBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0" IsHitTestVisible="False" />
+          </Panel>          <!-- The updates pill (3, 8.1): only when there are updates; it opens Library on Updates. -->
           <Button Classes="pill" Content="{Binding PillLabel}" Command="{Binding ShowUpdatesCommand}" IsVisible="{Binding HasPill}" Margin="0,0,8,0" />
           <!-- Signed out: the quiet "Sign in", as on the site, and a gear for Keys, Settings and Help. -->
           <Button Classes="link" Content="Sign in" Command="{Binding SignInCommand}" IsVisible="{Binding !IsSignedIn}" FontSize="14" Margin="0,0,6,0" />
@@ -219,6 +231,49 @@
     <Panel Grid.Row="1">
       <ContentControl Content="{Binding CurrentPage}" />
 
+      <!-- The search panel, 480 wide, under the field. -->
+      <Border IsVisible="{Binding ShowSearch}" Classes="panel" Width="480" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,232,0" Padding="8" ZIndex="20"
+              BoxShadow="0 20 60 -10 #CC000000">
+        <StackPanel>
+          <ItemsControl ItemsSource="{Binding SearchSections}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SearchSectionModel">
+                <StackPanel Margin="0,4,0,6">
+                  <TextBlock Classes="label" Text="{Binding Label}" FontSize="10" Margin="10,6,10,4" />
+                  <ItemsControl ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:SearchResultModel">
+                        <Button Classes="menurow" Command="{Binding OpenCommand}">
+                          <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Border Width="40" Height="40" CornerRadius="8" ClipToBounds="True" Background="{StaticResource InkBrush}" IsVisible="{Binding HasPicture}" Margin="0,0,12,0">
+                              <c:MediaImage Path="{Binding Picture}" DecodeWidth="40" />
+                            </Border>
+                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Classes.mono="{Binding IsMono}" />
+                              <TextBlock Classes="small" Text="{Binding Line}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <ItemsControl Grid.Column="2" ItemsSource="{Binding Chips}" VerticalAlignment="Center" Margin="8,0,0,0">
+                              <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                  <StackPanel Orientation="Horizontal" Spacing="4" />
+                                </ItemsPanelTemplate>
+                              </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                          </Grid>
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding SearchEmpty}" Margin="10,8">
+            <TextBlock Text="{Binding SearchEmptyLine}" FontSize="14" VerticalAlignment="Center" />
+            <Button Classes="link smalltext" Content="Browse everything →" Command="{Binding BrowseFromSearchCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
       <Border IsVisible="{Binding ShowAnyPanel}" Background="{StaticResource ScrimBrush}" PointerPressed="Scrim_PointerPressed" />
 
       <!-- Your account: who, and what is theirs. -->

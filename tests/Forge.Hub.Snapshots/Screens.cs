@@ -43,6 +43,7 @@ internal static class Screens
         Returning();
         Setup();
         Updates();
+        Browse();
         Console.WriteLine($"done: {outDir}");
     }
 
@@ -307,6 +308,115 @@ internal static class Screens
             Shot(window, "hub_library_account_signed_out");
         }
         window.Close();
+    }
+
+    /// <summary>Slice 4: Browse, product pages, search and Labs, checked against the slice's acceptance.</summary>
+    private static void Browse()
+    {
+        // The interface shots are not in the installer's set: for local work they come from the website folder.
+        var site = @"C:\UNREAL\AutomationForge-website\v2\public";
+        if (Directory.Exists(site)) Environment.SetEnvironmentVariable("FORGE_MEDIA_URL", site);
+        var (window, vm) = Open("browse", receipts: [("AutomationForgeHub", "0.2.5"), ("MotionForge", "0.4.1"), ("MotionForgeKimodo", "0.5.1"), ("MotionForgeToolset", "0.3.1")]);
+        vm.ShowBrowse();
+        Snap.Pump(800);
+        var browse = (BrowsePageViewModel)vm.CurrentPage!;
+        Console.WriteLine($"  forges: {browse.Forges.Count} ({string.Join(", ", browse.Forges.Select(f => f.Name))})");
+        Console.WriteLine($"  categories: {string.Join(" · ", browse.Categories.Select(c => c.Label))}");
+        Shot(window, "hub_browse");
+        ScrollPage(window, 640);
+        Shot(window, "hub_browse_tools_shelf");
+
+        browse.Category = "Add-on";
+        Snap.Pump(500);
+        Console.WriteLine($"  add-on groups: {string.Join(" · ", browse.Groups.Select(g => $"{g.Label} {g.Posters.Count}"))}");
+        var trellisOff = browse.Groups.SelectMany(g => g.Posters).Any(p => p.Slug == "meshforge-trellis");
+        ScrollPage(window, 640);
+        Shot(window, "hub_browse_addons");
+
+        browse.ShowLabs = true;
+        Snap.Pump(500);
+        var trellisOn = browse.Groups.SelectMany(g => g.Posters).Any(p => p.Slug == "meshforge-trellis");
+        Console.WriteLine($"  TRELLIS on the Add-ons shelf: Labs off {trellisOff}, Labs on {trellisOn}");
+        ScrollPage(window, 0);
+        Shot(window, "hub_browse_labs_on");
+        var quality = browse.Groups.SelectMany(g => g.Posters).Concat(browse.Shelf).Any(p => p.Slug == "motionforge-quality");
+        Console.WriteLine($"  MotionForge Quality on a shelf: {quality}");
+        browse.ShowLabs = false;
+
+        browse.Category = "Utility";
+        Snap.Pump(300);
+        ScrollPage(window, 640);
+        Shot(window, "hub_browse_utilities");
+
+        // Search.
+        foreach (var (q, name) in new[] { ("motion", "hub_search_motion"), ("trellis", "hub_search_labs"), ("MotionForgeQualityToolset", "hub_search_component"), ("zzz", "hub_search_nothing") })
+        {
+            vm.SearchText = q;
+            Snap.Pump(400);
+            Console.WriteLine($"  search '{q}': {string.Join(" | ", vm.SearchSections.Select(s => $"{s.Label}: {string.Join(", ", s.Items.Select(i => i.Title + (i.Chips.Any(c => c.IsLabs) ? " [LABS]" : "")))}"))}");
+            Shot(window, name);
+        }
+        vm.SearchText = "Quality";
+        Snap.Pump(200);
+        Console.WriteLine($"  search 'Quality' finds MotionForge Quality: {vm.SearchSections.SelectMany(s => s.Items).Any(i => i.Title == "MotionForge Quality")}");
+        vm.ClearSearch();
+
+        // Every product opens a page; the blocks it shows are the ones it has content for.
+        var failures = new List<string>();
+        foreach (var p in vm.Catalogue!.Products)
+        {
+            try
+            {
+                vm.OpenProduct(p.Slug);
+                Snap.Pump(60);
+                if (vm.CurrentPage is not ProductPageViewModel pp || pp.Product.Slug != p.Slug) failures.Add(p.Slug);
+                else if (pp.HasInside && pp.Inside!.Items.Count == 0 || pp.HasAdds && pp.Adds.Count == 0) failures.Add(p.Slug + " (empty block)");
+            }
+            catch (Exception ex) { failures.Add($"{p.Slug}: {ex.Message}"); }
+            vm.GoBack();
+        }
+        Console.WriteLine($"  product pages: {vm.Catalogue.Products.Count} opened, problems: {(failures.Count == 0 ? "none" : string.Join(", ", failures))}");
+
+        foreach (var slug in new[] { "motionforge", "terrainforge", "meshweightremap", "meshforge-trellis", "np-voiceover", "faceforge" })
+        {
+            vm.GoHome();
+            vm.OpenProduct(slug);
+            Snap.Pump(900);
+            Shot(window, $"hub_product_{slug}");
+            if (slug is "motionforge" or "faceforge")
+            {
+                ScrollPage(window, 700);
+                Shot(window, $"hub_product_{slug}_blocks");
+            }
+        }
+        vm.GoHome();
+        vm.OpenProduct("motionforge");
+        Snap.Pump(600);
+        var mf = (ProductPageViewModel)vm.CurrentPage!;
+        if (mf.Shots.Count > 0)
+        {
+            mf.Shots[0].OpenCommand.Execute(null);
+            Snap.Pump(900);
+            Shot(window, "hub_product_viewer");
+            mf.CloseViewerCommand.Execute(null);
+        }
+        mf.AskRemoveCommand.Execute(null);
+        Snap.Pump(300);
+        Console.WriteLine($"  remove: {mf.RemoveTitle} {mf.RemoveLine}");
+        Shot(window, "hub_product_remove_dialog");
+        mf.KeepCommand.Execute(null);
+        Environment.SetEnvironmentVariable("FORGE_MEDIA_URL", null);
+        window.Close();
+    }
+
+    private static void ScrollPage(Window window, double y)
+    {
+        var sv = window.GetVisualDescendants().OfType<ScrollViewer>()
+            .Where(s => s.IsEffectivelyVisible && s.Bounds.Height > 400 && s.Bounds.Width > 900)
+            .OrderByDescending(s => s.Bounds.Width).FirstOrDefault();
+        if (sv is null) return;
+        sv.Offset = new Vector(0, y);
+        Snap.Pump(400);
     }
 
     // ── helpers ──────────────────────────────────────────────────────────
