@@ -147,6 +147,13 @@ public sealed class ManifestClient
     /// <summary>Fresh from the network when possible; the cached copy otherwise. Throws only when there is neither.</summary>
     public async Task<(Manifest manifest, bool fromCache)> GetAsync(bool offline = false, CancellationToken ct = default)
     {
+        // FORGE_MANIFEST_URL may name a local file: a fixed manifest for tests and screenshots.
+        if (File.Exists(Url))
+        {
+            var local = JsonSerializer.Deserialize<Manifest>(await File.ReadAllTextAsync(Url, ct), Json)
+                        ?? throw new InvalidDataException("The manifest file is empty.");
+            return (local, false);
+        }
         if (!offline)
         {
             try

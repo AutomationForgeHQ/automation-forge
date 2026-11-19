@@ -30,8 +30,18 @@ public static class EngineLocator
 {
     private static readonly Regex MajorMinor = new(@"^(\d+\.\d+)", RegexOptions.Compiled);
 
+    /// <summary>
+    /// FORGE_ENGINES: engine folders separated by ';'. When set, only these are found, so a test can point the
+    /// Hub and the CLI at a throwaway engine folder and never see the real ones.
+    /// </summary>
+    public const string OverrideVariable = "FORGE_ENGINES";
+
     public static IReadOnlyList<EngineInstall> Find()
     {
+        if (Environment.GetEnvironmentVariable(OverrideVariable) is { Length: > 0 } only)
+            return only.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(FromPath).OfType<EngineInstall>().OrderByDescending(e => e.Version).ToList();
+
         var found = new List<EngineInstall>();
         found.AddRange(FromLauncherManifest());
         found.AddRange(FromRegistryBuilds());

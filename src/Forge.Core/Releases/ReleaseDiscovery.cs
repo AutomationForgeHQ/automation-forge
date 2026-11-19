@@ -30,6 +30,8 @@ public sealed class ReleaseDiscovery
 
     public async Task<Result> MergeIntoAsync(Manifest.Manifest manifest, bool offline = false, CancellationToken ct = default)
     {
+        // FORGE_RELEASES_API=off: the manifest alone, for tests and screenshots that must not depend on GitHub.
+        if (_api == "off") return new Result(0, 0, false, DateTimeOffset.UtcNow);
         var (json, fromCache) = await _cache.FetchAsync(_api, offline, ct);
         if (json is null) return new Result(0, 0, true, DateTimeOffset.UtcNow);
 

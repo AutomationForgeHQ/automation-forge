@@ -1,5 +1,6 @@
 using System.CommandLine;
 using Forge.Core;
+using Forge.Core.Catalogue;
 using Forge.Core.Cloud;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
@@ -7,7 +8,7 @@ using Forge.Core.Installs;
 using Forge.Core.Manifest;
 using Forge.Core.Projects;
 
-// forge — the Automation Forge installer, as a command line.
+// forge — the Kovati installer, as a command line (Kovati Hub's engine room).
 //
 // What CI, scripts and agents use, and what the hub runs when it needs to write
 // somewhere privileged. Nothing installs without an account (`forge login`):
@@ -29,7 +30,7 @@ var offlineOpt = new Option<bool>("--offline") { Description = "Use the cached m
 var forceOpt = new Option<bool>("--force") { Description = "Reinstall even if the same version is present." };
 var noElevate = new Option<bool>(Elevation.NoElevateFlag) { Hidden = true, Recursive = true };
 
-var root = new RootCommand("Automation Forge — install, update and manage the plugin sets for Unreal Engine 5.8.");
+var root = new RootCommand("Kovati: install, update and manage Kovati's tools for Unreal Engine 5.8.");
 root.Options.Add(noElevate);
 
 // ── engines ───────────────────────────────────────────────────────────────
@@ -76,12 +77,23 @@ list.SetAction(async (parse, ct) =>
 root.Subcommands.Add(list);
 
 // ── install ───────────────────────────────────────────────────────────────
-var whatArg = new Argument<string[]>("plugins") { Description = "Plugin ids or set names (a set installs every member)." };
-var install = new Command("install", "Download, verify and install plugins or whole sets, dependencies first.");
+var whatArg = new Argument<string[]>("plugins") { Description = "Plugin ids or set names (a set installs every member).", Arity = ArgumentArity.ZeroOrMore };
+var trackOpt = new Option<string?>("--track") { Description = "Install a track by capability, as Kovati Hub does: characters, animation, worldbuilding or storytelling." };
+var onlyOpt = new Option<string?>("--only") { Description = "With --track: only these capabilities, comma separated (e.g. motion,gameplay)." };
+var enginesOpt = new Option<string[]>("--engines") { Description = "With --track: the engines of a capability, e.g. motion=motionforge-uthana (repeat per capability).", AllowMultipleArgumentsPerToken = true };
+var agentsOpt = new Option<bool>("--agents") { Description = "With --track: also install agent access. Default: the choice saved by Kovati Hub." };
+var noAgentsOpt = new Option<bool>("--no-agents") { Description = "With --track: no agent access, whatever Kovati Hub saved." };
+var dryRunOpt = new Option<bool>("--dry-run") { Description = "With --track: print the plan and install nothing." };
+var install = new Command("install", "Download, verify and install plugins, whole sets, or a track by capability, dependencies first.");
 install.Arguments.Add(whatArg);
 install.Options.Add(engineOpt); install.Options.Add(projectOpt); install.Options.Add(channelOpt); install.Options.Add(offlineOpt); install.Options.Add(forceOpt);
+install.Options.Add(trackOpt); install.Options.Add(onlyOpt); install.Options.Add(enginesOpt); install.Options.Add(agentsOpt); install.Options.Add(noAgentsOpt); install.Options.Add(dryRunOpt);
 install.SetAction(async (parse, ct) =>
 {
+    if (parse.GetValue(trackOpt) is { Length: > 0 } trackName)
+        return await InstallTrackAsync(parse, trackName, ct);
+    if ((parse.GetValue(whatArg) ?? []).Length == 0) { Console.Error.WriteLine("Name plugins or sets to install, or a track with --track."); return 2; }
+
     var (manifest, _) = await manifestClient.GetAsync(parse.GetValue(offlineOpt), ct);
     var target = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
     var engineVersion = target.engine?.Version ?? new ProjectDescriptor(parse.GetValue(projectOpt)!).EngineAssociation ?? "5.8";
@@ -271,7 +283,7 @@ foreach (var (verb, enabled) in new[] { ("enable", true), ("disable", false) })
 
 // ── channel ───────────────────────────────────────────────────────────────
 var channelArg = new Argument<string?>("channel") { Description = "stable or nightly. Omit to show the current choice.", Arity = ArgumentArity.ZeroOrOne };
-var channelCmd = new Command("channel", "Show or set the release channel the hub and the CLI follow by default.");
+var channelCmd = new Command("channel", "Show or set the release channel Kovati Hub and the CLI follow by default.");
 channelCmd.Arguments.Add(channelArg);
 channelCmd.SetAction(parse =>
 {
@@ -287,7 +299,7 @@ root.Subcommands.Add(channelCmd);
 
 // ── login / logout / whoami ───────────────────────────────────────────────
 var noBrowser = new Option<bool>("--no-browser") { Description = "Print the sign-in link instead of opening the browser (remote sessions)." };
-var login = new Command("login", "Sign in to your Automation Forge account in the browser; the session is kept on this machine.");
+var login = new Command("login", "Sign in to your Kovati account in the browser; the session is kept on this machine.");
 login.Options.Add(noBrowser);
 login.SetAction(async (parse, ct) =>
 {
@@ -360,6 +372,122 @@ catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundExcep
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────
+
+// `forge install --track animation [--only motion,gameplay] [--engines motion=motionforge-uthana]
+// [--agents | --no-agents] [--dry-run]`: the planner Kovati Hub's track page uses (spec 6.5), so the dry run
+// is the window's install panel in text, and the acceptance checks run against it.
+async Task<int> InstallTrackAsync(ParseResult parse, string trackName, CancellationToken ct)
+{
+    var catalogue = CatalogueLoader.Load();
+    if (catalogue is null) { Console.Error.WriteLine($"No catalogue: {CatalogueLoader.BundledPath} is missing or unreadable. {CatalogueLoader.LastError} Set FORGE_CATALOGUE to a catalogue.json."); return 2; }
+    var track = catalogue.Track(trackName);
+    if (track is null) { Console.Error.WriteLine($"Unknown track: {trackName}. Tracks: {string.Join(", ", catalogue.TracksInOrder.Select(t => t.Slug))}."); return 2; }
+
+    var offline = parse.GetValue(offlineOpt);
+    var dryRun = parse.GetValue(dryRunOpt);
+    var (manifest, fromCache) = await manifestClient.GetAsync(offline, ct);
+    await new Forge.Core.Releases.ReleaseDiscovery(http).MergeIntoAsync(manifest, offline, ct);
+    var channel = parse.GetValue(channelOpt)!;
+
+    InstallTarget? target = null;
+    string engineVersion = "5.8";
+    try
+    {
+        var resolved = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
+        target = resolved.target;
+        engineVersion = resolved.engine?.Version ?? new ProjectDescriptor(parse.GetValue(projectOpt)!).EngineAssociation ?? "5.8";
+    }
+    catch (InvalidOperationException) when (dryRun)
+    {
+        // A dry run plans without an engine: what a machine with nothing installed would get.
+    }
+
+    var hubState = HubState.Load();
+    var agents = parse.GetValue(agentsOpt) ? true : parse.GetValue(noAgentsOpt) ? false : hubState.AgentsOn;
+    var installed = target is null
+        ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        : state.On(target).GroupBy(i => i.Plugin, StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g.First().Version, StringComparer.OrdinalIgnoreCase);
+    var owned = await OwnedOrEmptyAsync(ct);
+    var inputs = new PlanInputs
+    {
+        Catalogue = catalogue, Manifest = manifest, Engine = engineVersion, Channel = channel,
+        TargetKind = target?.Kind ?? "engine", Owned = owned, SignedIn = entitlements.IsSignedIn,
+        AgentAccess = agents, ShowLabs = hubState.ShowLabs, Installed = installed, Pins = hubState.Pins,
+    };
+
+    var selection = TrackPlanner.DefaultSelection(track, inputs);
+    if (parse.GetValue(onlyOpt) is { Length: > 0 } only)
+    {
+        var ids = only.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var id in ids)
+            if (track.Capability(id) is null) { Console.Error.WriteLine($"{track.Name} has no capability '{id}'. It has: {string.Join(", ", track.Capabilities.Select(c => c.Id))}."); return 2; }
+        selection = selection with { Capabilities = ids };
+    }
+    foreach (var spec in parse.GetValue(enginesOpt) ?? [])
+    {
+        var eq = spec.IndexOf('=');
+        var capId = eq > 0 ? spec[..eq] : "";
+        if (track.Capability(capId) is not { } cap) { Console.Error.WriteLine($"--engines {spec}: name a capability of {track.Name}, as capability=engine,engine."); return 2; }
+        var engines = spec[(eq + 1)..].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var e in engines)
+            if (!cap.Engines.Any(x => string.Equals(x.Product, e, StringComparison.OrdinalIgnoreCase))) { Console.Error.WriteLine($"{cap.Name} has no engine '{e}'. It has: {string.Join(", ", cap.Engines.Select(x => x.Product))}."); return 2; }
+        var map = selection.Engines.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+        map[cap.Id] = engines;
+        selection = selection with { Engines = map };
+    }
+
+    var plan = TrackPlanner.Plan(track, selection, inputs);
+
+    Console.WriteLine($"{track.Name} · {(target is null ? $"Unreal Engine {engineVersion} (no engine found)" : target.Label)} · {channel}"
+                      + $" · agent access {(agents ? "on" : "off")}"
+                      + (entitlements.IsSignedIn ? $" · {entitlements.AccountLabel}" : " · signed out")
+                      + (fromCache ? " · cached list" : ""));
+    foreach (var item in plan.Items)
+    {
+        var what = item.Role switch
+        {
+            PlanRole.Always => catalogue.Always.FirstOrDefault()?.Name ?? "",
+            PlanRole.Agent => $"agent access for {catalogue.Product(item.Product)?.Name}",
+            PlanRole.Engine => $"engine for {track.Capability(item.Capability)?.Name}",
+            PlanRole.Dependency => $"needed by {item.NeededBy}",
+            _ => track.Capability(item.Capability)?.Name ?? "",
+        };
+        var action = item.Action switch { PlanAction.Install => "install", PlanAction.Update => "update ", _ => "here   " };
+        Console.WriteLine($"  {action}  {item.Id,-26} {item.Version,-8} {Words.Size(item.Size),8}   {what}");
+    }
+    foreach (var drop in plan.Drops) Console.WriteLine($"  left out  {drop.Id,-24} {drop.Message}");
+    Console.WriteLine($"{plan.Summary} · {Words.Size(plan.Size)} · Free" + (plan.AlreadyHere > 0 ? $" · {plan.AlreadyHere} already here" : ""));
+
+    if (dryRun) return 0;
+    if (target is null) { Console.Error.WriteLine("No Unreal Engine installation found."); return 2; }
+    if (plan.ComponentCount == 0) { Console.WriteLine("Nothing to install."); return 0; }
+    if (!entitlements.IsSignedIn) { Console.Error.WriteLine($"  {AnonymousEntitlements.SignInMessage}  (forge login)"); return 4; }
+    if (!Installer.IsWritable(target.Root) && !parse.GetValue(noElevate) && !Elevation.IsElevated())
+    {
+        Console.WriteLine($"Windows will ask for permission once, to write to {target.Root}.");
+        var code = Elevation.RelaunchElevated(args);
+        if (code is null) { Console.Error.WriteLine("Windows permission was declined. Nothing changed."); return 3; }
+        return code.Value;
+    }
+
+    var failures = 0;
+    foreach (var item in plan.ToChange)
+    {
+        var p = manifest.Plugin(item.Id)!;
+        var version = p.Latest(engineVersion, channel)!;
+        try { await installer.InstallAsync(new InstallRequest(p, version, target), parse.GetValue(forceOpt), null, ct); }
+        catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException or UnauthorizedAccessException or IOException)
+        {
+            Console.Error.WriteLine($"  failed: {p.Id} — {ex.Message}"); failures++;
+        }
+    }
+    hubState = HubState.Load();
+    hubState.RecordTrack(track.Slug, target.Root, plan.Capabilities, selection.Engines);
+    hubState.LastTarget = target.Root;
+    hubState.Save();
+    return failures == 0 ? 0 : 1;
+}
+
 async Task<IReadOnlySet<string>> OwnedOrEmptyAsync(CancellationToken ct)
 {
     if (!entitlements.IsSignedIn) return new HashSet<string>(StringComparer.OrdinalIgnoreCase);

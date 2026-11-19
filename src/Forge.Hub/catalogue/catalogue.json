@@ -1,0 +1,3226 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-19T00:00:00Z",
+  "note": "Hand-written sample for Kovati Hub v2, from the site data of 19 November 2026 (v2/lib/catalogue.ts, the four track files, the tool pages in v2/lib/tools, docs.ts), the register and the manifest. Replace with the generated file when the generator exists.",
+  "mediaBase": "https://kovati.dev",
+  "links": {
+    "site": "https://kovati.dev",
+    "account": "https://app.kovati.dev",
+    "docs": "https://docs.kovati.dev",
+    "discord": "https://kovati.dev/discord",
+    "cart": "https://app.kovati.dev/cart/?add={ids}&from=hub",
+    "buy": "https://app.kovati.dev/buy/?plugin={id}",
+    "owned": "https://app.kovati.dev/plugins/",
+    "unrealEngine": "https://www.unrealengine.com/download",
+    "releaseNotes": "https://docs.kovati.dev/docs/releases/",
+    "gettingStarted": "https://docs.kovati.dev/docs/automation-forge/getting-started/",
+    "keysHelp": "https://docs.kovati.dev/docs/automation-forge/keys/",
+    "troubleshooting": "https://docs.kovati.dev/docs/automation-forge/troubleshooting/"
+  },
+  "labels": {
+    "price": {
+      "free": "Free",
+      "free-tier": "Free tier",
+      "paid": "Paid"
+    },
+    "trial": "Free trial",
+    "stage": {
+      "labs": "Labs",
+      "early": "Early access",
+      "beta": "Beta",
+      "released": "Released",
+      "coming": "Coming soon"
+    },
+    "addonKind": {
+      "provider": "Provider",
+      "integration": "Integration",
+      "extension": "Extension"
+    },
+    "labsLine": "Early experiments: they work for us, may break, and get no support yet."
+  },
+  "always": [
+    {
+      "plugin": "AutomationForgeHub",
+      "name": "Kovati Hub link",
+      "line": "The Kovati menu inside Unreal: turn tools on for a project, see updates, set keys."
+    }
+  ],
+  "heroOrder": [
+    "hairforge",
+    "skinforge",
+    "meshforge",
+    "motionforge",
+    "performanceforge",
+    "terrainforge",
+    "speechforge",
+    "faceforge"
+  ],
+  "categories": [
+    "Tool",
+    "Utility",
+    "Kit",
+    "Add-on",
+    "Playbook"
+  ],
+  "tracks": [
+    {
+      "slug": "characters",
+      "name": "Characters",
+      "order": 1,
+      "subtitle": "Look, dress, hair and skin",
+      "eyebrow": "Character pipelines for solo developers, indie and AA teams",
+      "promise": "Game-ready characters, without a character team.",
+      "lede": "Dress, groom and scar MetaHuman, Reallusion or your own characters, right inside Unreal, then hand them to Animation to move. Every step works by hand. AI is there when you want it.",
+      "site": "/characters/",
+      "media": {
+        "door": "/media/characters/door.jpg",
+        "doorVideo": "/media/characters/door.mp4",
+        "hero": "/media/characters/hero-v2.jpg",
+        "heroVideo": "/media/characters/hero-v2.mp4",
+        "credit": "With shots from Colony: New Eden, our concept trailer (2023)"
+      },
+      "film": {
+        "src": "/media/characters/film.mp4",
+        "poster": "/media/characters/film.jpg",
+        "title": "From a default character to one that belongs in your game.",
+        "line": "Dressed, groomed and scarred, in one sitting, inside Unreal."
+      },
+      "worksWith": [
+        "Unreal Engine 5.8",
+        "MetaHuman",
+        "Reallusion",
+        "Your own skeleton",
+        "Marvelous Designer"
+      ],
+      "needs": [
+        {
+          "name": "Unreal Engine 5.8",
+          "line": "Everything runs inside the editor."
+        },
+        {
+          "name": "A character",
+          "line": "A MetaHuman, a Reallusion character, or your own skeletal mesh."
+        },
+        {
+          "name": "For AI steps",
+          "line": "Your own GPU, a rented one, or an API key. You see the price before you spend."
+        }
+      ],
+      "capabilities": [
+        {
+          "id": "meshes",
+          "name": "Meshes from a picture",
+          "line": "Turn a picture or a sentence into a mesh, and review it before you keep it.",
+          "product": "meshforge",
+          "engines": [
+            {
+              "product": "meshforge-cloud",
+              "default": true
+            },
+            {
+              "product": "meshforge-trellis",
+              "default": false,
+              "labs": true
+            }
+          ],
+          "media": {
+            "poster": "/media/meshforge/hero.jpg",
+            "video": "/media/meshforge/hero.mp4"
+          },
+          "engineLabel": "Engines",
+          "engineRequired": true
+        },
+        {
+          "id": "outfits",
+          "name": "Outfits",
+          "line": "Fit an outfit to a body once, and it carries over to every other body shape.",
+          "product": "meshforge-garment",
+          "title": "One outfit. Every body.",
+          "media": {
+            "poster": "/media/meshforge/walk-cryo.jpg",
+            "video": "/media/meshforge/walk-cryo.mp4"
+          }
+        },
+        {
+          "id": "hair",
+          "name": "Hair",
+          "line": "Start from one of thirty looks and sculpt real strand hair live, in the viewport.",
+          "product": "hairforge",
+          "title": "Hair in hours, not weeks.",
+          "media": {
+            "poster": "/media/hairforge/hero.jpg",
+            "video": "/media/hairforge/hero.mp4"
+          }
+        },
+        {
+          "id": "skin",
+          "name": "Skin marks",
+          "line": "Stamp scars, tattoos and marks onto a character in 3D, then bake them, with every layer reversible.",
+          "product": "skinforge",
+          "title": "Every scar tells a story.",
+          "media": {
+            "poster": "/media/characters/skin.jpg",
+            "video": "/media/characters/skin.mp4"
+          }
+        }
+      ],
+      "next": {
+        "track": "animation",
+        "line": "Then make it move."
+      }
+    },
+    {
+      "slug": "animation",
+      "name": "Animation",
+      "order": 2,
+      "subtitle": "Motion from a sentence, capture and gameplay clips",
+      "eyebrow": "Animation pipelines for solo developers, indie and AA teams",
+      "promise": "Motion for every character. Free to start.",
+      "lede": "Describe a motion and generate it on your own GPU, keep the good takes, act it yourself, and turn it into gameplay, right inside Unreal. Almost everything here is free.",
+      "site": "/animation/",
+      "media": {
+        "door": "/media/animation/door.jpg",
+        "doorVideo": "/media/animation/door.mp4",
+        "hero": "/media/animation/hero-v2.jpg",
+        "heroVideo": "/media/animation/hero-v2.mp4"
+      },
+      "film": {
+        "src": "/media/animation/film.mp4",
+        "poster": "/media/animation/film.jpg",
+        "title": "From a sentence to a character that moves in your game.",
+        "line": "Typed, generated on your own GPU, checked, and playing in the game."
+      },
+      "worksWith": [
+        "Unreal Engine 5.8",
+        "MetaHuman",
+        "Your own skeleton",
+        "NVIDIA Kimodo",
+        "Uthana"
+      ],
+      "needs": [
+        {
+          "name": "Unreal Engine 5.8",
+          "line": "Everything runs inside the editor."
+        },
+        {
+          "name": "A character",
+          "line": "A MetaHuman, or your own skeletal character."
+        },
+        {
+          "name": "For AI steps",
+          "line": "Your own GPU, a rented one, or an API key. You see the price before you spend."
+        }
+      ],
+      "capabilities": [
+        {
+          "id": "motion",
+          "name": "Motion from a sentence",
+          "line": "Describe a motion and watch it play on your own character, as an ordinary animation.",
+          "product": "motionforge",
+          "title": "Motion from a sentence.",
+          "engines": [
+            {
+              "product": "motionforge-kimodo",
+              "default": true
+            },
+            {
+              "product": "motionforge-uthana",
+              "default": true
+            }
+          ],
+          "media": {
+            "poster": "/media/animation/forest.jpg",
+            "video": "/media/animation/forest.mp4"
+          },
+          "engineLabel": "Engines",
+          "engineRequired": true
+        },
+        {
+          "id": "gameplay",
+          "name": "Gameplay clips",
+          "line": "Turn any animation clip into a montage your gameplay can play.",
+          "product": "montageforge",
+          "title": "From clip to gameplay.",
+          "media": {
+            "poster": "/media/animation/hall-jump.jpg",
+            "video": "/media/animation/hall-jump.mp4"
+          }
+        },
+        {
+          "id": "capture",
+          "name": "Capture",
+          "line": "Record your face and voice with a webcam and put the performance on the character.",
+          "product": "performanceforge",
+          "title": "Act it yourself.",
+          "media": {
+            "poster": "/media/performanceforge/pair_card_g.jpg?v=20261110g",
+            "video": "/media/performanceforge/pair_card_g.mp4?v=20261110g"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "worldbuilding",
+      "name": "Worldbuilding",
+      "order": 3,
+      "subtitle": "Terrain, real places, interiors and props",
+      "eyebrow": "Worldbuilding for games, film and real-time 3D",
+      "promise": "Real places and imagined worlds, ready to play.",
+      "lede": "Build terrain from real map data or in a procedural node graph, then dress it with roads, water, forests and interiors, all inside the level you are building. Every step works by hand. AI is there when you want it.",
+      "site": "/worldbuilding/",
+      "media": {
+        "door": "/media/worldbuilding/door.jpg",
+        "doorVideo": "/media/worldbuilding/door.mp4",
+        "hero": "/media/worldbuilding/hero-v2.jpg",
+        "heroVideo": "/media/worldbuilding/hero-v2.mp4"
+      },
+      "film": {
+        "src": "/media/worldbuilding/film.mp4",
+        "poster": "/media/worldbuilding/film.jpg",
+        "title": "From a map to a place you can walk through.",
+        "line": "Terrain, roads, forests and props, built inside the level you are making."
+      },
+      "worksWith": [
+        "Unreal Engine 5.8",
+        "Landscape",
+        "PCG",
+        "World Partition",
+        "Plasticity"
+      ],
+      "needs": [
+        {
+          "name": "Unreal Engine 5.8",
+          "line": "Everything runs inside the editor, in the level you are building."
+        },
+        {
+          "name": "A place, or an idea",
+          "line": "Real elevation data for a real place, or a procedural node graph for an imagined one."
+        },
+        {
+          "name": "For AI steps",
+          "line": "Your own GPU, a rented one, or an API key. You see the price before you spend."
+        }
+      ],
+      "capabilities": [
+        {
+          "id": "terrain",
+          "name": "Terrain",
+          "line": "Build terrain from a real place or in a procedural node graph, inside the level you are making.",
+          "product": "terrainforge",
+          "title": "Any place on Earth, playable.",
+          "media": {
+            "poster": "/media/worldbuilding/places.jpg",
+            "video": "/media/worldbuilding/places.mp4"
+          }
+        },
+        {
+          "id": "roads",
+          "name": "Roads, rivers and trails",
+          "line": "Draw roads, rivers and trails that cut into the terrain, with bridges where they cross.",
+          "product": "roads-kit",
+          "title": "Roads that follow the land.",
+          "media": {
+            "poster": "/media/colony/card-buggy.jpg",
+            "video": "/media/colony/card-buggy.mp4"
+          }
+        },
+        {
+          "id": "forests",
+          "name": "Forests and ground cover",
+          "line": "Forests, meadows and rocks that read the terrain and fill it the way nature would.",
+          "product": "pcg-kit",
+          "title": "Forests that plant themselves.",
+          "media": {
+            "poster": "/media/terrainforge/world-forest.jpg",
+            "video": "/media/terrainforge/world-forest.mp4"
+          }
+        },
+        {
+          "id": "interiors",
+          "name": "Interiors",
+          "line": "Build ships, stations and bunkers from parts that snap to one grid.",
+          "product": "roomforge",
+          "title": "Interiors from a kit of parts.",
+          "media": {
+            "poster": "/media/colony/card-station.jpg",
+            "video": "/media/colony/card-station.mp4"
+          }
+        },
+        {
+          "id": "props",
+          "name": "Props from a picture",
+          "line": "Turn a picture or a sentence into a prop, and review it before it reaches the level.",
+          "product": "meshforge",
+          "title": "Props from a picture.",
+          "engines": [
+            {
+              "product": "meshforge-cloud",
+              "default": true
+            },
+            {
+              "product": "meshforge-trellis",
+              "default": false,
+              "labs": true
+            }
+          ],
+          "media": {
+            "poster": "/media/meshforge/hero.jpg",
+            "video": "/media/meshforge/hero.mp4"
+          },
+          "engineLabel": "Engines",
+          "engineRequired": true
+        },
+        {
+          "id": "materials",
+          "name": "Materials",
+          "line": "Make a material from a sentence, and look at it before you keep it.",
+          "product": "surfaceforge",
+          "engines": [
+            {
+              "product": "surfaceforge-local",
+              "default": true
+            },
+            {
+              "product": "surfaceforge-patina",
+              "default": true
+            }
+          ],
+          "media": {
+            "poster": "/media/surfaceforge/hero.jpg"
+          },
+          "engineLabel": "Engines",
+          "engineRequired": true
+        }
+      ]
+    },
+    {
+      "slug": "storytelling",
+      "name": "Storytelling",
+      "order": 4,
+      "subtitle": "Voices, faces, dialogue and localisation",
+      "eyebrow": "Narrative design and performance for solo developers, indie and AA teams",
+      "promise": "Give every character a voice and a face.",
+      "lede": "Write the dialogue, voice it, translate it, and watch the face act it out, right inside Unreal. It works with any dialogue system, or none. For narrative designers, writers and the teams around them.",
+      "site": "/storytelling/",
+      "media": {
+        "door": "/media/storytelling/door.jpg",
+        "doorVideo": "/media/storytelling/door.mp4",
+        "hero": "/media/storytelling/hero-v2.jpg",
+        "heroVideo": "/media/storytelling/hero-v2.mp4"
+      },
+      "film": {
+        "src": "/media/storytelling/film.mp4",
+        "poster": "/media/storytelling/film.jpg",
+        "title": "From a line on the page to a scene that plays.",
+        "line": "Written, voiced, translated and acted, then playing in the game."
+      },
+      "worksWith": [
+        "Unreal Engine 5.8",
+        "MetaHuman",
+        "Any dialogue system",
+        "ElevenLabs",
+        "NVIDIA Audio2Face"
+      ],
+      "needs": [
+        {
+          "name": "Unreal Engine 5.8",
+          "line": "Everything runs inside the editor."
+        },
+        {
+          "name": "A script",
+          "line": "Lines you wrote, or recordings you already have."
+        },
+        {
+          "name": "For AI steps",
+          "line": "Your own GPU, a rented one, or an API key. You see the price before you spend."
+        }
+      ],
+      "capabilities": [
+        {
+          "id": "voices",
+          "name": "Voices",
+          "line": "Voice every line in your game, with generated voices or your own recordings.",
+          "product": "speechforge",
+          "title": "Every line, spoken.",
+          "engines": [
+            {
+              "product": "speechforge-elevenlabs",
+              "default": true
+            }
+          ],
+          "media": {
+            "poster": "/media/speechforge/hero.jpg",
+            "video": "/media/speechforge/hero.mp4"
+          },
+          "engineLabel": "Voice engines",
+          "engineRequired": false
+        },
+        {
+          "id": "faces",
+          "name": "Faces",
+          "line": "Lip sync and emotion for the face, solved from the voice line.",
+          "product": "faceforge",
+          "title": "The face that goes with the voice.",
+          "engines": [
+            {
+              "product": "faceforge-metahuman",
+              "default": true
+            },
+            {
+              "product": "faceforge-ace",
+              "default": false
+            }
+          ],
+          "media": {
+            "poster": "/media/faceforge/hero.jpg",
+            "video": "/media/faceforge/hero.mp4"
+          },
+          "engineLabel": "Face engines",
+          "engineRequired": true
+        },
+        {
+          "id": "translation",
+          "name": "Translation",
+          "line": "Translate the whole script, then voice it again in every language.",
+          "product": "speechforge-deepl",
+          "title": "One script, every language.",
+          "media": {
+            "poster": "/media/faceforge/lang-de.jpg",
+            "video": "/media/faceforge/lang-de.mp4"
+          }
+        },
+        {
+          "id": "capture",
+          "name": "Capture",
+          "line": "Record your face and voice with a webcam and put the performance on the character.",
+          "product": "performanceforge",
+          "title": "Act it yourself.",
+          "media": {
+            "poster": "/media/performanceforge/pair_card_g.jpg?v=20261110g",
+            "video": "/media/performanceforge/pair_card_g.mp4?v=20261110g"
+          }
+        },
+        {
+          "id": "playback",
+          "name": "Play it in your game",
+          "line": "Play a line’s voice, face and subtitle together on any character, from any dialogue system.",
+          "product": "line-player",
+          "title": "Play it in your game.",
+          "media": {
+            "poster": "/media/storytelling/quest.jpg",
+            "video": "/media/storytelling/quest.mp4"
+          }
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "slug": "meshforge-garment",
+      "name": "MeshForge Garment",
+      "type": "Tool",
+      "track": "characters",
+      "line": "Fit an outfit to a body once, and it carries over to every other body shape.",
+      "price": "paid",
+      "storeId": "MeshForgeGarment",
+      "belongsTo": "meshforge",
+      "plugins": [
+        "MeshForgeGarment"
+      ],
+      "agentPlugins": [
+        "MeshForgeGarmentToolset"
+      ],
+      "needs": [
+        {
+          "kind": "app",
+          "name": "Blender",
+          "line": "The Garment Studio wraps in Blender, found on your machine."
+        }
+      ],
+      "mark": "Fit",
+      "media": {
+        "card": "/media/meshforge/outfits.jpg",
+        "cardVideo": "/media/meshforge/outfits.mp4",
+        "focus": "18% 50%"
+      },
+      "site": "/characters/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/meshforge/garment/",
+      "changelog": "https://docs.kovati.dev/docs/releases/meshforgegarment/"
+    },
+    {
+      "slug": "hairforge",
+      "name": "HairForge",
+      "type": "Tool",
+      "track": "characters",
+      "hero": true,
+      "tagline": "Strand hair",
+      "line": "Start from one of thirty looks and sculpt real strand hair live, in the viewport.",
+      "price": "paid",
+      "storeId": "HairForge",
+      "editions": [
+        {
+          "name": "HairForge for Unreal",
+          "price": "paid",
+          "line": "The full tool inside the Unreal editor, with live sculpting on the GPU and the hand-off to MetaHuman Creator."
+        },
+        {
+          "name": "HairForge for Blender",
+          "price": "paid",
+          "line": "The same looks and the same way of working, for artists who groom in Blender."
+        }
+      ],
+      "media": {
+        "card": "/media/hairforge/card.jpg",
+        "cardVideo": "/media/hairforge/card.mp4",
+        "hero": "/media/hairforge/hero.jpg",
+        "heroVideo": "/media/hairforge/hero.mp4"
+      },
+      "site": "/tools/hairforge/",
+      "page": {
+        "promise": "Hair in hours, not weeks.",
+        "subline": "Start from a look, then set how long and what colour, draw cornrows straight onto the head, and build it for MetaHuman Creator. Every strand live, inside Unreal.",
+        "priceLine": "HairForge is sold whole, with all thirty looks. There is no cut-down version, but you can try all of it in the Hub before you buy.",
+        "adds": [
+          {
+            "title": "Start from a look.",
+            "line": "Short, long, shaved, braided or curly."
+          },
+          {
+            "title": "Longer or shorter.",
+            "line": "The look rebuilds around the new length."
+          },
+          {
+            "title": "Any colour, the same cut.",
+            "line": "From black to platinum in one click."
+          },
+          {
+            "title": "Sleek or messy.",
+            "line": "Every strand follows while you drag."
+          },
+          {
+            "title": "Draw cornrows onto the head.",
+            "line": "Row by row, mirrored to the other side."
+          },
+          {
+            "title": "Fades, parts and shaved sides.",
+            "line": "Decide where hair grows, and how short."
+          },
+          {
+            "title": "Review it, then build it.",
+            "line": "From the stage to a real groom."
+          },
+          {
+            "title": "On the character you ship.",
+            "line": "Ada, a stock MetaHuman, in her own idle."
+          }
+        ],
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "The Unreal edition runs inside the editor. The Blender edition follows."
+          },
+          {
+            "name": "A graphics card",
+            "line": "Every strand updates live on the graphics card."
+          },
+          {
+            "name": "A character",
+            "line": "A MetaHuman, or your own character’s head."
+          }
+        ],
+        "shots": {
+          "kind": "interface",
+          "title": "A hair studio, inside Unreal.",
+          "line": "Look, scalp, shape, colour, review and output, step by step down the left, with the head live beside it.",
+          "items": [
+            {
+              "src": "/media/ui/hairforge/tiles.jpg",
+              "video": "/media/ui/hairforge/tiles.mp4",
+              "label": "HairForge · Unreal Editor 5.8",
+              "caption": "Click a tile and the look grows on the head, every strand, then turn the head to see it from every side.",
+              "width": 1600,
+              "height": 680
+            },
+            {
+              "src": "/media/ui/hairforge/colour.jpg",
+              "video": "/media/ui/hairforge/colour.mp4",
+              "label": "Finish · Colour",
+              "caption": "Click a colour and the hair changes in the same frame, without rebuilding.",
+              "width": 1280,
+              "height": 720
+            },
+            {
+              "src": "/media/ui/hairforge/views.jpg",
+              "video": "/media/ui/hairforge/views.mp4",
+              "label": "Views",
+              "caption": "Check the shape in grey, the density in wire, and the guides coloured by part.",
+              "width": 1280,
+              "height": 720
+            }
+          ]
+        },
+        "film": {
+          "src": "/media/hairforge/film.mp4",
+          "poster": "/media/hairforge/film.jpg",
+          "title": "From a bare head to a finished groom.",
+          "line": "A look picked, shaped, coloured and handed to MetaHuman Creator."
+        }
+      }
+    },
+    {
+      "slug": "skinforge",
+      "name": "SkinForge",
+      "type": "Tool",
+      "track": "characters",
+      "alsoIn": [
+        "worldbuilding"
+      ],
+      "hero": true,
+      "tagline": "Scars, tattoos",
+      "line": "Stamp scars, tattoos and marks onto a character in 3D, then bake them, with every layer reversible.",
+      "price": "free-tier",
+      "plugins": [
+        "SkinForge"
+      ],
+      "agentPlugins": [
+        "SkinForgeToolset"
+      ],
+      "editions": [
+        {
+          "name": "SkinForge Lite",
+          "price": "free",
+          "line": "Every feature, with every baked map capped at 2K."
+        },
+        {
+          "name": "SkinForge Full",
+          "price": "paid",
+          "line": "The same tool, baked at the full resolution of your character or mesh."
+        }
+      ],
+      "media": {
+        "card": "/media/skinforge/v4_hero_card.jpg?v=20261111a",
+        "cardVideo": "/media/skinforge/v4_hero_card.mp4?v=20261111a",
+        "hero": "/media/skinforge/v4_hero.jpg?v=20261111a",
+        "heroVideo": "/media/skinforge/v4_hero.mp4?v=20261111a"
+      },
+      "site": "/tools/skinforge/",
+      "page": {
+        "promise": "Scars, tattoos and marks, exactly where you want them.",
+        "subline": "Stamp a mark onto your character in 3D, set its age, its colour and its wear, then bake it into the textures. Every layer comes off again, and the originals are never touched.",
+        "priceLine": "SkinForge Lite is free, with baked maps capped at 2K. SkinForge Full bakes at full resolution.",
+        "adds": [
+          {
+            "title": "From bare skin to a back piece.",
+            "line": "Click, and it is on the skin."
+          },
+          {
+            "title": "Sixty-one marks to start with.",
+            "line": "Ink, scars and wounds, cyber, paint and grime, skin detail."
+          },
+          {
+            "title": "A fresh session, or twenty years on.",
+            "line": "Every mark comes with presets."
+          },
+          {
+            "title": "Pick the colour of the glow.",
+            "line": "Implants that light up."
+          },
+          {
+            "title": "Each mark has its own controls.",
+            "line": "Wear, inks, age and glow, per layer."
+          },
+          {
+            "title": "From a fresh cut to an old scar.",
+            "line": "One slider ages the mark."
+          },
+          {
+            "title": "More than colour.",
+            "line": "Relief, shine and tissue, per mark."
+          },
+          {
+            "title": "Day 1, and Day 4.",
+            "line": "Bruises heal the way bruises do."
+          },
+          {
+            "title": "It follows the body.",
+            "line": "Stamped in 3D, at its true size."
+          },
+          {
+            "title": "Every layer comes off again.",
+            "line": "Bake versions, and go back to any of them."
+          }
+        ],
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Everything runs inside the editor."
+          },
+          {
+            "name": "A mesh with textures",
+            "line": "A MetaHuman, your own character, or a skeletal prop."
+          },
+          {
+            "name": "Marks to stamp",
+            "line": "A starter library of 61 marks comes with it. Bring your own images too."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "Made in the skin, not painted on it.",
+          "line": "Every picture on this page is one MetaHuman in one light, with SkinForge marks baked into his own textures.",
+          "items": [
+            {
+              "src": "/media/skinforge/v4_hero_paint_face.jpg?v=20261111a",
+              "label": "War dots and finger stripes",
+              "width": 1920,
+              "height": 1080
+            },
+            {
+              "src": "/media/skinforge/v4_card_hero_cyber_macro.jpg?v=20261111a",
+              "label": "UV circuit · Cyan",
+              "width": 1920,
+              "height": 1080
+            },
+            {
+              "src": "/media/skinforge/v4_hero_ink_back.jpg?v=20261111a",
+              "label": "Dragon back piece · Healed",
+              "width": 1920,
+              "height": 1080
+            }
+          ]
+        },
+        "film": {
+          "src": "/media/skinforge/v4_film.mp4?v=20261111a",
+          "poster": "/media/skinforge/v4_film.jpg?v=20261111a",
+          "title": "Every mark, on the skin.",
+          "line": "Ink, scars, paint and cyberware, stamped, aged and baked on one character."
+        }
+      },
+      "freeTierLive": false
+    },
+    {
+      "slug": "motionforge",
+      "name": "MotionForge",
+      "type": "Tool",
+      "track": "animation",
+      "hero": true,
+      "tagline": "Typed motion",
+      "line": "Describe a motion and watch it play on your own character, as an ordinary animation.",
+      "price": "free",
+      "plugins": [
+        "MotionForge"
+      ],
+      "agentPlugins": [
+        "MotionForgeToolset"
+      ],
+      "media": {
+        "card": "/media/motionforge/card.jpg?v=20261109b",
+        "cardVideo": "/media/motionforge/card.mp4?v=20261109b",
+        "hero": "/media/motionforge/hero.jpg",
+        "heroVideo": "/media/motionforge/hero.mp4",
+        "heroFocus": "70% 50%"
+      },
+      "site": "/tools/motionforge/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/motionforge/",
+      "changelog": "https://docs.kovati.dev/docs/releases/motionforge/",
+      "page": {
+        "promise": "Type a motion. Watch your character do it.",
+        "subline": "Describe what the character does, generate a few takes, and keep the one you like. It lands on your own skeleton as an ordinary Unreal animation.",
+        "priceLine": "MotionForge and both engines are free. Kimodo runs on your own GPU; Uthana bills your own account.",
+        "adds": [
+          {
+            "title": "Say what happens.",
+            "line": "Who moves, what they do, and how it ends."
+          },
+          {
+            "title": "Keep the take you like.",
+            "line": "Generate several, compare them, choose one."
+          },
+          {
+            "title": "Quick enough to try again.",
+            "line": "A second idea costs a few seconds, not a session."
+          },
+          {
+            "title": "Walks, looks, gestures.",
+            "line": "Described in plain words, played in your level."
+          },
+          {
+            "title": "Your GPU, or your account.",
+            "line": "Choose the engine per motion, not per project."
+          },
+          {
+            "title": "On your own character.",
+            "line": "A MetaHuman, the Unreal mannequin, or your own skeleton."
+          }
+        ],
+        "inside": {
+          "title": "What comes with it",
+          "line": "Two engines to choose from, and a first motion in a few minutes.",
+          "items": [
+            {
+              "name": "Get started",
+              "line": "Three steps in one window: where motion is made, who it is for, and what happens. Each one checks itself and says what is missing."
+            },
+            {
+              "name": "Example prompts",
+              "line": "Prompts to start from, with the way of writing them that works: one or two actions, named poses, and an ending in a relaxed idle."
+            },
+            {
+              "name": "A record in every clip",
+              "line": "Each animation remembers the engine, the prompt and the seed that made it, long after the motion is renamed or deleted."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Everything runs inside the editor."
+          },
+          {
+            "name": "A character",
+            "line": "A MetaHuman, the Unreal mannequin, or your own skeletal character."
+          },
+          {
+            "name": "For Kimodo: Docker and a graphics card",
+            "line": "Free per take. About 20 GB to download once, and a free Hugging Face account. A card with about 16 GB of spare memory runs it fastest; smaller cards work with system memory, slower. Or rent a GPU by the hour on your own Runpod account."
+          },
+          {
+            "name": "For Uthana: your own account",
+            "line": "Paid to Uthana at their rates, $0.10 a generated second on pay as you go. You see the price on the button before you generate."
+          }
+        ],
+        "shots": {
+          "kind": "interface",
+          "title": "A motion studio, inside Unreal.",
+          "line": "Every motion has its own window: the prompt, the character and the engine on the right, the takes playing on your character on the left.",
+          "items": [
+            {
+              "src": "/media/ui/motionforge/r1_window.jpg",
+              "label": "MD_Arrival · Motion Definition",
+              "caption": "Three takes from one prompt, each with its seed and its cost. Two of them walk side by side on one clock while you choose.",
+              "width": 1920,
+              "height": 846
+            },
+            {
+              "src": "/media/ui/motionforge/r1_get_started.jpg",
+              "label": "Get started",
+              "caption": "Three steps to a first motion, each checking itself and saying what is missing.",
+              "width": 996,
+              "height": 560
+            },
+            {
+              "src": "/media/ui/motionforge/library.jpg",
+              "label": "MotionForge · Library",
+              "caption": "Every motion in the project, with its engine, its takes and the animation it made.",
+              "width": 1052,
+              "height": 1000
+            }
+          ]
+        },
+        "film": {
+          "src": "/media/motionforge/film.mp4",
+          "poster": "/media/motionforge/film.jpg",
+          "title": "From a sentence to a character that moves in your game.",
+          "line": "A motion typed, three takes generated, one kept, and playing on your characters in the level."
+        }
+      }
+    },
+    {
+      "slug": "motionforge-kimodo",
+      "name": "MotionForge Kimodo",
+      "type": "Add-on",
+      "track": "animation",
+      "line": "Generate motion on your own graphics card, at no cost per take.",
+      "price": "free",
+      "belongsTo": "motionforge",
+      "extends": "motionforge",
+      "addonKind": "provider",
+      "runs": "On your graphics card · free per take",
+      "vendor": "NVIDIA Kimodo",
+      "plugins": [
+        "MotionForgeKimodo"
+      ],
+      "agentPlugins": [
+        "MotionForgeKimodoToolset"
+      ],
+      "needs": [
+        {
+          "kind": "app",
+          "name": "Docker Desktop",
+          "line": "Kimodo runs in a container on this machine."
+        },
+        {
+          "kind": "gpu",
+          "name": "A graphics card",
+          "line": "A card with about 16 GB of spare memory runs it fastest; smaller cards work with system memory, slower. Or rent a GPU by the hour on your own Runpod account."
+        },
+        {
+          "kind": "key",
+          "name": "Hugging Face",
+          "keyId": "HuggingFace",
+          "line": "A free Hugging Face account, to download the model."
+        },
+        {
+          "kind": "key",
+          "name": "Runpod",
+          "keyId": "Runpod",
+          "optional": true,
+          "line": "Only to rent a GPU by the hour."
+        }
+      ],
+      "runners": [
+        "Kimodo"
+      ],
+      "later": "About 20 GB to download once, when you set it up.",
+      "site": "/animation/",
+      "changelog": "https://docs.kovati.dev/docs/releases/motionforgekimodo/"
+    },
+    {
+      "slug": "motionforge-uthana",
+      "name": "MotionForge Uthana",
+      "type": "Add-on",
+      "track": "animation",
+      "line": "Generate motion with Uthana on your own account, fingers included.",
+      "price": "free",
+      "belongsTo": "motionforge",
+      "extends": "motionforge",
+      "addonKind": "provider",
+      "runs": "Cloud · your Uthana account",
+      "vendor": "Uthana",
+      "plugins": [
+        "MotionForgeUthana"
+      ],
+      "needs": [
+        {
+          "kind": "key",
+          "name": "Uthana",
+          "keyId": "MotionForge.Uthana",
+          "line": "Your own Uthana account, at their rates. You see the price on the button before you generate."
+        }
+      ],
+      "site": "/animation/",
+      "changelog": "https://docs.kovati.dev/docs/releases/motionforgeuthana/"
+    },
+    {
+      "slug": "motionforge-quality",
+      "name": "MotionForge Quality",
+      "type": "Add-on",
+      "track": "animation",
+      "line": "Score every take, so the good ones rise to the top of a batch.",
+      "price": "free",
+      "extends": "motionforge",
+      "addonKind": "extension",
+      "plugins": [
+        "MotionForgeQuality"
+      ],
+      "agentPlugins": [
+        "MotionForgeQualityToolset"
+      ],
+      "site": "/animation/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/motionforge/quality/",
+      "changelog": "https://docs.kovati.dev/docs/releases/motionforgequality/",
+      "listed": false
+    },
+    {
+      "slug": "montageforge",
+      "name": "MontageForge",
+      "type": "Tool",
+      "track": "animation",
+      "line": "Turn any animation clip into a montage your gameplay can play.",
+      "price": "free",
+      "belongsTo": "motionforge",
+      "plugins": [
+        "MontageForge"
+      ],
+      "agentPlugins": [
+        "MontageForgeToolset"
+      ],
+      "mark": "Play",
+      "media": {
+        "card": "/media/animation/montage.jpg",
+        "cardVideo": "/media/animation/montage.mp4",
+        "focus": "72% 50%",
+        "hero": "/media/animation/montage.jpg",
+        "heroVideo": "/media/animation/montage.mp4"
+      },
+      "site": "/tools/montageforge/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/montageforge/",
+      "changelog": "https://docs.kovati.dev/docs/releases/montageforge/",
+      "page": {
+        "promise": "From a clip to a move your gameplay can play.",
+        "subline": "Turn any animation into a montage with gameplay events exactly where you put them. Regenerate the animation and your timings and hand-tuning still hold.",
+        "priceLine": "MontageForge is free.",
+        "adds": [
+          {
+            "title": "Events where you put them.",
+            "line": "Your ability hears the moment it happens."
+          },
+          {
+            "title": "Regenerate without losing your work.",
+            "line": "Timings follow the clip, whatever its new length."
+          },
+          {
+            "title": "Play it while walking.",
+            "line": "Arms and torso from the montage, legs from locomotion."
+          },
+          {
+            "title": "Nothing that uses it breaks.",
+            "line": "A rebuild updates the montage in place."
+          }
+        ],
+        "inside": {
+          "title": "What comes with it",
+          "line": "Two small assets and one build. It knows nothing about your game, so it works in any of them.",
+          "items": [
+            {
+              "name": "Montage Recipe",
+              "line": "The clip, the slot, the blends, the body mask and the events. The recipe is the source; the montage is built from it."
+            },
+            {
+              "name": "Curve Preset",
+              "line": "A body mask, saved once: which parts of the body a montage drives over locomotion."
+            },
+            {
+              "name": "The gameplay event",
+              "line": "An animation event that sends a gameplay tag to the character. The one piece most projects end up writing themselves."
+            },
+            {
+              "name": "Play styles",
+              "line": "Move freely while it plays, or hold still until it ends."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "With the Gameplay Abilities plugin that ships with the engine."
+          },
+          {
+            "name": "An animation",
+            "line": "Anything: from MotionForge, from capture, or keyframed by hand."
+          },
+          {
+            "name": "An animation blueprint with slots",
+            "line": "For layered montages, the curves your blueprint reads. Copy them from a montage that already works."
+          }
+        ],
+        "shots": {
+          "kind": "interface",
+          "title": "A montage your game can play, built for you.",
+          "line": "This is Unreal’s own montage editor, open on a montage MontageForge built from a recipe: the clip in its slot, the gameplay event where the needle goes in, and the curves that say which part of the body the move drives.",
+          "items": [
+            {
+              "src": "/media/ui/montageforge/montage-editor.jpg",
+              "label": "AM_StimpackSelf",
+              "caption": "A self-injection move, built from its recipe: one gameplay event, the upper body only.",
+              "width": 1942,
+              "height": 1054
+            },
+            {
+              "src": "/media/ui/montageforge/timeline.jpg",
+              "label": "Timeline",
+              "caption": "The event sits where the recipe put it, as a share of the clip.",
+              "width": 1140,
+              "height": 327
+            }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "meshweightremap",
+      "name": "MeshWeightRemap",
+      "type": "Utility",
+      "track": "characters",
+      "line": "Fix garments that stay pinned while the body moves, so they follow the character they are worn on.",
+      "price": "free",
+      "plugins": [
+        "MeshWeightRemap"
+      ],
+      "agentPlugins": [
+        "MeshWeightRemapToolset"
+      ],
+      "mark": "Bind",
+      "site": "/characters/",
+      "docs": "https://docs.kovati.dev/docs/tools/mesh-weight-remap/",
+      "changelog": "https://docs.kovati.dev/docs/releases/meshweightremap/"
+    },
+    {
+      "slug": "marvelous-designer-playbook",
+      "name": "Marvelous Designer playbook",
+      "type": "Playbook",
+      "track": "characters",
+      "line": "Sew a garment in Marvelous Designer and bring it into your game, step by step.",
+      "price": "free",
+      "belongsTo": "meshforge",
+      "software": [
+        "Marvelous Designer"
+      ],
+      "media": {
+        "card": "/media/marvelous-designer-playbook/card.jpg",
+        "cardVideo": "/media/marvelous-designer-playbook/card.mp4",
+        "hero": "/media/marvelous-designer-playbook/reel.jpg",
+        "heroVideo": "/media/marvelous-designer-playbook/reel.mp4"
+      },
+      "site": "/tools/marvelous-designer-playbook/",
+      "page": {
+        "promise": "Sew it in Marvelous Designer. Wear it in your game.",
+        "subline": "A playbook is a pipeline you can follow step by step: a guide for you, and skills and scripts your agent can run. This one takes a garment from Marvelous Designer to a character in Unreal, the way we dress our own cast.",
+        "priceLine": "The Marvelous Designer playbook is free. The production know-how, layered outfits, simulated cloth and one fit for every body, is the Garment production playbook.",
+        "adds": [
+          {
+            "title": "Marvelous Designer, on a script.",
+            "line": "Your agent works in it. You keep the final say."
+          },
+          {
+            "title": "Bodies at their real size.",
+            "line": "The trap that wastes the first afternoon."
+          },
+          {
+            "title": "Start from a garment that exists.",
+            "line": "A first look in under a minute."
+          },
+          {
+            "title": "Seams that close, every time.",
+            "line": "Checked before you simulate, measured after."
+          },
+          {
+            "title": "Out to the game in one run.",
+            "line": "Fit, settle, pack and export, about two minutes."
+          }
+        ],
+        "inside": {
+          "title": "What is in the playbook.",
+          "line": "Every step works by hand from the guide. The skills and scripts are there when you want an agent to do the repetitive part.",
+          "items": [
+            {
+              "name": "The guide",
+              "line": "From an empty scene to a garment on your character: bodies, starting garments, sewing, settling, export and import, with the traps we hit along the way."
+            },
+            {
+              "name": "The Marvelous Designer bridge",
+              "line": "An open-source MCP server, with our fixes so the window never freezes and a session can restart on its own."
+            },
+            {
+              "name": "Agent skills",
+              "line": "How an agent starts the bridge, drives Marvelous Designer, checks its own work and stops when something looks wrong."
+            },
+            {
+              "name": "The garment pipeline",
+              "line": "One command from a recipe to a fitted, settled, exported garment, with checkpoints so a failed step resumes where it stopped."
+            },
+            {
+              "name": "Body set-up",
+              "line": "How to bring in your own character and Epic’s free reference bodies at the right size, saved once and reused."
+            },
+            {
+              "name": "Checks and renders",
+              "line": "The seam audit, cloth-inside-body counts and fixed-camera renders, so you compare tries, not angles."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Marvelous Designer 2026",
+            "line": "Your own licence, on the tier its terms ask of your studio. Tested on 2026.1."
+          },
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "For the last step, with MeshForge Garment to put the garment on your character."
+          },
+          {
+            "name": "Python",
+            "line": "To run the pipeline and the bridge. No account and no fee."
+          },
+          {
+            "name": "An agent, if you want one",
+            "line": "Any agent that speaks MCP can run the steps. The guide works without one."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "One garment, fitted to six bodies.",
+          "line": "Fitted once on the player, then fitted again on each of Epic’s free reference bodies. About a minute and a half a body, with nobody at the mouse.",
+          "items": [
+            {
+              "src": "/media/marvelous-designer-playbook/bodies.jpg",
+              "caption": "The same suit on six bodies, front and back. Each one fitted by Marvelous Designer’s own Auto Fit, run from a script.",
+              "width": 2100,
+              "height": 1050
+            },
+            {
+              "src": "/media/marvelous-designer-playbook/skirt-wide.jpg",
+              "label": "Drafted",
+              "caption": "A skirt drafted from the body’s measurements, sewn and settled by script.",
+              "width": 900,
+              "height": 506
+            },
+            {
+              "src": "/media/marvelous-designer-playbook/draft-wide.jpg",
+              "label": "Patterns",
+              "caption": "The flat patterns behind it, with every corner named, so every seam can be checked.",
+              "width": 1500,
+              "height": 844
+            }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "garment-playbook",
+      "name": "Garment production playbook",
+      "type": "Playbook",
+      "track": "characters",
+      "line": "Layered outfits, simulated cloth and one fit for every body: the way we dress our own cast.",
+      "price": "paid",
+      "belongsTo": "meshforge",
+      "software": [
+        "Marvelous Designer"
+      ],
+      "media": {
+        "card": "/media/garment-playbook/card.jpg",
+        "cardVideo": "/media/garment-playbook/card.mp4",
+        "hero": "/media/garment-playbook/reel.jpg",
+        "heroVideo": "/media/garment-playbook/reel.mp4"
+      },
+      "site": "/tools/garment-playbook/",
+      "page": {
+        "promise": "Outfits that layer, move and fit every body.",
+        "subline": "The production half of dressing a game cast: garments that go over and under each other on their own, cloth that swings without costing a frame, one fit for every body shape, and fabric that looks the same on every piece. Taken from what we learned dressing our own game.",
+        "priceLine": "Paid, bought once. It is the know-how behind our own cast, on top of the free Marvelous Designer playbook.",
+        "adds": [
+          {
+            "title": "Layers that sort themselves out.",
+            "line": "Every garment fitted alone, given a number, combined in play."
+          },
+          {
+            "title": "Slots for clothes, not for skin.",
+            "line": "A coat never hides the suit under it."
+          },
+          {
+            "title": "One fit for every body.",
+            "line": "Not a mesh per character."
+          },
+          {
+            "title": "Cloth that swings, cheaply.",
+            "line": "A light mesh moves, the detailed one follows."
+          },
+          {
+            "title": "The same cloth, the same size.",
+            "line": "Measured per garment, not guessed."
+          }
+        ],
+        "inside": {
+          "title": "What is in the playbook.",
+          "line": "Production knowledge, curated from three months of real work on our own cast. Every step works by hand; the skills let an agent do the repetitive part.",
+          "items": [
+            {
+              "name": "The production guide",
+              "line": "Layering, slots and masks, fitting across bodies, simulated cloth and fabric scale, with the numbers we measured and the traps we paid for."
+            },
+            {
+              "name": "Layer and mask tools",
+              "line": "Measure each garment alone on every reference body, and write its layer tables and its body and head masks."
+            },
+            {
+              "name": "The multi-body fit",
+              "line": "Fit one garment to each reference body in Marvelous Designer, then turn the fits into shapes the game blends."
+            },
+            {
+              "name": "The simulated-cloth recipe",
+              "line": "Strip, simplify and export the moving part, build one cloth asset with a shape per body, and the tuning that made our tail behave."
+            },
+            {
+              "name": "Fabric scale and looks",
+              "line": "The UV size measurement, and the way one master material carries looks, badges, names and ranks."
+            },
+            {
+              "name": "Agent skills and checks",
+              "line": "Skills for each stage, and the validators that caught our own mistakes, such as a tail bound five centimetres too low."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "The Marvelous Designer playbook",
+            "line": "The free playbook comes first: this one starts where a garment is already in your game."
+          },
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "With Chaos Cloth for the simulated parts."
+          },
+          {
+            "name": "Marvelous Designer 2026",
+            "line": "Your own licence, for fitting to several bodies and exporting the cloth."
+          },
+          {
+            "name": "A family of bodies",
+            "line": "MetaHumans today. Any character standard whose bodies share one mesh layout works the same way."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "One suit, five looks, every body.",
+          "line": "One garment and one master material. The look, the badge, the rank and the name are settings on the wearer, not new meshes.",
+          "items": [
+            {
+              "src": "/media/garment-playbook/looks.jpg",
+              "caption": "Clean cryo, worn work, military, void pilot and deck crew: the same mesh and the same material, five looks.",
+              "width": 2000,
+              "height": 551
+            },
+            {
+              "src": "/media/garment-playbook/chest-wide.jpg",
+              "label": "Detail",
+              "caption": "Name and rank are typed in, not painted: one material makes every crew member’s tape.",
+              "width": 1383,
+              "height": 778
+            },
+            {
+              "src": "/media/garment-playbook/badge-wide.jpg",
+              "label": "Badges",
+              "caption": "Embroidered badges, with thread relief that catches the light.",
+              "width": 821,
+              "height": 450
+            },
+            {
+              "src": "/media/garment-playbook/jacket-wide.jpg",
+              "label": "Layers",
+              "caption": "A coat built to go over the suit, fitted on its own.",
+              "width": 903,
+              "height": 508
+            }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "hairforge-looks",
+      "name": "HairForge look packs",
+      "type": "Kit",
+      "track": "characters",
+      "line": "More looks to start from, each one fully editable in HairForge.",
+      "price": "paid",
+      "belongsTo": "hairforge",
+      "contents": [
+        "Editable strand looks",
+        "presets"
+      ],
+      "mark": "Looks",
+      "media": {
+        "card": "/media/hairforge/looks.jpg",
+        "cardVideo": "/media/hairforge/looks.mp4"
+      },
+      "site": "/characters/"
+    },
+    {
+      "slug": "skinforge-stamps",
+      "name": "SkinForge stamp packs",
+      "type": "Kit",
+      "track": "characters",
+      "line": "Ready-made scars, tattoos and wear to stamp on any character or mesh.",
+      "price": "paid",
+      "belongsTo": "skinforge",
+      "contents": [
+        "Scars",
+        "tattoos",
+        "wear and dirt"
+      ],
+      "mark": "Marks",
+      "media": {
+        "card": "/media/skinforge/v4_card_Tattoo_Tiger.jpg"
+      },
+      "site": "/characters/"
+    },
+    {
+      "slug": "terrainforge",
+      "name": "TerrainForge",
+      "type": "Tool",
+      "track": "worldbuilding",
+      "hero": true,
+      "tagline": "Real terrain",
+      "line": "Build terrain from a real place or in a procedural node graph, inside the level you are making.",
+      "price": "free-tier",
+      "storeId": "TerrainForge",
+      "plugins": [
+        "TerrainForge"
+      ],
+      "agentPlugins": [
+        "TerrainForgeToolset"
+      ],
+      "editions": [
+        {
+          "name": "TerrainForge Lite",
+          "price": "free",
+          "line": "Every node, real places and the import to a level, with the output resolution capped."
+        },
+        {
+          "name": "TerrainForge Full",
+          "price": "paid",
+          "line": "The full resolution, the largest maps and the big presets. Your terrains carry over from Lite."
+        }
+      ],
+      "media": {
+        "card": "/media/terrainforge/card.jpg?v=20261109",
+        "cardVideo": "/media/terrainforge/card.mp4?v=20261109",
+        "hero": "/media/terrainforge/hero.jpg?v=20261109d",
+        "heroVideo": "/media/terrainforge/hero.mp4?v=20261109d"
+      },
+      "site": "/tools/terrainforge/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/terrainforge/",
+      "changelog": "https://docs.kovati.dev/docs/releases/terrainforge/",
+      "page": {
+        "promise": "Real or imagined terrain, built in your level.",
+        "subline": "Bring in a real place from the map, or build one procedurally in a node graph, from a template or from your own. Rain, rivers and ice shape the ground, and you watch it happen in your own lighting and materials.",
+        "priceLine": "Lite is free, with the output resolution capped. Full is paid, and your terrains carry over when you move up.",
+        "adds": [
+          {
+            "title": "Any place on Earth, playable.",
+            "line": "Search for a place, draw a square, and it comes in."
+          },
+          {
+            "title": "Mountains, deserts, ice and coasts.",
+            "line": "Real places, each from its country’s own survey."
+          },
+          {
+            "title": "Or start from a template.",
+            "line": "Six of the ready graphs that ship with it."
+          },
+          {
+            "title": "Inside the graph.",
+            "line": "Landforms, then the weather, then the layers."
+          },
+          {
+            "title": "Agents can drive it too.",
+            "line": "Every step is a tool an agent can call."
+          },
+          {
+            "title": "Straight to a level, with every layer.",
+            "line": "Heightmap, masks and materials arrive together."
+          },
+          {
+            "title": "One click to a level, then dress it.",
+            "line": "Its masks feed your materials and your PCG."
+          },
+          {
+            "title": "Layer by layer.",
+            "line": "Its masks place the river, the meadow and the forest."
+          },
+          {
+            "title": "Then walk it.",
+            "line": "Levels from real places, dressed and explored."
+          }
+        ],
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Everything runs inside the editor, in the level you are building."
+          },
+          {
+            "name": "Any graphics card, or none",
+            "line": "The heaviest steps run on the graphics card when there is one, and on the processor when there is not."
+          },
+          {
+            "name": "An internet connection, for real places",
+            "line": "Map data comes in with no account and no key. Procedural terrain works offline."
+          }
+        ],
+        "shots": {
+          "kind": "interface",
+          "title": "A real editor, docked beside your level.",
+          "line": "A library of landforms, a live 3D preview, the flow graph that makes it, and a monitor for every build. One window, inside Unreal.",
+          "items": [
+            {
+              "src": "/media/ui/terrainforge/editor-orbit.jpg?v=20261109d",
+              "video": "/media/ui/terrainforge/editor-orbit.mp4?v=20261109d",
+              "label": "TerrainForge · Unreal Editor 5.8",
+              "caption": "Landforms on the left, the live preview turning in the middle with the flow graph under it, the builds on the right.",
+              "width": 1600,
+              "height": 900
+            },
+            {
+              "src": "/media/ui/terrainforge/build.jpg?v=20261109d",
+              "video": "/media/ui/terrainforge/build.mp4?v=20261109d",
+              "label": "Build monitor",
+              "caption": "Every pass with its time and memory, and which nodes ran on the graphics card.",
+              "width": 1600,
+              "height": 900
+            },
+            {
+              "src": "/media/ui/terrainforge/presets.jpg?v=20261109d",
+              "label": "Start from a preset",
+              "caption": "Start from a ready graph and its world settings. Everything stays editable.",
+              "width": 1400,
+              "height": 910
+            }
+          ]
+        },
+        "film": {
+          "src": "/media/terrainforge/film.mp4?v=20261109d",
+          "poster": "/media/terrainforge/film.jpg?v=20261109d",
+          "title": "From a map to your world.",
+          "line": "Real places brought in, shaped in the graph, built into a level and dressed, layer by layer."
+        }
+      },
+      "freeTierLive": false
+    },
+    {
+      "slug": "roads-kit",
+      "name": "Roads, rivers and trails",
+      "type": "Kit",
+      "track": "worldbuilding",
+      "line": "Draw roads, rivers and trails that cut into the terrain, with bridges where they cross.",
+      "price": "paid",
+      "belongsTo": "terrainforge",
+      "contents": [
+        "Road, river and trail splines",
+        "bridges",
+        "materials"
+      ],
+      "media": {
+        "card": "/media/roads-kit/card.jpg",
+        "cardVideo": "/media/roads-kit/card.mp4"
+      },
+      "site": "/worldbuilding/"
+    },
+    {
+      "slug": "pcg-kit",
+      "name": "PCG kit",
+      "type": "Kit",
+      "track": "worldbuilding",
+      "line": "Forests, meadows and rocks that read the terrain and fill it the way nature would.",
+      "price": "free",
+      "belongsTo": "terrainforge",
+      "contents": [
+        "PCG graphs",
+        "materials",
+        "a setup panel"
+      ],
+      "media": {
+        "card": "/media/pcg-kit/card.jpg",
+        "cardVideo": "/media/pcg-kit/card.mp4"
+      },
+      "site": "/worldbuilding/"
+    },
+    {
+      "slug": "terrainforge-nextmap",
+      "name": "TerrainForge NEXTMap",
+      "type": "Add-on",
+      "track": "worldbuilding",
+      "line": "Any place on Earth at one metre, from Intermap’s NEXTMap One, on your own account.",
+      "price": "paid",
+      "belongsTo": "terrainforge",
+      "extends": "terrainforge",
+      "addonKind": "provider",
+      "runs": "Cloud · your Intermap account",
+      "site": "/worldbuilding/"
+    },
+    {
+      "slug": "roomforge",
+      "name": "RoomForge",
+      "type": "Tool",
+      "track": "worldbuilding",
+      "line": "Build ships, stations and bunkers from parts that snap to one grid.",
+      "price": "free-tier",
+      "mark": "Snap",
+      "media": {
+        "card": "/media/roomforge/card.jpg",
+        "cardVideo": "/media/roomforge/card.mp4",
+        "hero": "/media/roomforge/reel.jpg",
+        "heroVideo": "/media/roomforge/reel.mp4"
+      },
+      "site": "/tools/roomforge/",
+      "page": {
+        "promise": "Draw the plan. Walk the interior.",
+        "subline": "Corridors, rooms, halls, doors and stairs snap to one grid, so a ship, a station or a bunker goes together like a floor plan. Move a room and the walls around it rebuild.",
+        "priceLine": "A free tier to build your first interior, and a full version that is paid. Part kits are added on top.",
+        "adds": [
+          {
+            "title": "Everything snaps.",
+            "line": "One grid, so parts meet without seams."
+          },
+          {
+            "title": "Draw it as a floor plan.",
+            "line": "Areas, then rooms, then the doors between them."
+          },
+          {
+            "title": "Doors that are yours.",
+            "line": "Your door Blueprint fits every opening of its size."
+          },
+          {
+            "title": "Up and down, too.",
+            "line": "Stairs, lifts and halls that span decks."
+          },
+          {
+            "title": "Lights the game can switch.",
+            "line": "Normal, emergency or off, per room or per circuit."
+          },
+          {
+            "title": "Your own parts, from Plasticity.",
+            "line": "Design a piece, and it snaps like ours."
+          }
+        ],
+        "inside": {
+          "title": "What it is made of.",
+          "line": "RoomForge grows out of the tools we use to build Colony. Much of it already builds our own levels.",
+          "items": [
+            {
+              "name": "The grid parts",
+              "line": "Corridor sections, wall bays, corners, ceilings, floor strips, doors, windows and frames, all on the 4 m grid."
+            },
+            {
+              "name": "The plan editor",
+              "line": "Draw areas and rooms, connect them, and furnish them from what each room is for. Built for Colony; being moved to the new parts."
+            },
+            {
+              "name": "Rules, not random",
+              "line": "Rooms furnish themselves by rules you can read and change. Re-roll a room, and pin what you like so it stays."
+            },
+            {
+              "name": "More looks",
+              "line": "Next: the same parts in other looks, such as industrial, habitat, medical and military, each with its own lighting and dressing."
+            },
+            {
+              "name": "More kinds of place",
+              "line": "Next: part kits for stations, bunkers and dungeons, added to RoomForge like the ship kit."
+            },
+            {
+              "name": "The Plasticity playbook",
+              "line": "Free: how to design your own parts in Plasticity so they snap to the grid."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "The rooms are built in your level, from ordinary meshes, lights and door Blueprints."
+          },
+          {
+            "name": "Plasticity, for your own parts",
+            "line": "Only if you design parts of your own. It is sold by its makers; the playbook is free."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "Built from parts, in our own game.",
+          "line": "Every space here is made of the same pieces on the same 4 m grid: corridor sections, wall bays, doors, frames and galleries. We built them for Colony, our own game, and they are where RoomForge starts.",
+          "items": [
+            {
+              "src": "/media/roomforge/atrium.jpg",
+              "label": "Atrium",
+              "caption": "An atrium: the same rib, window and floor parts, repeated down its length.",
+              "width": 1383,
+              "height": 862
+            },
+            {
+              "src": "/media/roomforge/corridor.jpg",
+              "label": "Corridor",
+              "caption": "A corridor: one frame section, repeated, with a door at the end.",
+              "width": 1383,
+              "height": 798
+            },
+            {
+              "src": "/media/roomforge/farm.jpg",
+              "label": "Farm",
+              "caption": "A farm hall, its plots laid on the same grid as the floor.",
+              "width": 1383,
+              "height": 862
+            },
+            {
+              "src": "/media/roomforge/hangar-high.jpg",
+              "label": "Hangar",
+              "caption": "A hangar, from the gallery its stairs climb to.",
+              "width": 1383,
+              "height": 862
+            }
+          ]
+        }
+      },
+      "freeTierLive": false
+    },
+    {
+      "slug": "plasticity-playbook",
+      "name": "Plasticity playbook",
+      "type": "Playbook",
+      "track": "worldbuilding",
+      "line": "Design your own parts in Plasticity and bring them into the level, ready to snap.",
+      "price": "free",
+      "belongsTo": "roomforge",
+      "software": [
+        "Plasticity"
+      ],
+      "media": {
+        "card": "/media/plasticity-playbook/card.jpg",
+        "cardVideo": "/media/plasticity-playbook/card.mp4",
+        "hero": "/media/plasticity-playbook/reel.jpg",
+        "heroVideo": "/media/plasticity-playbook/reel.mp4"
+      },
+      "site": "/tools/plasticity-playbook/",
+      "page": {
+        "promise": "Design your own parts in Plasticity. Build rooms with them.",
+        "subline": "A playbook is a pipeline you can follow step by step: a guide for you, and skills and scripts your agent can run. This one takes crisp, bevelled parts from Plasticity to your level, sized to one grid so they fit together.",
+        "priceLine": "The Plasticity playbook is free. It belongs to RoomForge, the room builder its parts snap into.",
+        "adds": [
+          {
+            "title": "Model the way Plasticity wants.",
+            "line": "Block first, then refine, then bevel every edge."
+          },
+          {
+            "title": "Parts that fit together.",
+            "line": "One grid, and pieces that stretch to any width."
+          },
+          {
+            "title": "Build a part once.",
+            "line": "Then copy it, mirror it, array it."
+          },
+          {
+            "title": "Small detail, without the triangles.",
+            "line": "Screws, vents and labels go in a sheet."
+          },
+          {
+            "title": "Into the level, cleanly.",
+            "line": "Through Blender, checked on the way."
+          }
+        ],
+        "inside": {
+          "title": "What is in the playbook.",
+          "line": "Every step works by hand in Plasticity and Blender. The skills and scripts are there when you want an agent to model or check the repetitive parts.",
+          "items": [
+            {
+              "name": "The guide",
+              "line": "From a drawing to a part in your level: order of work, the grid, repeating parts, trim sheets, export, and the operations Plasticity refuses."
+            },
+            {
+              "name": "Agent skills",
+              "line": "How an agent launches Plasticity, models, saves so the window is really saved, and checks each step from what it returns."
+            },
+            {
+              "name": "Scripts",
+              "line": "The helpers we model with: run a list of steps, build a part once and repeat it, save and reopen safely."
+            },
+            {
+              "name": "The Blender stage",
+              "line": "The bridge settings that tessellate well for a game, materials by part name, and renders from fixed cameras."
+            },
+            {
+              "name": "Checks",
+              "line": "Gaps that leak light, faces that flicker against each other, doors that hit what is beside them, run on the export before it reaches the level."
+            },
+            {
+              "name": "Sockets in the part",
+              "line": "Marker bodies that carry each attachment point and its direction inside the geometry, so they survive every export."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Plasticity",
+            "line": "Your own licence. The agent route needs version 26.1.3, the one its server supports."
+          },
+          {
+            "name": "Blender",
+            "line": "Free. For the bridge, tessellation, materials and the checks."
+          },
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Where the parts end up."
+          },
+          {
+            "name": "An agent, if you want one",
+            "line": "Through a community MCP server for Plasticity. The guide works without one."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "A ship, from parts.",
+          "line": "Walls, frames, floors, nooks and doors, each modelled once in Plasticity on a 4 m grid, then placed again and again.",
+          "items": [
+            {
+              "src": "/media/plasticity-playbook/corridor.jpg",
+              "caption": "One corridor, built from a handful of parts: the same frame, wall and floor strips, repeated along the grid.",
+              "width": 1600,
+              "height": 900
+            },
+            {
+              "src": "/media/plasticity-playbook/gallery-wide.jpg",
+              "label": "Halls",
+              "caption": "A hall’s rib cage, the same way, at a larger scale.",
+              "width": 1600,
+              "height": 900
+            },
+            {
+              "src": "/media/plasticity-playbook/plasticity-wide.jpg",
+              "label": "Plasticity",
+              "caption": "The source stays in Plasticity: real curves and bevels you can still change.",
+              "width": 1050,
+              "height": 590
+            },
+            {
+              "src": "/media/plasticity-playbook/trims-wide.jpg",
+              "label": "Trim sheets",
+              "caption": "Small details modelled once, baked into a sheet the whole kit shares.",
+              "width": 710,
+              "height": 400
+            }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "meshforge",
+      "name": "MeshForge",
+      "type": "Tool",
+      "track": "worldbuilding",
+      "alsoIn": [
+        "characters"
+      ],
+      "hero": true,
+      "tagline": "Props, garments",
+      "line": "Turn a picture or a sentence into a prop, and review it before it reaches the level.",
+      "price": "free",
+      "plugins": [
+        "MeshForge"
+      ],
+      "agentPlugins": [
+        "MeshForgeToolset"
+      ],
+      "media": {
+        "card": "/media/meshforge/hero.jpg",
+        "cardVideo": "/media/meshforge/hero.mp4",
+        "hero": "/media/meshforge/hero.jpg?v=20261109c",
+        "heroVideo": "/media/meshforge/hero.mp4?v=20261109c"
+      },
+      "site": "/tools/meshforge/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/meshforge/",
+      "changelog": "https://docs.kovati.dev/docs/releases/meshforge/",
+      "page": {
+        "promise": "Props, gear and outfits, made in Unreal.",
+        "subline": "Describe it or show a picture. MeshForge draws the concept, has Meshy or Tripo build the mesh, and lands it in your level at its real size, with collision. Then fit outfits to your characters.",
+        "priceLine": "MeshForge and its engines are free; Meshy and Tripo bill your own account. The Garment pipeline, MetaHuman part included, is one paid product.",
+        "adds": [
+          {
+            "title": "From a prompt or a picture.",
+            "line": "Write a sentence, or bring a picture you have."
+          },
+          {
+            "title": "Every engine, one workshop.",
+            "line": "Tripo and Meshy in the cloud, on your own account. TRELLIS on your own graphics card, as an early preview in Labs."
+          },
+          {
+            "title": "The price, before you press the button.",
+            "line": "Your account, at the engine’s own rates."
+          },
+          {
+            "title": "Props for your world.",
+            "line": "Generated, sized and placed in a real level."
+          },
+          {
+            "title": "Hero assets.",
+            "line": "Gear and outfits your characters wear."
+          },
+          {
+            "title": "Generated, then played.",
+            "line": "Gear and a vehicle, in a playable character’s hands."
+          },
+          {
+            "title": "The Garment pipeline.",
+            "line": "Pose, wrap, test, wear."
+          },
+          {
+            "title": "One walk, four outfits.",
+            "line": "Generated or made by hand, fitted and layered."
+          },
+          {
+            "title": "One suit, every body.",
+            "line": "One product, the MetaHuman part included."
+          },
+          {
+            "title": "Vehicles.",
+            "line": "One buggy, three worlds."
+          },
+          {
+            "title": "Workflows and post steps.",
+            "line": "Save the recipe once, run it on every prop."
+          }
+        ],
+        "inside": {
+          "title": "Post steps, extensions and toolsets.",
+          "line": "MeshForge is the workshop. These plug into it, and agents can drive every one of them.",
+          "items": [
+            {
+              "name": "Edit in Blender",
+              "line": "A post step. Opens the mesh in Blender in the middle of the chain; one click sends it back with its materials slot for slot, as a new version. Skinned garments keep their skeleton, weights and morphs."
+            },
+            {
+              "name": "Meshy retexture",
+              "line": "A post step. A new surface on the same geometry from a description, one picture or up to four, at 2K, 4K or 8K. Works on any mesh, yours included."
+            },
+            {
+              "name": "Tripo retexture",
+              "line": "A post step. Re-textures from the model itself, a style prompt or pictures, with PBR and baked lighting removed. Works on any mesh."
+            },
+            {
+              "name": "Sculpt in the editor",
+              "line": "A post step. Sculpt, smooth, lattice and bend or twist a working copy inside Unreal, with your references beside it."
+            },
+            {
+              "name": "Garment fit",
+              "line": "A post step of MeshForge Garment. Wraps a garment around your character’s body: a type (thirteen, from T-shirt to helmet), a fit from tight to oversized, and the clearance in centimetres."
+            },
+            {
+              "name": "Wardrobe skinning",
+              "line": "A post step of MeshForge Garment. Skins the fitted garment to the character’s skeleton, with bone profiles per garment and sculpting in pose."
+            },
+            {
+              "name": "MeshForge Garment for MetaHuman",
+              "line": "Turns one fitted garment into one outfit for every body made with the MetaHuman sliders. Part of MeshForge Garment, at its price."
+            },
+            {
+              "name": "MeshForge TRELLIS",
+              "line": "An early preview in Labs. Microsoft TRELLIS.2 on your own graphics card or a rented one, from one picture, free per take, and concept pictures drawn locally with FLUX.2 or SDXL. It needs a lot of graphics memory."
+            },
+            {
+              "name": "MeshForge Toolset",
+              "line": "Lets an agent drive every step you can: engines, prices, generating, importing, post steps and workflows."
+            },
+            {
+              "name": "Garment toolsets",
+              "line": "The fit, the skinning, the Garment Studio and the MetaHuman outfit, for agents too."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Everything runs inside the editor."
+          },
+          {
+            "name": "An engine to generate with",
+            "line": "A Meshy or Tripo account, at their rates, or a graphics card for TRELLIS (24 GB; 16 GB works at draft quality), yours or rented. Your own meshes need neither."
+          },
+          {
+            "name": "Blender, for garments",
+            "line": "The Garment Studio wraps in Blender, found on your machine. Edit in Blender uses it too."
+          }
+        ],
+        "shots": {
+          "kind": "interface",
+          "title": "A prop workshop, inside Unreal.",
+          "line": "Each prop is one asset. The stages run down the right, with the price on each, and the result turns in the viewer on the left.",
+          "items": [
+            {
+              "src": "/media/ui/meshforge/gen.jpg",
+              "video": "/media/ui/meshforge/gen.mp4",
+              "label": "Mesh Definition · Stages",
+              "caption": "A sentence, a concept picture, then the mesh, each with its price. Nothing blocks the editor while it runs.",
+              "width": 1712,
+              "height": 936
+            },
+            {
+              "src": "/media/ui/meshforge/jobs.jpg",
+              "label": "Work in progress",
+              "caption": "Run several at once; each job keeps its clock.",
+              "width": 640,
+              "height": 360
+            },
+            {
+              "src": "/media/ui/meshforge/compare.jpg",
+              "label": "Mesh · Compare A/B",
+              "caption": "Two takes side by side, wiped down the middle.",
+              "width": 1191,
+              "height": 898
+            }
+          ]
+        },
+        "film": {
+          "src": "/media/meshforge/film.mp4?v=20261109c",
+          "poster": "/media/meshforge/film.jpg?v=20261109c",
+          "title": "From a sentence to your prop.",
+          "line": "Pictures, a mesh from the engine you choose, post steps, then props, gear, outfits and a vehicle in play."
+        }
+      }
+    },
+    {
+      "slug": "meshforge-cloud",
+      "name": "MeshForge Cloud",
+      "type": "Add-on",
+      "track": "worldbuilding",
+      "line": "Adds Meshy and Tripo as engines, on your own account. Each brings its own settings and prices a take before it runs.",
+      "price": "free",
+      "belongsTo": "meshforge",
+      "extends": "meshforge",
+      "addonKind": "provider",
+      "runs": "Cloud · Meshy or Tripo account",
+      "vendor": "Meshy · Tripo",
+      "plugins": [
+        "MeshForgeCloud"
+      ],
+      "needs": [
+        {
+          "kind": "account",
+          "name": "A Meshy or Tripo account",
+          "line": "At their rates. Each take is priced before it runs."
+        }
+      ],
+      "site": "/worldbuilding/",
+      "changelog": "https://docs.kovati.dev/docs/releases/meshforgecloud/"
+    },
+    {
+      "slug": "meshforge-trellis",
+      "name": "MeshForge TRELLIS",
+      "type": "Add-on",
+      "track": "worldbuilding",
+      "line": "Turn a picture into a textured mesh with Microsoft TRELLIS, on your own graphics card or a rented one.",
+      "price": "free",
+      "belongsTo": "meshforge",
+      "extends": "meshforge",
+      "addonKind": "provider",
+      "runs": "Your GPU or a rented one",
+      "vendor": "Microsoft TRELLIS",
+      "plugins": [
+        "MeshForgeTrellis"
+      ],
+      "agentPlugins": [
+        "MeshForgeTrellisToolset"
+      ],
+      "needs": [
+        {
+          "kind": "gpu",
+          "name": "A graphics card, yours or rented",
+          "line": "24 GB; 16 GB works at draft quality."
+        }
+      ],
+      "site": "/worldbuilding/",
+      "changelog": "https://docs.kovati.dev/docs/releases/meshforgetrellis/"
+    },
+    {
+      "slug": "surfaceforge",
+      "name": "SurfaceForge",
+      "type": "Tool",
+      "track": "worldbuilding",
+      "line": "Make a material from a sentence, and look at it before you keep it.",
+      "price": "free",
+      "plugins": [
+        "SurfaceForge"
+      ],
+      "agentPlugins": [
+        "SurfaceForgeToolset"
+      ],
+      "mark": "Grain",
+      "media": {
+        "card": "/media/surfaceforge/brick-tall.jpg",
+        "hero": "/media/surfaceforge/hero.jpg"
+      },
+      "site": "/tools/surfaceforge/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/surfaceforge/",
+      "changelog": "https://docs.kovati.dev/docs/releases/surfaceforge/",
+      "page": {
+        "promise": "Say the surface. Keep the one you like.",
+        "subline": "Describe a material in a sentence and get several to choose from. The one you pick comes back at full quality, every map wired into a material your level can use.",
+        "priceLine": "SurfaceForge and both of its engines are free. Local costs nothing to run; PATINA bills your own account, and you see the price before you press the button.",
+        "adds": [
+          {
+            "title": "Several to choose from.",
+            "line": "Quick previews first, the real thing after."
+          },
+          {
+            "title": "What you picked is what you get.",
+            "line": "The full version starts from the same seed."
+          },
+          {
+            "title": "A material, not a folder of textures.",
+            "line": "Every map wired, sized in centimetres."
+          },
+          {
+            "title": "Nothing is lost.",
+            "line": "Every kept surface stays in your project."
+          }
+        ],
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Everything runs inside the editor, from its own tab."
+          },
+          {
+            "name": "An engine to generate with",
+            "line": "SurfaceForge Local: an NVIDIA card with 12 GB or more, Docker, and about 22 GB of disk for the image and models. Or SurfaceForge PATINA, hosted, on your own fal.ai account."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "One sentence, a whole material.",
+          "line": "Base colour, normal, roughness and height, from the same seed, all tiling. Here, an old brick wall.",
+          "items": [
+            {
+              "src": "/media/surfaceforge/brick-maps.jpg",
+              "label": "Old brick",
+              "caption": "The base colour, its normal, roughness and height maps, and the same brick repeated to show the edges meet.",
+              "width": 2400,
+              "height": 1200
+            },
+            {
+              "src": "/media/surfaceforge/plaster-tiled.jpg",
+              "label": "Cracked plaster",
+              "caption": "Cracked plaster, repeated across a wall.",
+              "width": 1280,
+              "height": 720
+            },
+            {
+              "src": "/media/surfaceforge/grass-tiled.jpg",
+              "label": "Dry grass",
+              "caption": "Dry grass, for the ground under your foliage.",
+              "width": 1280,
+              "height": 720
+            },
+            {
+              "src": "/media/surfaceforge/panel-tiled.jpg",
+              "label": "Wall panels",
+              "caption": "Clean wall panels for an interior.",
+              "width": 1280,
+              "height": 720
+            }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "surfaceforge-local",
+      "name": "SurfaceForge Local",
+      "type": "Add-on",
+      "track": "worldbuilding",
+      "line": "Generate materials on your own graphics card, with no account and no fee.",
+      "price": "free",
+      "belongsTo": "surfaceforge",
+      "extends": "surfaceforge",
+      "addonKind": "provider",
+      "runs": "Your graphics card · no account",
+      "vendor": "On this machine",
+      "plugins": [
+        "SurfaceForgeLocal"
+      ],
+      "needs": [
+        {
+          "kind": "app",
+          "name": "Docker Desktop",
+          "line": "The model runs in a container on this machine."
+        },
+        {
+          "kind": "gpu",
+          "name": "An NVIDIA card with 12 GB or more",
+          "line": "And about 22 GB of disk for the image and models."
+        },
+        {
+          "kind": "key",
+          "name": "Hugging Face",
+          "keyId": "HuggingFace",
+          "optional": true,
+          "line": "Only if the model download asks for it."
+        }
+      ],
+      "runners": [
+        "SurfaceForgeLocal"
+      ],
+      "later": "About 22 GB of disk for the image and models, downloaded when you set it up.",
+      "site": "/worldbuilding/",
+      "changelog": "https://docs.kovati.dev/docs/releases/surfaceforgelocal/"
+    },
+    {
+      "slug": "surfaceforge-patina",
+      "name": "SurfaceForge PATINA",
+      "type": "Add-on",
+      "track": "worldbuilding",
+      "line": "Generate materials with PATINA, hosted, on your own account.",
+      "price": "free",
+      "belongsTo": "surfaceforge",
+      "extends": "surfaceforge",
+      "addonKind": "provider",
+      "runs": "Hosted · your PATINA account",
+      "vendor": "PATINA on fal.ai",
+      "plugins": [
+        "SurfaceForgePatina"
+      ],
+      "needs": [
+        {
+          "kind": "key",
+          "name": "fal.ai",
+          "keyId": "SurfaceForge.Patina",
+          "line": "Your own fal.ai account."
+        }
+      ],
+      "site": "/worldbuilding/",
+      "changelog": "https://docs.kovati.dev/docs/releases/surfaceforgepatina/"
+    },
+    {
+      "slug": "speechforge",
+      "name": "SpeechForge",
+      "type": "Tool",
+      "track": "storytelling",
+      "hero": true,
+      "tagline": "Voiced dialogue",
+      "line": "Voice every line in your game, with generated voices or your own recordings.",
+      "price": "free",
+      "plugins": [
+        "SpeechForge"
+      ],
+      "agentPlugins": [
+        "SpeechForgeToolset"
+      ],
+      "media": {
+        "card": "/media/speechforge/card.jpg?v=20261109",
+        "cardVideo": "/media/speechforge/card.mp4?v=20261109",
+        "hero": "/media/speechforge/hero.jpg",
+        "heroVideo": "/media/speechforge/hero.mp4"
+      },
+      "site": "/tools/speechforge/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/speechforge/",
+      "changelog": "https://docs.kovati.dev/docs/releases/speechforge/",
+      "page": {
+        "promise": "Every line in your game, spoken.",
+        "subline": "Write a scene, give each character a voice and hear every line inside Unreal, then in every language. Bring your own actors too. It works with any dialogue system, or none.",
+        "priceLine": "SpeechForge and its ElevenLabs add-on are free. Translation, with DeepL, is a paid add-on.",
+        "adds": [
+          {
+            "title": "Write the lines, pick the voices.",
+            "line": "A scene’s whole cast in one bank."
+          },
+          {
+            "title": "Every language, the same voice.",
+            "line": "One bank, translated in one step."
+          },
+          {
+            "title": "Know the cost, then voice it all.",
+            "line": "One line or the whole scene."
+          },
+          {
+            "title": "See it in a scene.",
+            "line": "No dialogue system needed."
+          }
+        ],
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Everything runs inside the editor."
+          },
+          {
+            "name": "A voice provider, or your recordings",
+            "line": "An ElevenLabs account for generated voices, at their rates. Your own recordings need no account."
+          },
+          {
+            "name": "Any dialogue system, or none",
+            "line": "Lines are standard Unreal sound waves. Play them in Sequencer, from your Blueprints or from the system you use."
+          }
+        ],
+        "shots": {
+          "kind": "interface",
+          "title": "A dialogue studio, inside Unreal.",
+          "line": "Bring the script in, cast the voices, write and listen, produce every line, then perform and localise it, one tab after another.",
+          "items": [
+            {
+              "src": "/media/ui/speechforge/bank.jpg",
+              "label": "Speech Library · Write",
+              "caption": "Every line of a scene: who says it, how it is said, and in which voice.",
+              "width": 1760,
+              "height": 470
+            },
+            {
+              "src": "/media/ui/speechforge/cast-page.jpg",
+              "label": "Speech Library · Cast",
+              "caption": "Cast once: each character keeps its voice for every line.",
+              "width": 1760,
+              "height": 790
+            },
+            {
+              "src": "/media/ui/speechforge/localize-page.jpg",
+              "label": "Speech Library · Localize",
+              "caption": "Pick the languages, and the whole bank is translated in one step.",
+              "width": 1760,
+              "height": 960
+            }
+          ]
+        },
+        "film": {
+          "src": "/media/speechforge/film.mp4",
+          "poster": "/media/speechforge/film.jpg",
+          "title": "From a written scene to a voiced one.",
+          "line": "A cast chosen, the price seen, every line voiced, then the scene in Spanish and German."
+        }
+      }
+    },
+    {
+      "slug": "speechforge-elevenlabs",
+      "name": "SpeechForge ElevenLabs",
+      "type": "Add-on",
+      "track": "storytelling",
+      "line": "Voice lines with ElevenLabs on your own account, and turn your own read into a character’s voice.",
+      "price": "free",
+      "belongsTo": "speechforge",
+      "extends": "speechforge",
+      "addonKind": "provider",
+      "runs": "Cloud · your ElevenLabs account",
+      "vendor": "ElevenLabs",
+      "plugins": [
+        "SpeechForgeElevenLabs"
+      ],
+      "needs": [
+        {
+          "kind": "key",
+          "name": "ElevenLabs",
+          "keyId": "SpeechForge.ElevenLabs",
+          "line": "An ElevenLabs account for generated voices, at their rates. Your own recordings need no account."
+        }
+      ],
+      "site": "/storytelling/",
+      "changelog": "https://docs.kovati.dev/docs/releases/speechforgeelevenlabs/"
+    },
+    {
+      "slug": "speechforge-deepl",
+      "name": "SpeechForge DeepL",
+      "type": "Add-on",
+      "track": "storytelling",
+      "line": "Localisation: DeepL translates the whole script with the scene as context and the names kept, then your voice engine voices every language.",
+      "price": "paid",
+      "storeId": "SpeechForgeDeepL",
+      "belongsTo": "speechforge",
+      "extends": "speechforge",
+      "addonKind": "extension",
+      "runs": "Cloud · translation, your DeepL key",
+      "vendor": "DeepL",
+      "plugins": [
+        "SpeechForgeDeepL"
+      ],
+      "needs": [
+        {
+          "kind": "key",
+          "name": "DeepL",
+          "keyId": "SpeechForge.DeepL",
+          "line": "Your own DeepL key."
+        }
+      ],
+      "site": "/storytelling/",
+      "changelog": "https://docs.kovati.dev/docs/releases/speechforgedeepl/"
+    },
+    {
+      "slug": "faceforge",
+      "name": "FaceForge",
+      "type": "Tool",
+      "track": "storytelling",
+      "hero": true,
+      "tagline": "Lip sync",
+      "line": "Lip sync and emotion for the face, solved from the voice line.",
+      "price": "free",
+      "plugins": [
+        "FaceForge"
+      ],
+      "agentPlugins": [
+        "FaceForgeToolset"
+      ],
+      "characters": [
+        {
+          "name": "MetaHuman",
+          "line": "The full MetaHuman face rig, from Unreal’s own solver or ACE."
+        },
+        {
+          "name": "Character Creator",
+          "line": "CC5 runs on the MetaHuman rig, so it takes MetaHuman face curves or the 52 ARKit shapes. Earlier versions use the 52 ARKit shapes. Shown in our public video."
+        },
+        {
+          "name": "Daz 3D",
+          "line": "Genesis characters exported with the 52 ARKit face shapes."
+        },
+        {
+          "name": "Any ARKit head",
+          "line": "Ready Player Me, your own sculpt: any head with the 52 ARKit shapes. ACE speaks ARKit directly; the MetaHuman solver’s curves are converted to ARKit by our own mapping, which you can tune. The coverage check shows what a head can move before you bake."
+        }
+      ],
+      "media": {
+        "card": "/media/faceforge/card.jpg?v=20261109",
+        "cardVideo": "/media/faceforge/card.mp4?v=20261109",
+        "hero": "/media/faceforge/hero.jpg",
+        "heroVideo": "/media/faceforge/hero.mp4"
+      },
+      "site": "/tools/faceforge/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/faceforge/",
+      "changelog": "https://docs.kovati.dev/docs/releases/faceforge/",
+      "page": {
+        "promise": "A face that moves with every line.",
+        "subline": "Give it a voice line and it solves the lips, jaw, brows and blinks to match, then bakes an animation your character plays. A whole scene takes seconds, in any language, on every character.",
+        "priceLine": "FaceForge and both of its engines are free. ACE runs on your own graphics card, or a GPU you rent by the hour.",
+        "adds": [
+          {
+            "title": "Emotion, read or asked for.",
+            "line": "The same line, the same voice, another mood."
+          },
+          {
+            "title": "One line, every character.",
+            "line": "Each face from its own voice."
+          },
+          {
+            "title": "See it in a scene.",
+            "line": "No dialogue system needed."
+          },
+          {
+            "title": "A whole scene in seconds.",
+            "line": "Line, solve, face."
+          },
+          {
+            "title": "Every language, the same face.",
+            "line": "English, Spanish, German."
+          },
+          {
+            "title": "Voices from SpeechForge.",
+            "line": "Write the line, voice it, translate it."
+          },
+          {
+            "title": "Fix it by hand, keep the fix.",
+            "line": "Your keys survive a better solve."
+          }
+        ],
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Everything runs inside the editor."
+          },
+          {
+            "name": "An engine to solve with",
+            "line": "FaceForge MetaHuman uses Unreal’s own solver on the processor, with no account. FaceForge ACE needs an NVIDIA card and Docker, or a GPU you rent on your own Runpod account."
+          },
+          {
+            "name": "A face that can move",
+            "line": "A MetaHuman, or a head with ARKit-style blend shapes, as most Character Creator, Daz and Ready Player Me heads have."
+          },
+          {
+            "name": "Voice lines",
+            "line": "From SpeechForge, from your actors, or any sound wave in your project."
+          }
+        ],
+        "shots": {
+          "kind": "interface",
+          "title": "A face bank, inside Unreal.",
+          "line": "Every line of a scene with its speaker and status on the left, the face playing it on the right, and solve, merge and bake at the foot.",
+          "items": [
+            {
+              "src": "/media/ui/faceforge/bank.jpg",
+              "video": "/media/ui/faceforge/bank.mp4",
+              "label": "Face Bank · Unreal Editor 5.8",
+              "caption": "Pick a line and its face plays on the stage, with the voice. Switch the stage to another character to check the same line on them.",
+              "width": 1600,
+              "height": 834
+            },
+            {
+              "src": "/media/ui/faceforge/clip-mood.jpg",
+              "label": "Clip",
+              "caption": "Mood, intensity, blinks and head pose, set per line or left to the voice.",
+              "width": 660,
+              "height": 652
+            },
+            {
+              "src": "/media/ui/faceforge/runner-rented.jpg",
+              "label": "Audio2Face runner",
+              "caption": "ACE runs on your own NVIDIA card, or on a GPU you rent by the hour.",
+              "width": 995,
+              "height": 372
+            }
+          ]
+        },
+        "film": {
+          "src": "/media/faceforge/film.mp4",
+          "poster": "/media/faceforge/film.jpg",
+          "title": "From a written line to a face that speaks it.",
+          "line": "Three scenes with every face solved from its voice, then one line in three moods, on three faces and in three languages."
+        }
+      }
+    },
+    {
+      "slug": "faceforge-ace",
+      "name": "FaceForge ACE",
+      "type": "Add-on",
+      "track": "storytelling",
+      "line": "Solve faces with NVIDIA Audio2Face, on your own graphics card or a rented one. Ask for an emotion, or add NVIDIA Audio2Emotion to read it from the voice.",
+      "price": "free",
+      "belongsTo": "faceforge",
+      "extends": "faceforge",
+      "addonKind": "provider",
+      "runs": "Your GPU or a rented one",
+      "vendor": "NVIDIA Audio2Face",
+      "plugins": [
+        "FaceForgeACE"
+      ],
+      "agentPlugins": [
+        "FaceForgeACEToolset"
+      ],
+      "needs": [
+        {
+          "kind": "app",
+          "name": "Docker Desktop",
+          "line": "Audio2Face runs in a container on this machine."
+        },
+        {
+          "kind": "gpu",
+          "name": "An NVIDIA card, or a rented GPU",
+          "line": "Or a GPU you rent on your own Runpod account."
+        },
+        {
+          "kind": "key",
+          "name": "Hugging Face",
+          "keyId": "HuggingFace",
+          "optional": true,
+          "line": "Only if the model download asks for it."
+        },
+        {
+          "kind": "key",
+          "name": "Runpod",
+          "keyId": "Runpod",
+          "optional": true,
+          "line": "Only to rent a GPU by the hour."
+        }
+      ],
+      "runners": [
+        "Audio2Face"
+      ],
+      "site": "/storytelling/",
+      "changelog": "https://docs.kovati.dev/docs/releases/faceforgeace/"
+    },
+    {
+      "slug": "faceforge-metahuman",
+      "name": "FaceForge MetaHuman",
+      "type": "Add-on",
+      "track": "storytelling",
+      "line": "Solve faces with Unreal’s own audio-to-face solver, with no account at all.",
+      "price": "free",
+      "belongsTo": "faceforge",
+      "extends": "faceforge",
+      "addonKind": "provider",
+      "runs": "Inside Unreal, any machine",
+      "vendor": "Unreal's own solver",
+      "plugins": [
+        "FaceForgeMetaHuman"
+      ],
+      "site": "/storytelling/",
+      "changelog": "https://docs.kovati.dev/docs/releases/faceforgemetahuman/"
+    },
+    {
+      "slug": "performanceforge",
+      "name": "PerformanceForge",
+      "type": "Tool",
+      "track": "animation",
+      "alsoIn": [
+        "storytelling"
+      ],
+      "hero": true,
+      "tagline": "Capture stage",
+      "line": "Record your face and voice with a webcam and put the performance on the character.",
+      "price": "paid",
+      "storeId": "PerformanceForge",
+      "plugins": [
+        "PerformanceForge"
+      ],
+      "agentPlugins": [
+        "PerformanceForgeToolset"
+      ],
+      "needs": [
+        {
+          "kind": "device",
+          "name": "A microphone, and a webcam for faces",
+          "line": "The ones you already have. Voice-only takes need only the microphone."
+        }
+      ],
+      "mark": "Take",
+      "media": {
+        "card": "/media/performanceforge/pair_card_g.jpg?v=20261110g",
+        "cardVideo": "/media/performanceforge/pair_card_g.mp4?v=20261110g",
+        "hero": "/media/performanceforge/pair_hero_silent_g.jpg?v=20261110g",
+        "heroVideo": "/media/performanceforge/pair_hero_silent_g.mp4?v=20261110g"
+      },
+      "site": "/tools/performanceforge/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/performanceforge/",
+      "changelog": "https://docs.kovati.dev/docs/releases/performanceforge/",
+      "page": {
+        "promise": "Act the scene yourself, and your character plays it.",
+        "subline": "A capture stage inside Unreal. Read the line from the prompter, record your face and voice with a webcam, choose the best take, and it goes onto the character.",
+        "priceLine": "PerformanceForge is paid, bought once. SpeechForge and FaceForge, which use its takes, are free.",
+        "adds": [
+          {
+            "title": "A webcam is enough.",
+            "line": "Your face and voice, on one clock."
+          },
+          {
+            "title": "Every take kept. You choose.",
+            "line": "Plan a session, record, then review."
+          },
+          {
+            "title": "The script on the prompter.",
+            "line": "Line after line, with the direction under it."
+          },
+          {
+            "title": "Straight into the character.",
+            "line": "Your acting on the face, in the voice you cast."
+          }
+        ],
+        "inside": {
+          "title": "Where it is going",
+          "line": "A capture stage for whatever you capture with. Much raw capture is already free from Epic and NVIDIA; what PerformanceForge adds is one place to record, review and choose, and takes that go straight into your voices, faces and montages.",
+          "items": [
+            {
+              "name": "Webcam and microphone",
+              "line": "Available now: face and voice, captured in the editor."
+            },
+            {
+              "name": "Epic’s own capture",
+              "line": "Next: takes from Unreal’s capture tools, in the same session."
+            },
+            {
+              "name": "Live Link Face on iPhone",
+              "line": "Next: face capture from a phone, filed and reviewed the same way."
+            },
+            {
+              "name": "Motion capture suits",
+              "line": "Next: body takes from suits such as Rokoko, on to MontageForge and the rest of the animation pipeline."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "The stage runs inside the editor."
+          },
+          {
+            "name": "A microphone, and a webcam for faces",
+            "line": "The ones you already have. Voice-only takes need only the microphone."
+          },
+          {
+            "name": "SpeechForge and FaceForge",
+            "line": "Free. They turn a take into voices and faces. A MetaHuman for the face from video."
+          },
+          {
+            "name": "For a new voice: your ElevenLabs account",
+            "line": "Only if a take is turned into the character’s voice, at ElevenLabs’ rates. Your own read needs no account."
+          }
+        ],
+        "shots": {
+          "kind": "interface",
+          "title": "A capture stage, docked in your editor.",
+          "line": "The line to perform at the top, your camera in the middle, every take underneath. Then a session page to review the takes and choose the one that ships.",
+          "items": [
+            {
+              "src": "/media/ui/performanceforge/record_prompter_g.jpg?v=20261110g",
+              "label": "Performance Capture · Record",
+              "caption": "The line, who says it and how, your camera and microphone, and one Record button. Every take files itself with its audio, frames and timing.",
+              "width": 2560,
+              "height": 1528
+            }
+          ]
+        },
+        "film": {
+          "src": "/media/performanceforge/film_g.mp4?v=20261110g",
+          "poster": "/media/performanceforge/film_g.jpg?v=20261110g",
+          "title": "From a webcam to a character on screen.",
+          "line": "A line read into a webcam, the same line performed by a character, and the takes it was chosen from."
+        }
+      }
+    },
+    {
+      "slug": "line-player",
+      "name": "Line player",
+      "type": "Utility",
+      "track": "storytelling",
+      "line": "Play a line’s voice, face and subtitle together on any character, from any dialogue system.",
+      "price": "free",
+      "belongsTo": "speechforge",
+      "mark": "Line",
+      "site": "/storytelling/"
+    },
+    {
+      "slug": "open-world-playbook",
+      "name": "Open-world production playbook",
+      "type": "Playbook",
+      "track": "worldbuilding",
+      "line": "An open world from a real place: water, roads, forests and a horizon that holds, the way we built our own.",
+      "price": "paid",
+      "belongsTo": "terrainforge",
+      "software": [
+        "Unreal Engine"
+      ],
+      "media": {
+        "card": "/media/open-world-playbook/card.jpg",
+        "cardVideo": "/media/open-world-playbook/card.mp4",
+        "hero": "/media/open-world-playbook/reel.jpg",
+        "heroVideo": "/media/open-world-playbook/reel.mp4"
+      },
+      "site": "/tools/open-world-playbook/",
+      "page": {
+        "promise": "An open world from a real place, without the lost weeks.",
+        "subline": "A playbook is production know-how you can follow: a guide for you, skills and scripts for your agent. This one is how we built Colony’s Alpine valleys from real survey data: water that follows the ground, roads that cut and bridge it, forests that fill it, a horizon that holds when you fly. Every trap we paid for, written down.",
+        "priceLine": "Paid, bought once. It is the know-how behind our own world; the tools and kits it uses are sold, or free, on their own.",
+        "adds": [
+          {
+            "title": "Build it in the order that works.",
+            "line": "Ground, then water, then everything that grows."
+          },
+          {
+            "title": "Water that follows the ground.",
+            "line": "The terrain decides. The water is derived from it."
+          },
+          {
+            "title": "The canyon that should not exist.",
+            "line": "A trap, shown as it happened."
+          },
+          {
+            "title": "Roads that belong to the land.",
+            "line": "The road is its line, and everything works outwards from it."
+          },
+          {
+            "title": "Meadows and forests that hold up in play.",
+            "line": "Filled by rules, judged where the player stands."
+          },
+          {
+            "title": "A horizon that holds when you fly.",
+            "line": "The whole map visible, without loading the whole map."
+          },
+          {
+            "title": "Work small, build big.",
+            "line": "Fast choices by day, heavy builds overnight."
+          }
+        ],
+        "inside": {
+          "title": "What is in the playbook.",
+          "line": "Production knowledge from building our own world, cut down from about 150 written reports and a notebook of 2,000 lines. Every step works by hand; the skills let an agent run the long parts.",
+          "items": [
+            {
+              "name": "The production guide",
+              "line": "From choosing a place to flying over the finished world: terrain, water, roads, ground cover, streaming and the horizon, in the order that works."
+            },
+            {
+              "name": "The water chain",
+              "line": "Route rivers down the terrain, carve the beds into the heightmap, and bring lakes and rivers into the level with their surfaces matching. With the checks that must print zero."
+            },
+            {
+              "name": "Headless builds",
+              "line": "Landscape, procedural layers and distant versions built tile by tile from the command line, with scripts that fail loudly when a save did not happen."
+            },
+            {
+              "name": "Settings that work",
+              "line": "Streaming cells and ranges, the two distant rows, landscape layers, foliage and collision settings we measured, as values you can copy."
+            },
+            {
+              "name": "Agent skills",
+              "line": "How an agent runs long builds without wedging the editor: timeouts, memory guards, one overnight queue, and when to stop and ask."
+            },
+            {
+              "name": "The trap list",
+              "line": "Every failure that cost us an evening, with its symptom, its cause and the fix. The canyon is one of them."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "With World Partition, Water and PCG, all part of the engine."
+          },
+          {
+            "name": "Terrain",
+            "line": "From TerrainForge, from public elevation data, or from any tool that writes a heightmap."
+          },
+          {
+            "name": "A good machine",
+            "line": "Ours has 64 GB of memory and a 16 GB graphics card. The guide keeps a whole world inside that."
+          },
+          {
+            "name": "Works best with",
+            "line": "TerrainForge, the PCG kit, and the roads, rivers and trails kit."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "Real valleys, made playable.",
+          "line": "Swiss and French survey data at one metre a pixel. A landscape eight kilometres a side with its lakes and rivers, and roads and forests proven on one-kilometre plots cut from the same data.",
+          "items": [
+            {
+              "src": "/media/open-world-playbook/place.jpg",
+              "video": "/media/open-world-playbook/place.mp4",
+              "caption": "The Écrins in the French Alps: real terrain, laser-scanned at one metre a pixel, its lake filled from the same data.",
+              "width": 1280,
+              "height": 720
+            },
+            {
+              "src": "/media/roads-kit/rivers.jpg",
+              "video": "/media/roads-kit/rivers.mp4",
+              "label": "Water",
+              "caption": "Rivers routed down every valley of a real region.",
+              "width": 960,
+              "height": 540
+            },
+            {
+              "src": "/media/open-world-playbook/road-wide.jpg",
+              "label": "Roads",
+              "caption": "A road that keeps its own line and cuts the hill, with a wall to hold it.",
+              "width": 1677,
+              "height": 943
+            },
+            {
+              "src": "/media/open-world-playbook/meadow.jpg",
+              "video": "/media/open-world-playbook/meadow.mp4",
+              "label": "Ground cover",
+              "caption": "A meadow filled by rules, with no ring of grass popping in round you.",
+              "width": 1280,
+              "height": 720
+            }
+          ]
+        },
+        "film": {
+          "youtube": "dkrDEh8ljLo",
+          "poster": "/media/open-world-playbook/film.jpg",
+          "title": "Eight days, a team of agents, a lot of mountains.",
+          "line": "The devlog this playbook is written from. Fourteen minutes, with what worked and what did not."
+        }
+      }
+    },
+    {
+      "slug": "motion-playbook",
+      "name": "Motion production playbook",
+      "type": "Playbook",
+      "track": "animation",
+      "line": "Generated motion that imports right, checks out and plays as gameplay: the way we animate our own cast.",
+      "price": "paid",
+      "belongsTo": "motionforge",
+      "software": [
+        "Uthana",
+        "NVIDIA Kimodo"
+      ],
+      "media": {
+        "card": "/media/motion-playbook/card.jpg",
+        "cardVideo": "/media/motion-playbook/card.mp4",
+        "hero": "/media/motion-playbook/reel.jpg",
+        "heroVideo": "/media/motion-playbook/reel.mp4"
+      },
+      "site": "/tools/motion-playbook/",
+      "page": {
+        "promise": "Generated motion that plays right in your game.",
+        "subline": "A generated take is the easy part. This is the rest: getting it onto your character without a twist or a double-speed clip, judging whether it is right, and turning it into gestures and actions your game plays over walking and running. Taken from animating our own cast.",
+        "priceLine": "Paid, bought once. MotionForge and its engines stay free; this is the know-how for shipping what they make.",
+        "adds": [
+          {
+            "title": "Generate on your own skeleton.",
+            "line": "The best retarget is the one you never run."
+          },
+          {
+            "title": "Know when a clip is wrong.",
+            "line": "Logs pass while the character lies on its side."
+          },
+          {
+            "title": "Imports that do what you asked.",
+            "line": "The settings Unreal quietly ignores."
+          },
+          {
+            "title": "Prompts that hold a pose.",
+            "line": "Every beat names the pose it acts on."
+          },
+          {
+            "title": "From a clip to gameplay.",
+            "line": "Gestures over walking, actions in place."
+          }
+        ],
+        "inside": {
+          "title": "What is in the playbook.",
+          "line": "Production knowledge from animating our own cast. Every step works by hand; the skills let an agent run and check the repetitive parts.",
+          "items": [
+            {
+              "name": "The production guide",
+              "line": "Generating, importing, judging, retargeting and turning clips into gameplay, in the order that works, with the numbers we measured."
+            },
+            {
+              "name": "Clip checks",
+              "line": "Root-relative comparison, per-joint error, frame-rate and orientation checks you can run on any clip, from any source."
+            },
+            {
+              "name": "The prompt guide",
+              "line": "How to write beats that hold, with the wordings that failed beside the ones that worked."
+            },
+            {
+              "name": "Gesture library recipe",
+              "line": "Which gestures to make, how to mask each one, and how to assign them to every reading of a line."
+            },
+            {
+              "name": "Agent skills",
+              "line": "Skills for each stage, including when to send a take back instead of fixing it."
+            },
+            {
+              "name": "Licence notes",
+              "line": "Which motion models and datasets you can ship from, which you cannot, and how to keep a record so a swap stays cheap."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Everything ends up as ordinary animations and montages."
+          },
+          {
+            "name": "MotionForge",
+            "line": "Free. With Kimodo on your own graphics card, or Uthana on your own account."
+          },
+          {
+            "name": "Your character",
+            "line": "A MetaHuman, the Unreal mannequin, or your own skeleton."
+          },
+          {
+            "name": "Works best with",
+            "line": "MontageForge, free, for turning clips into montages."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "From a sentence to the game.",
+          "line": "Typed, generated on the character’s own skeleton, checked, and playing as gameplay. The same few gestures carry a whole conversation.",
+          "items": [
+            {
+              "src": "/media/animation/hero.jpg",
+              "video": "/media/animation/hero.mp4",
+              "caption": "A walk generated from one sentence, playing on a character in our game.",
+              "width": 1920,
+              "height": 1080
+            },
+            {
+              "src": "/media/characters/hero.jpg",
+              "video": "/media/characters/hero.mp4",
+              "label": "Dialogue",
+              "caption": "A line in conversation, in one of our ship’s corridors.",
+              "width": 1920,
+              "height": 1080
+            },
+            {
+              "src": "/media/storytelling/hero.jpg",
+              "video": "/media/storytelling/hero.mp4",
+              "label": "Faces",
+              "caption": "Body and face from separate passes, playing together.",
+              "width": 1920,
+              "height": 940
+            }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "dialogue-playbook",
+      "name": "Dialogue production playbook",
+      "type": "Playbook",
+      "track": "storytelling",
+      "line": "Cast, takes, faces and a second language that keeps the acting: the way we voice our own scenes.",
+      "price": "paid",
+      "belongsTo": "speechforge",
+      "software": [
+        "ElevenLabs",
+        "DeepL"
+      ],
+      "media": {
+        "card": "/media/dialogue-playbook/card.jpg",
+        "cardVideo": "/media/dialogue-playbook/card.mp4",
+        "hero": "/media/dialogue-playbook/reel.jpg",
+        "heroVideo": "/media/dialogue-playbook/reel.mp4"
+      },
+      "site": "/tools/dialogue-playbook/",
+      "page": {
+        "promise": "Voiced, acted and translated dialogue, without the mess.",
+        "subline": "How we run dialogue production for our own game: a cast before a script, every take kept, faces that say the words actually spoken, and a second language that keeps the acting. With every trap that made a character stand silent.",
+        "priceLine": "Paid, bought once. SpeechForge and FaceForge stay free; this is the know-how for running a production with them.",
+        "adds": [
+          {
+            "title": "Cast before you write.",
+            "line": "Characters first, then the lines they say."
+          },
+          {
+            "title": "Keep every take. Choose one.",
+            "line": "Prototype with the last take, ship with the chosen one."
+          },
+          {
+            "title": "Faces that say the right words.",
+            "line": "Four links, each silent when it breaks."
+          },
+          {
+            "title": "A second language that keeps the acting.",
+            "line": "Recorded lines are dubbed, not regenerated."
+          },
+          {
+            "title": "Lines that play when they should.",
+            "line": "Rules for the dialogue system, tested in play."
+          }
+        ],
+        "inside": {
+          "title": "What is in the playbook.",
+          "line": "Production knowledge from voicing our own scenes. Every step works by hand; the skills let an agent cast, produce and check whole scenes.",
+          "items": [
+            {
+              "name": "The production guide",
+              "line": "Casting, writing, sessions and takes, faces, corrections and localisation, in the order that keeps rework down."
+            },
+            {
+              "name": "Session templates",
+              "line": "A planned recording session and a quick one, with the settings for each: keep every take or keep the last, process now or on choosing."
+            },
+            {
+              "name": "Face checks",
+              "line": "The four links a face needs to move, and a check that compares the curves you write with the ones the face can read."
+            },
+            {
+              "name": "The localisation order",
+              "line": "Translate with scene context, voice or dub each line by where it came from, and re-solve faces without losing hand work."
+            },
+            {
+              "name": "Dialogue-system notes",
+              "line": "Conditions, greetings and camera shots that behave in play, with a chapter for Narrative Pro."
+            },
+            {
+              "name": "Agent skills",
+              "line": "Skills to cast a scene, produce it, and report what is stale, missing or out of date."
+            }
+          ]
+        },
+        "takes": [
+          {
+            "name": "Unreal Engine 5.8",
+            "line": "Lines are standard sound waves, faces are standard animations."
+          },
+          {
+            "name": "SpeechForge and FaceForge",
+            "line": "Free. Voices on your own ElevenLabs account, faces solved on your machine."
+          },
+          {
+            "name": "Any dialogue system, or none",
+            "line": "The method does not depend on one. Our game uses Narrative Pro, and the guide covers it."
+          },
+          {
+            "name": "Works best with",
+            "line": "PerformanceForge for recorded takes, and SpeechForge DeepL for other languages."
+          }
+        ],
+        "shots": {
+          "kind": "results",
+          "title": "A scene, voiced and acted.",
+          "line": "Our airlock scene: two characters, two dialogues, sixty takes, every face solved from its own line.",
+          "items": [
+            {
+              "src": "/media/characters/hero.jpg",
+              "video": "/media/characters/hero.mp4",
+              "caption": "Voice and face on one line, from a scene in our game.",
+              "width": 1920,
+              "height": 1080
+            },
+            {
+              "src": "/media/storytelling/hero.jpg",
+              "video": "/media/storytelling/hero.mp4",
+              "label": "Faces",
+              "caption": "The face follows the words actually spoken, never another take’s.",
+              "width": 1920,
+              "height": 940
+            }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "np-voiceover",
+      "name": "NP VoiceOver",
+      "type": "Add-on",
+      "track": "storytelling",
+      "line": "Cast every speaker once, and every line in a Narrative Pro dialogue is voiced in one pass.",
+      "price": "paid",
+      "belongsTo": "speechforge",
+      "extends": "Narrative Pro",
+      "addonKind": "integration",
+      "site": "/storytelling/",
+      "docs": "https://docs.kovati.dev/docs/tools/narrative-pro-addons/"
+    },
+    {
+      "slug": "np-quests",
+      "name": "NP Quests",
+      "type": "Add-on",
+      "track": "storytelling",
+      "line": "Build whole Narrative Pro quests, wired to the dialogue that gives and completes them.",
+      "price": "paid",
+      "extends": "Narrative Pro",
+      "addonKind": "integration",
+      "site": "/storytelling/",
+      "docs": "https://docs.kovati.dev/docs/tools/narrative-pro-addons/"
+    },
+    {
+      "slug": "np-validate",
+      "name": "NP Validate",
+      "type": "Add-on",
+      "track": "storytelling",
+      "line": "Find the quest that can never finish and the line nobody can reach, before a playtest does.",
+      "price": "paid",
+      "extends": "Narrative Pro",
+      "addonKind": "integration",
+      "site": "/storytelling/",
+      "docs": "https://docs.kovati.dev/docs/tools/narrative-pro-addons/"
+    },
+    {
+      "slug": "np-navigation",
+      "name": "NP Navigation",
+      "type": "Add-on",
+      "track": "worldbuilding",
+      "line": "Send a Narrative Pro character to a named place that stays right when the level changes.",
+      "price": "paid",
+      "extends": "Narrative Pro",
+      "addonKind": "integration",
+      "site": "/worldbuilding/",
+      "docs": "https://docs.kovati.dev/docs/tools/narrative-pro-addons/"
+    },
+    {
+      "slug": "np-wardrobe",
+      "name": "NP Wardrobe",
+      "type": "Add-on",
+      "track": "characters",
+      "line": "One garment reshapes to any body between two fitted shapes, at runtime.",
+      "price": "paid",
+      "extends": "Narrative Pro",
+      "addonKind": "integration",
+      "site": "/characters/",
+      "docs": "https://docs.kovati.dev/docs/tools/narrative-pro-addons/"
+    },
+    {
+      "slug": "pipelines",
+      "name": "AutomationForge Pipelines",
+      "type": "Tool",
+      "track": "studio",
+      "line": "Chain the steps once, set the checks, and leave the pipeline running.",
+      "price": "free",
+      "plugins": [
+        "AutomationForgePipelines"
+      ],
+      "agentPlugins": [
+        "AutomationForgeToolset"
+      ],
+      "media": {
+        "card": "/media/studio/pipelines.jpg"
+      },
+      "site": "/studio/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/pipelines/",
+      "changelog": "https://docs.kovati.dev/docs/releases/automationforgepipelines/"
+    },
+    {
+      "slug": "hub",
+      "name": "Kovati Hub",
+      "type": "App",
+      "track": "studio",
+      "line": "One free app that installs, updates and keeps track of everything you own.",
+      "price": "free",
+      "plugins": [
+        "AutomationForgeHub"
+      ],
+      "site": "/studio/",
+      "docs": "https://docs.kovati.dev/docs/automation-forge/hub/",
+      "changelog": "https://docs.kovati.dev/docs/releases/automationforgehub/",
+      "listed": false
+    },
+    {
+      "slug": "pro",
+      "name": "Kovati Pro",
+      "type": "Plan",
+      "track": "studio",
+      "line": "Review, provenance and vendors for the whole team, as a subscription.",
+      "price": "paid",
+      "site": "/studio/",
+      "listed": false
+    }
+  ]
+}

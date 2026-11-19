@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\Forge.Core\Forge.Core.csproj" />
@@ -6,6 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" Version="2.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The same catalogue the Hub ships, so a track install from the command line plans exactly what the window does. -->
+    <None Include="..\Forge.Hub\catalogue\catalogue.json" Link="catalogue\catalogue.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>

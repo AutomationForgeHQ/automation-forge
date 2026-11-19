@@ -10,13 +10,19 @@
     <AssemblyName>AutomationForgeHub</AssemblyName>
     <RootNamespace>Forge.Hub</RootNamespace>
     <ApplicationIcon>Assets\forge.ico</ApplicationIcon>
-    <AssemblyTitle>Automation Forge</AssemblyTitle>
-    <Description>The Automation Forge hub — installs and updates the plugin sets for Unreal Engine.</Description>
+    <AssemblyTitle>Kovati Hub</AssemblyTitle>
+    <Description>Kovati Hub installs and updates Kovati's tools for Unreal Engine.</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
+    <!-- The catalogue and the installer's set of stills, beside the executable (spec 12.4). tools/sync_hub_catalogue.py fills it. -->
+    <None Include="catalogue\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Forge.Hub.Snapshots" />
   </ItemGroup>
 
   <ItemGroup>
