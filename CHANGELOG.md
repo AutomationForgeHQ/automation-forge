@@ -1,4 +1,4 @@
-# Automation Forge hub and CLI
+# Kovati Hub and the forge CLI
 
 Every released version of the hub and the `forge` CLI, newest first. A stable release publishes **one**
 section of this file, the one whose heading starts with its version, as its release notes. Write for someone

@@ -7,9 +7,9 @@ using Forge.Hub.ViewModels;
 namespace Forge.Hub.Views;
 
 /// <summary>
-/// The window owns its chrome: the OS title bar is replaced by a strip of ours
-/// (drag, double-click to maximise, our own minimise / maximise / close) while
-/// the native resize edges and Windows snap behaviour stay.
+/// The window owns its chrome: the OS title bar is replaced by the bar of spec 3 (drag on any empty part,
+/// double-click to maximise, our own minimise / maximise / close) while the native resize edges and Windows
+/// snap behaviour stay. Esc closes a drawer; Alt+Left and the mouse's back button go back.
 /// </summary>
 public partial class MainWindow : Window
 {
@@ -22,6 +22,22 @@ public partial class MainWindow : Window
             if (e.Property == WindowStateProperty)
                 Padding = WindowState == WindowState.Maximized ? new Thickness(7) : new Thickness(0);
         };
+        AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
+        AddHandler(PointerPressedEvent, OnBackButton, RoutingStrategies.Tunnel, handledEventsToo: true);
+    }
+
+    private MainViewModel? Vm => DataContext as MainViewModel;
+
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (Vm is not { } vm) return;
+        if (e.Key == Key.Escape && vm.ShowAnyPanel) { vm.ClosePanels(); e.Handled = true; }
+        else if (e.Key == Key.Left && e.KeyModifiers == KeyModifiers.Alt && vm.CanGoBack) { vm.GoBack(); e.Handled = true; }
+    }
+
+    private void OnBackButton(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsXButton1Pressed && Vm is { CanGoBack: true } vm) { vm.GoBack(); e.Handled = true; }
     }
 
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -32,8 +48,15 @@ public partial class MainWindow : Window
 
     private void Scrim_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (DataContext is MainViewModel vm) vm.ClosePanels();
+        Vm?.ClosePanels();
         e.Handled = true;
+    }
+
+    /// <summary>A row of the account menu or the gear menu was chosen: the menu closes.</summary>
+    private void MenuRow_Click(object? sender, RoutedEventArgs e)
+    {
+        AvatarButton.Flyout?.Hide();
+        GearButton.Flyout?.Hide();
     }
 
     private void Minimize_Click(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

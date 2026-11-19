@@ -1,0 +1,323 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:Forge.Hub.ViewModels.Pages"
+             xmlns:vm="using:Forge.Hub.ViewModels"
+             xmlns:core="using:Forge.Core.Catalogue"
+             xmlns:eng="using:Forge.Core.Engines"
+             xmlns:c="using:Forge.Hub.Controls"
+             x:Class="Forge.Hub.Views.Pages.TrackPageView"
+             x:DataType="p:TrackPageViewModel">
+
+  <UserControl.Resources>
+    <StreamGeometry x:Key="Tick">M 1.5 6.5 L 5.5 10.5 L 12.5 2.5</StreamGeometry>
+  </UserControl.Resources>
+
+  <Grid RowDefinitions="Auto,*" MaxWidth="1400">
+    <Button Grid.Row="0" Classes="link" Content="{Binding BackLabel}" Command="{Binding Hub.GoBackCommand}" IsVisible="{Binding HasBack}"
+            Margin="32,14,32,12" FontSize="14" HorizontalAlignment="Left" />
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,24,352" Margin="32,0,32,20">
+
+      <!-- The left column scrolls; the install panel beside it does not (4.3). -->
+      <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Disabled" Padding="0,0,8,0">
+        <StackPanel Spacing="0" Margin="0,0,0,24">
+
+          <!-- The hero: 240 high, radius 16, the eyebrow and the promise over a rising gradient, "The film" at the top right. -->
+          <Border CornerRadius="16" ClipToBounds="True" Height="240" Background="{StaticResource PlateBrush}">
+            <Panel>
+              <c:MediaImage Path="{Binding Hero}" DecodeWidth="760" />
+              <Border>
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Color="#0008090A" Offset="0.15" />
+                    <GradientStop Color="#9908090A" Offset="0.6" />
+                    <GradientStop Color="#F208090A" Offset="1" />
+                  </LinearGradientBrush>
+                </Border.Background>
+              </Border>
+              <Border>
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                    <GradientStop Color="#B308090A" Offset="0" />
+                    <GradientStop Color="#0008090A" Offset="0.7" />
+                  </LinearGradientBrush>
+                </Border.Background>
+              </Border>
+              <StackPanel VerticalAlignment="Bottom" Margin="28,0,28,26" Spacing="10">
+                <TextBlock Classes="label amber" Text="{Binding Eyebrow}" TextWrapping="Wrap" />
+                <TextBlock Classes="display-l" Text="{Binding Promise}" TextWrapping="Wrap" MaxWidth="560" HorizontalAlignment="Left" />
+              </StackPanel>
+              <Button Classes="quiet small" Command="{Binding OpenFilmCommand}" IsVisible="{Binding HasFilm}" Background="{StaticResource ChipDarkBrush}"
+                      HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16" ToolTip.Tip="Opens the film on kovati.dev">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Path Data="M 0 0 L 8 5 L 0 10 Z" Fill="{StaticResource BoneBrush}" VerticalAlignment="Center" />
+                  <TextBlock Text="The film" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Panel>
+          </Border>
+
+          <Grid ColumnDefinitions="*,Auto" Margin="0,18,0,0">
+            <TextBlock Classes="lede" Text="{Binding Lede}" TextWrapping="Wrap" />
+            <Button Grid.Column="1" Classes="link smalltext" Content="Open on kovati.dev ↗" Command="{Binding OpenSiteCommand}" VerticalAlignment="Bottom" Margin="24,0,0,4" />
+          </Grid>
+
+          <Grid ColumnDefinitions="*,Auto" Margin="0,34,0,6">
+            <TextBlock Classes="label" Text="WHAT YOU GET" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+              <TextBlock Classes="small" Text="{Binding CountLine}" VerticalAlignment="Center" />
+              <Button Classes="link amber smalltext" Content="Show Labs" Command="{Binding ShowLabsCommand}" IsVisible="{Binding HasHiddenLabs}" />
+            </StackPanel>
+          </Grid>
+          <Border Classes="hairline" />
+
+          <ItemsControl ItemsSource="{Binding Rows}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="p:CapabilityRowModel">
+                <Border Classes="caprow" Classes.coming="{Binding IsComing}">
+                  <Grid ColumnDefinitions="30,128,18,*,Auto">
+                    <CheckBox Grid.Column="0" IsChecked="{Binding IsTicked, Mode=TwoWay}" IsVisible="{Binding HasBox}" IsEnabled="{Binding CanToggle}"
+                              VerticalAlignment="Top" Margin="0,28,0,0" Padding="0" AutomationProperties.Name="{Binding Name}" />
+                    <Border Grid.Column="0" Width="20" Height="20" CornerRadius="10" Background="#264CC76F" IsVisible="{Binding IsInstalled}" VerticalAlignment="Top" Margin="0,30,0,0" HorizontalAlignment="Left"
+                            ToolTip.Tip="Installed">
+                      <Path Data="{StaticResource Tick}" Stroke="{StaticResource GoodBrush}" StrokeThickness="1.8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+
+                    <Border Grid.Column="1" Classes="thumb" Width="128" Height="80" VerticalAlignment="Top">
+                      <c:MediaImage Path="{Binding Poster}" DecodeWidth="128" />
+                    </Border>
+
+                    <StackPanel Grid.Column="3" Spacing="3">
+                      <TextBlock Classes="title" Text="{Binding Name}" />
+                      <TextBlock Classes="small" Text="{Binding ProductName}" />
+                      <TextBlock Text="{Binding Line}" FontSize="14" LineHeight="20" Foreground="{StaticResource Bone75Brush}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                      <TextBlock Text="{Binding ExtraLine}" IsVisible="{Binding HasExtraLine}" FontSize="13" Foreground="{StaticResource HotBrush}" TextWrapping="Wrap" Margin="0,4,0,0" />
+
+                      <StackPanel IsVisible="{Binding HasEngines}" Margin="0,12,0,0" Spacing="2">
+                        <TextBlock Classes="label" Text="{Binding EngineLabel}" FontSize="10" Margin="0,0,0,4" />
+                        <ItemsControl ItemsSource="{Binding Engines}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="p:EngineLineModel">
+                              <Grid ColumnDefinitions="*,Auto" Margin="0,1">
+                                <CheckBox Classes="engine" IsChecked="{Binding IsTicked, Mode=TwoWay}" IsEnabled="{Binding CanToggle}" AutomationProperties.Name="{Binding Runs}">
+                                  <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Runs}" FontSize="14" VerticalAlignment="Center" />
+                                    <ContentControl Content="{Binding LabsChip}" IsVisible="{Binding IsLabs}" VerticalAlignment="Center" />
+                                  </StackPanel>
+                                </CheckBox>
+                                <TextBlock Grid.Column="1" Classes="small" Text="{Binding Vendor}" VerticalAlignment="Center" Margin="12,0,0,0" />
+                              </Grid>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding EngineWarning}" IsVisible="{Binding ShowEngineWarning}" FontSize="13" Foreground="{StaticResource AmberBrush}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                      </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4" Spacing="10" HorizontalAlignment="Right" Margin="16,2,0,0" MinWidth="150">
+                      <ItemsControl ItemsSource="{Binding Chips}" HorizontalAlignment="Right">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="6" />
+                          </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                      </ItemsControl>
+                      <TextBlock Classes="mono" Text="{Binding InstalledText}" IsVisible="{Binding ShowInstalledText}" Foreground="{StaticResource MuteBrush}" HorizontalAlignment="Right" />
+                      <Button Classes="link amber smalltext" Content="{Binding UpdateText}" Command="{Binding UpdateCommand}" IsVisible="{Binding HasUpdate}" HorizontalAlignment="Right" />
+                      <StackPanel IsVisible="{Binding NeedsPurchase}" Spacing="6" HorizontalAlignment="Right">
+                        <Button Classes="quiet small" Content="{Binding CartLabel}" Command="{Binding AddToCartCommand}" IsEnabled="{Binding CanBuy}" HorizontalAlignment="Right" />
+                      </StackPanel>
+                      <Button Classes="link smalltext" Content="{Binding SiteLabel}" Command="{Binding OpenSiteCommand}" IsVisible="{Binding IsComing}" HorizontalAlignment="Right" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <!-- The track that follows. -->
+          <Border Classes="caprow" IsVisible="{Binding HasNext}">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Classes="title" Text="{Binding NextLine}" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Classes="link amber" Content="{Binding NextName}" Command="{Binding OpenNextCommand}" />
+            </Grid>
+          </Border>
+
+          <TextBlock Classes="label" Text="WHAT IT TAKES" Margin="0,34,0,10" />
+          <ItemsControl ItemsSource="{Binding Needs}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="core:NameLine">
+                <Grid ColumnDefinitions="200,*" Margin="0,0,0,10">
+                  <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Medium" />
+                  <TextBlock Grid.Column="1" Classes="small" Text="{Binding Line}" TextWrapping="Wrap" FontSize="14" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- The install panel (4.3, 4.4, 4.5): 352 wide, plate, radius 16. It always says what will happen. -->
+      <Border Grid.Column="2" Classes="panel" VerticalAlignment="Top">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <Panel Margin="24,22,24,24">
+
+            <!-- Ready: the summary, the agent switch, the target, the button. -->
+            <StackPanel IsVisible="{Binding IsReady}" Spacing="0">
+              <TextBlock Classes="label amber" Text="INSTALL" />
+              <TextBlock Classes="display-m" Text="{Binding Track.Name}" Margin="0,8,0,0" />
+              <TextBlock Text="{Binding Summary}" FontSize="15" FontWeight="SemiBold" Margin="0,12,0,0" />
+              <TextBlock Text="{Binding SizeLine}" FontSize="14" Foreground="{StaticResource Bone80Brush}" Margin="0,2,0,0" />
+              <TextBlock Classes="small" Text="{Binding AlreadyHereLine}" IsVisible="{Binding HasAlreadyHere}" Margin="0,2,0,0" />
+              <ItemsControl ItemsSource="{Binding LaterLines}" Margin="0,6,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Classes="small" Text="{Binding}" TextWrapping="Wrap" Margin="0,2" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <Border Classes="hairline" Margin="0,16" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Use with AI agents" FontSize="14" FontWeight="Medium" VerticalAlignment="Center" />
+                <ToggleSwitch Grid.Column="1" IsChecked="{Binding AgentsOn, Mode=TwoWay}" Margin="0,-6,-10,-6" AutomationProperties.Name="Use with AI agents" />
+              </Grid>
+              <TextBlock Classes="small" Text="{Binding AgentsLine}" TextWrapping="Wrap" Margin="0,6,0,0" />
+
+              <Border Classes="hairline" Margin="0,16" />
+              <TextBlock Classes="small" Text="Install into" />
+              <TextBlock Text="{Binding TargetLabel}" FontSize="14" Margin="0,3,0,0" IsVisible="{Binding !HasManyEngines}" />
+              <ComboBox ItemsSource="{Binding Hub.Engines}" SelectedItem="{Binding Hub.SelectedEngine}" IsVisible="{Binding HasManyEngines}" HorizontalAlignment="Stretch" Margin="0,6,0,0">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="eng:EngineInstall">
+                    <TextBlock Text="{Binding FullVersion, StringFormat='Unreal Engine {0}'}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+
+              <Button Classes="primary large" Command="{Binding InstallCommand}" IsEnabled="{Binding ButtonEnabled}" Margin="0,18,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Path Data="{StaticResource Tick}" Stroke="{StaticResource DimBrush}" StrokeThickness="1.8" IsVisible="{Binding ButtonShowsTick}" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding ButtonText}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{Binding $parent[Button].Foreground}" />
+                </StackPanel>
+              </Button>
+              <ItemsControl ItemsSource="{Binding Notes}" Margin="0,10,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Classes="small" Text="{Binding}" TextWrapping="Wrap" Margin="0,2" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <StackPanel Orientation="Horizontal" Spacing="16" IsVisible="{Binding NoEngine}" Margin="0,8,0,0">
+                <Button Classes="link amber smalltext" Content="Get Unreal Engine ↗" Command="{Binding GetUnrealEngineCommand}" />
+                <Button Classes="link smalltext" Content="Choose its folder…" Command="{Binding Hub.ChooseEngineFolderCommand}" />
+              </StackPanel>
+              <TextBlock Text="{Binding PanelMessage}" IsVisible="{Binding HasPanelMessage}" FontSize="13" Foreground="{StaticResource AmberBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
+
+              <Button Classes="link smalltext" Content="{Binding ShowComponentsLabel}" Command="{Binding ToggleComponentsCommand}" Margin="0,14,0,0" />
+
+              <!-- Show components (4.4): the only place on this page where component ids appear. -->
+              <StackPanel IsVisible="{Binding ShowComponents}" Margin="0,10,0,0" Spacing="10">
+                <ItemsControl ItemsSource="{Binding ComponentGroups}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:ComponentGroupModel">
+                      <StackPanel Spacing="4" Margin="0,0,0,12">
+                        <TextBlock Classes="label" Text="{Binding Label}" FontSize="10" />
+                        <ItemsControl ItemsSource="{Binding Items}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="p:ComponentLineModel">
+                              <StackPanel Margin="0,2">
+                                <Grid ColumnDefinitions="*,Auto">
+                                  <TextBlock Classes="mono" Classes.here="{Binding Muted}" Text="{Binding Id}" TextTrimming="CharacterEllipsis" />
+                                  <TextBlock Grid.Column="1" Classes="mono" Classes.here="{Binding Muted}" Text="{Binding Version}" Foreground="{StaticResource MuteBrush}" Margin="10,0,0,0" />
+                                </Grid>
+                                <TextBlock Classes="small" Text="{Binding Note}" IsVisible="{Binding HasNote}" FontSize="12" TextWrapping="Wrap" Margin="10,1,0,0" />
+                              </StackPanel>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Classes="link smalltext" Content="Everything on this machine →" Command="{Binding EverythingOnThisMachineCommand}" />
+              </StackPanel>
+
+              <!-- Paid capabilities the account does not hold. Coming-soon ones are not repeated here. -->
+              <StackPanel IsVisible="{Binding HasNotIncluded}" Margin="0,18,0,0" Spacing="10">
+                <Border Classes="hairline" Margin="0,0,0,6" />
+                <TextBlock Classes="label" Text="NOT INCLUDED" />
+                <ItemsControl ItemsSource="{Binding NotIncluded}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:NotIncludedModel">
+                      <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                        <TextBlock Text="{Binding Line}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        <Button Grid.Column="1" Classes="quiet small" Content="{Binding CartLabel}" Command="{Binding AddToCartCommand}" IsEnabled="{Binding CanBuy}" Margin="10,0,0,0" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Classes="small" Text="You can read about it on kovati.dev." IsVisible="{Binding !PaymentsLive}" />
+              </StackPanel>
+            </StackPanel>
+
+            <!-- Signing in on the way. -->
+            <StackPanel IsVisible="{Binding IsSigningIn}" Spacing="12">
+              <TextBlock Classes="label amber" Text="INSTALL" />
+              <TextBlock Classes="display-m" Text="{Binding Track.Name}" />
+              <TextBlock Text="Waiting for you to sign in, in your browser…" FontSize="14" TextWrapping="Wrap" />
+              <TextBlock Classes="small" Text="When the sign-in arrives the install starts by itself." TextWrapping="Wrap" />
+              <Button Classes="quiet small" Content="Cancel" Command="{Binding CancelCommand}" HorizontalAlignment="Left" />
+            </StackPanel>
+
+            <!-- Installing: one line per component, a tick when done, the percentage while downloading. -->
+            <StackPanel IsVisible="{Binding IsInstalling}" Spacing="0">
+              <TextBlock Classes="label amber" Text="INSTALLING" />
+              <TextBlock Classes="display-m" Text="{Binding Track.Name}" Margin="0,8,0,0" />
+              <Grid ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+                <ProgressBar Value="{Binding Progress}" Maximum="100" Height="4" MinWidth="0" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Classes="mono" Text="{Binding ProgressText}" Margin="12,0,0,0" />
+              </Grid>
+              <ItemsControl ItemsSource="{Binding InstallLines}" Margin="0,16,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:InstallLineModel">
+                    <Grid ColumnDefinitions="22,*,Auto" Margin="0,4">
+                      <Ellipse Width="12" Height="12" Stroke="{StaticResource LineStrongBrush}" StrokeThickness="1.2" IsVisible="{Binding IsPending}" HorizontalAlignment="Left" />
+                      <Ellipse Width="12" Height="12" Stroke="{StaticResource AmberBrush}" StrokeThickness="1.6" IsVisible="{Binding Running}" HorizontalAlignment="Left" />
+                      <Path Data="{StaticResource Tick}" Stroke="{StaticResource GoodBrush}" StrokeThickness="1.8" IsVisible="{Binding Done}" />
+                      <Path Data="M 1 1 L 10 10 M 10 1 L 1 10" Stroke="{StaticResource AmberBrush}" StrokeThickness="1.6" IsVisible="{Binding Failed}" />
+                      <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" />
+                      <TextBlock Grid.Column="2" Classes="mono" Text="{Binding PercentText}" Foreground="{StaticResource MuteBrush}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Classes="mono" Text="{Binding StatusLine}" Foreground="{StaticResource MuteBrush}" TextWrapping="Wrap" Margin="0,14,0,0" />
+              <Button Classes="link smalltext" Content="Cancel" Command="{Binding CancelCommand}" HorizontalAlignment="Right" Margin="0,10,0,0" />
+            </StackPanel>
+
+            <!-- Done: what happened, in plain names; failures with the reason and "Try again". -->
+            <StackPanel IsVisible="{Binding IsDone}" Spacing="0">
+              <TextBlock Classes="label amber" Text="{Binding DoneLabel}" />
+              <TextBlock Classes="display-xs" Text="{Binding DoneTitle}" TextWrapping="Wrap" Margin="0,10,0,0" />
+              <TextBlock Classes="small" Text="{Binding DoneLine}" Margin="0,6,0,0" />
+              <ItemsControl ItemsSource="{Binding Failures}" IsVisible="{Binding HasFailures}" Margin="0,16,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:FailureModel">
+                    <StackPanel Spacing="6" Margin="0,0,0,12">
+                      <TextBlock FontSize="13" LineHeight="18" TextWrapping="Wrap" Text="{Binding Message}" />
+                      <Button Classes="quiet small" Content="Try again" Command="{Binding TryAgainCommand}" HorizontalAlignment="Left" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Button Classes="primary large" Content="Continue" Command="{Binding InstallCommand}" IsVisible="{Binding Stopped}" Margin="0,18,0,0" />
+              <Button Classes="primary large" Content="Open the set-up guide ↗" Command="{Binding OpenGuideCommand}" IsVisible="{Binding !Stopped}" Margin="0,18,0,0" />
+              <Button Classes="link smalltext" Content="Back to the install panel" Command="{Binding BackToPanelCommand}" Margin="0,14,0,0" />
+            </StackPanel>
+          </Panel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </Grid>
+</UserControl>

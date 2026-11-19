@@ -69,13 +69,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag }}
-          name: ${{ inputs.prerelease && format('Nightly {0}', inputs.version) || format('Automation Forge {0}', inputs.version) }}
+          name: ${{ inputs.prerelease && format('Nightly {0}', inputs.version) || format('Kovati Hub {0}', inputs.version) }}
           prerelease: ${{ inputs.prerelease }}
           body_path: ${{ steps.notes.outputs.found == 'true' && 'release-notes.md' || '' }}
           generate_release_notes: ${{ steps.notes.outputs.found != 'true' }}
           fail_on_unmatched_files: true
           files: |
             dist/AutomationForge-Setup.exe
+            dist/KovatiHub-Setup.exe
             dist/AutomationForge-Hub-win-x64.zip
             dist/forge-win-x64.zip
             dist/SHA256SUMS.txt

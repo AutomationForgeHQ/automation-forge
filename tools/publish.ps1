@@ -13,7 +13,8 @@
     tools/publish.ps1 -SkipInstaller        without Inno Setup
 
   Output, all in dist/:
-    AutomationForge-Setup.exe               the installer (hub + CLI, per-user)
+    AutomationForge-Setup.exe               the installer (Kovati Hub + CLI, per-user); installed Hubs update from this name
+    KovatiHub-Setup.exe                     the same installer under the new name (spec 10.2)
     AutomationForge-Hub-win-x64.zip         the hub, portable
     forge-win-x64.zip                       the CLI alone
     SHA256SUMS.txt
@@ -59,7 +60,7 @@ Get-ChildItem $OutDir -Recurse -Filter *.pdb | Remove-Item -Force
 
 Write-Host '== portable zips'
 Compress-Archive -Path (Join-Path $OutDir 'hub/*') -DestinationPath (Join-Path $OutDir 'AutomationForge-Hub-win-x64.zip') -CompressionLevel Optimal
-Compress-Archive -Path (Join-Path $OutDir 'cli/forge.exe') -DestinationPath (Join-Path $OutDir 'forge-win-x64.zip') -CompressionLevel Optimal
+Compress-Archive -Path (Join-Path $OutDir 'cli/forge.exe'), (Join-Path $OutDir 'cli/catalogue') -DestinationPath (Join-Path $OutDir 'forge-win-x64.zip') -CompressionLevel Optimal
 
 if (-not $SkipInstaller) {
   Write-Host '== installer'
@@ -72,6 +73,8 @@ if (-not $SkipInstaller) {
   if (-not $iscc) { throw 'Inno Setup 6 was not found. Install it (winget install JRSoftware.InnoSetup) or pass -SkipInstaller.' }
   & $iscc /Q "/DAppVersion=$Version" "/DFileVersion=$fileVersion" "/DSourceDir=$OutDir" "/O$OutDir" (Join-Path $root 'installer/AutomationForge.iss')
   if ($LASTEXITCODE) { throw 'installer build failed' }
+  # The same file under the new name; the old one stays, because installed Hubs look for it by name.
+  Copy-Item (Join-Path $OutDir 'AutomationForge-Setup.exe') (Join-Path $OutDir 'KovatiHub-Setup.exe')
 }
 
 Write-Host '== checksums'

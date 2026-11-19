@@ -1,0 +1,161 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:Forge.Hub.ViewModels.Pages"
+             xmlns:c="using:Forge.Hub.Controls"
+             x:Class="Forge.Hub.Views.Pages.HomePageView"
+             x:DataType="p:HomePageViewModel">
+
+  <UserControl.Resources>
+    <!-- A track door (4.1, 11.4): 4:5, radius 16, the picture filling it under a rising ink gradient; the
+         number and the chip at the top; the subtitle and the name at the bottom; on hover the ring and the glow
+         warm, the picture grows 4 % and the promise slides in. -->
+    <DataTemplate x:Key="TrackDoor" x:DataType="p:TrackCardModel">
+      <Button Classes="plain card" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding AccessibleName}" HorizontalAlignment="Stretch">
+        <c:Ratio Value="1.25">
+          <Border Classes="glow">
+            <Panel>
+              <Border CornerRadius="16" ClipToBounds="True" Background="{StaticResource PlateBrush}">
+                <Panel>
+                  <c:MediaImage Classes="pic" Path="{Binding Door}" DecodeWidth="300" />
+                  <Border>
+                    <Border.Background>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#8C08090A" Offset="0" />
+                        <GradientStop Color="#0008090A" Offset="0.22" />
+                        <GradientStop Color="#4D08090A" Offset="0.55" />
+                        <GradientStop Color="#F208090A" Offset="1" />
+                      </LinearGradientBrush>
+                    </Border.Background>
+                  </Border>
+                </Panel>
+              </Border>
+              <Grid Margin="16" VerticalAlignment="Top" ColumnDefinitions="*,Auto">
+                <TextBlock Classes="label amber" Text="{Binding Number}" VerticalAlignment="Center" />
+                <Border Grid.Column="1" Classes="chip free onpicture" IsVisible="{Binding FreeToStart}">
+                  <TextBlock Classes="chip" Text="FREE TO START" />
+                </Border>
+              </Grid>
+              <StackPanel VerticalAlignment="Bottom" Margin="20,0,20,20" Spacing="8">
+                <TextBlock Classes="label amber" Text="{Binding Subtitle}" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" LetterSpacing="1.6" />
+                <TextBlock Classes="display-m cardname" Text="{Binding Name}" />
+                <StackPanel Classes="hoverlines" Spacing="6">
+                  <TextBlock Text="{Binding Promise}" FontSize="14" LineHeight="20" Foreground="{StaticResource Bone90Brush}" TextWrapping="Wrap" />
+                  <TextBlock Text="See what you get →" FontSize="13" FontWeight="Medium" />
+                </StackPanel>
+              </StackPanel>
+              <Border Classes="ring" />
+            </Panel>
+          </Border>
+        </c:Ratio>
+      </Button>
+    </DataTemplate>
+    <!-- A small door (4.2, ADD A TRACK): 150 x 188, the number at the top, the name only. -->
+    <DataTemplate x:Key="SmallDoor" x:DataType="p:TrackCardModel">
+      <Button Classes="plain card" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding AccessibleName}" Width="150">
+        <c:Ratio Value="1.25">
+          <Border Classes="glow">
+            <Panel>
+              <Border CornerRadius="16" ClipToBounds="True" Background="{StaticResource PlateBrush}">
+                <Panel>
+                  <c:MediaImage Classes="pic" Path="{Binding Door}" DecodeWidth="150" />
+                  <Border>
+                    <Border.Background>
+                      <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#8C08090A" Offset="0" />
+                        <GradientStop Color="#0008090A" Offset="0.3" />
+                        <GradientStop Color="#F208090A" Offset="1" />
+                      </LinearGradientBrush>
+                    </Border.Background>
+                  </Border>
+                </Panel>
+              </Border>
+              <TextBlock Classes="label amber" Text="{Binding Number}" Margin="14,12" VerticalAlignment="Top" />
+              <TextBlock Classes="display-xs cardname" Text="{Binding Name}" Margin="14,0,14,14" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
+              <Border Classes="ring" />
+            </Panel>
+          </Border>
+        </c:Ratio>
+      </Button>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="32,36,32,32" MaxWidth="1336" Spacing="0">
+
+      <!-- No engine: one amber-ringed line above everything. -->
+      <Border Classes="banner" IsVisible="{Binding NoEngine}" Margin="0,0,0,28">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Text="{Binding NoEngineLine}" FontSize="14" TextWrapping="Wrap" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="18" Margin="20,0,0,0" VerticalAlignment="Center">
+            <Button Classes="link amber" Content="Get Unreal Engine ↗" Command="{Binding Hub.GetUnrealEngineCommand}" />
+            <Button Classes="link" Content="Choose its folder…" Command="{Binding Hub.ChooseEngineFolderCommand}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- Returning, slice 1: the updates line first, or one quiet line when all is current. -->
+      <Border Classes="banner" IsVisible="{Binding HasUpdates}" Margin="0,0,0,28">
+        <Grid ColumnDefinitions="*,Auto,Auto">
+          <TextBlock Text="{Binding UpdatesLine}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <Button Grid.Column="1" Classes="link" Content="See what changed" Command="{Binding SeeEverythingCommand}" Margin="0,0,20,0" VerticalAlignment="Center" />
+          <Button Grid.Column="2" Classes="primary small" Content="Update all" Command="{Binding UpdateAllCommand}" />
+        </Grid>
+      </Border>
+      <TextBlock Classes="small" Text="{Binding QuietLine}" Margin="0,0,0,26">
+        <TextBlock.IsVisible>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="IsReturning" />
+            <Binding Path="!HasUpdates" />
+          </MultiBinding>
+        </TextBlock.IsVisible>
+      </TextBlock>
+
+      <StackPanel IsVisible="{Binding IsFirstRun}" Spacing="10" Margin="0,4,0,30">
+        <TextBlock Classes="label amber" Text="START HERE" />
+        <TextBlock Classes="display-xl" Text="What do you want to make?" Margin="0,4,0,0" />
+        <TextBlock Classes="lede" Text="Pick a track to see what it installs. Nothing is downloaded until you say so." />
+      </StackPanel>
+
+      <StackPanel IsVisible="{Binding IsReturning}" Spacing="6" Margin="0,0,0,16">
+        <TextBlock Classes="label" Text="YOUR TRACKS" IsVisible="{Binding HasYourTracks}" />
+      </StackPanel>
+
+      <!-- First run: all four doors. Returning: yours first, then the others under ADD A TRACK. -->
+      <ItemsControl ItemsSource="{Binding Tracks}" ItemTemplate="{StaticResource TrackDoor}" IsVisible="{Binding IsFirstRun}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="4" ColumnSpacing="20" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+      </ItemsControl>
+
+      <ItemsControl ItemsSource="{Binding YourTracks}" ItemTemplate="{StaticResource TrackDoor}" IsVisible="{Binding IsReturning}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="4" ColumnSpacing="20" RowSpacing="20" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+      </ItemsControl>
+      <TextBlock Classes="label" Text="ADD A TRACK" Margin="0,32,0,16">
+        <TextBlock.IsVisible>
+          <MultiBinding Converter="{x:Static BoolConverters.And}">
+            <Binding Path="IsReturning" />
+            <Binding Path="HasOtherTracks" />
+          </MultiBinding>
+        </TextBlock.IsVisible>
+      </TextBlock>
+      <ItemsControl ItemsSource="{Binding OtherTracks}" ItemTemplate="{StaticResource SmallDoor}" IsVisible="{Binding IsReturning}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Horizontal" Spacing="20" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+      </ItemsControl>
+
+      <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,26,0,0">
+        <TextBlock Classes="small" Text="Already know what you need?" VerticalAlignment="Center" />
+        <Button Classes="link" Content="See everything on this machine →" Command="{Binding SeeEverythingCommand}" FontSize="13" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

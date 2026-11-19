@@ -8,9 +8,13 @@ namespace Forge.Hub;
 /// </summary>
 public static class SingleInstance
 {
-    public const string MutexName = @"Local\AutomationForgeHub";
-    private const string ShowEvent = @"Local\AutomationForgeHub.Show";
-    private const string QuitEvent = @"Local\AutomationForgeHub.Quit";
+    // The names stay as 0.4.4 has them (spec 10.2): the installer asks the running Hub to quit through them.
+    // FORGE_HUB_INSTANCE gives a development build names of its own, so it runs beside an installed Hub
+    // instead of raising it and leaving.
+    private static readonly string Suffix = Environment.GetEnvironmentVariable("FORGE_HUB_INSTANCE") is { Length: > 0 } s ? "." + s : "";
+    public static readonly string MutexName = @"Local\AutomationForgeHub" + Suffix;
+    private static readonly string ShowEvent = @"Local\AutomationForgeHub" + Suffix + ".Show";
+    private static readonly string QuitEvent = @"Local\AutomationForgeHub" + Suffix + ".Quit";
 
     public static void SignalShow() => Signal(ShowEvent);
 

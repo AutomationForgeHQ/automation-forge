@@ -1,14 +1,14 @@
 # Accounts
 
-One account, three surfaces: the account site, the hub, and the `forge`
+One account, three surfaces: the account site, Kovati Hub, and the `forge`
 command line. **Nothing installs without it.** Every plugin — free or paid —
-is added to an account first; then the hub installs what the account holds.
+is added to an account first; then Kovati Hub installs what the account holds.
 
-- A **free** plugin is added with one click, on the site or by the hub's
+- A **free** plugin is added with one click, on the site or by Kovati Hub's
   *Install* itself, the first time.
 - A **paid** plugin is bought on the account site, or bought on Fab and linked.
 - Once a plugin is on the account, it is *yours* everywhere: the site says so,
-  the hub shows *Install*, `forge whoami` lists it.
+  Kovati Hub shows *Install*, `forge whoami` lists it.
 
 ## Creating an account
 
@@ -29,16 +29,16 @@ through a different provider joins it to the same account.
 - **Plugins** — every set and plugin, with *Add to account* on the free ones,
   *Buy* on the paid ones, and *yours* on what the account holds. *Add all free*
   per set. Adding a toolset adds the plugins it depends on too.
-- **Hub** — the hub installer and the command line. Plugins are not downloaded
-  from the site; the hub installs them.
+- **Hub** — Kovati Hub installer and the command line. Plugins are not downloaded
+  from the site; Kovati Hub installs them.
 - **Orders** — what was bought, whether it is paid.
 - **Sign out**, top right.
 
-## Signing the hub in
+## Signing Kovati Hub in
 
-In the hub, top right: **Sign in.** The browser opens the account site — sign
-in there if you are not already — and asks *Sign the hub in as …?* Say **Yes,
-connect it.** The browser shows *Connected*, the hub is signed in, and the tab
+In Kovati Hub, top right: **Sign in.** The browser opens the account site — sign
+in there if you are not already — and asks *Sign Kovati Hub in as …?* Say **Yes,
+connect it.** The browser shows *Connected*, Kovati Hub is signed in, and the tab
 can be closed. Your photo (or a person glyph) replaces the button; click it for
 **Account** — name, email, what is on the account, *Manage on the web* — or
 **Sign out**.
@@ -73,19 +73,19 @@ an engine that is not installed, an unknown plugin; `4` not signed in, or the
 account service could not answer; `5` something in the request is paid and not
 on the account (the rest was installed).
 
-The hub and the CLI share the sign-in: sign in with one and the other knows.
+Kovati Hub and the CLI share the sign-in: sign in with one and the other knows.
 
 ## How it works
 
-No password ever passes through the desktop. The hub (or `forge`) listens on a
+No password ever passes through the desktop. Kovati Hub (or `forge`) listens on a
 loopback port, opens `/connect/?port=…&state=…` on the account site, and waits.
 When you say yes, the page posts your session — a refresh token, your id,
-email, name and photo — to that port, and the hub answers by sending the
+email, name and photo — to that port, and Kovati Hub answers by sending the
 browser back to the *Connected* page. The one-time `state` ties the answer to
 the request that asked for it; anything else is refused.
 
 The session is kept in `%LOCALAPPDATA%\AutomationForge\account.bin`, protected
-with Windows DPAPI under your Windows user. From it the hub mints an hour-long
+with Windows DPAPI under your Windows user. From it Kovati Hub mints an hour-long
 ID token whenever it needs one, reads your account's record (what it holds)
 from the project's database, and asks the account API for each download: the
 API checks the account holds the plugin and answers with a URL that lives for

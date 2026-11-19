@@ -1,0 +1,169 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Chips (9.1, 11.3): 18 high, a pill, a 1 px ring; solid ink on pictures where the site blurs. -->
+  <Style Selector="Border.chip">
+    <Setter Property="Height" Value="18" />
+    <Setter Property="Padding" Value="8,0" />
+    <Setter Property="CornerRadius" Value="9" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="BorderBrush" Value="#33FFFFFF" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Border.chip TextBlock.chip">
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{StaticResource Bone85Brush}" />
+  </Style>
+  <Style Selector="Border.chip.onpicture">
+    <Setter Property="Background" Value="{StaticResource ChipDarkBrush}" />
+  </Style>
+  <Style Selector="Border.chip.free">
+    <Setter Property="BorderBrush" Value="#80EBAA28" />
+  </Style>
+  <Style Selector="Border.chip.free TextBlock.chip">
+    <Setter Property="Foreground" Value="{StaticResource HotBrush}" />
+  </Style>
+  <Style Selector="Border.chip.stage">
+    <Setter Property="BorderBrush" Value="#59EBAA28" />
+  </Style>
+  <Style Selector="Border.chip.stage TextBlock.chip">
+    <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
+  </Style>
+  <Style Selector="Border.chip.soon">
+    <Setter Property="BorderBrush" Value="{StaticResource RingMidBrush}" />
+  </Style>
+  <Style Selector="Border.chip.soon TextBlock.chip">
+    <Setter Property="Foreground" Value="{StaticResource Bone60Brush}" />
+  </Style>
+  <Style Selector="Border.chip.labs">
+    <Setter Property="BorderBrush" Value="#99EBAA28" />
+    <Setter Property="Background" Value="{StaticResource LabsWashBrush}" />
+  </Style>
+  <Style Selector="Border.chip.labs TextBlock.chip">
+    <Setter Property="Foreground" Value="{StaticResource HotBrush}" />
+  </Style>
+
+  <!-- Panels: plate, a white 10 % ring, radius 16. -->
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RingSoftBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="16" />
+  </Style>
+  <!-- One line with an amber ring: the "no engine" notice, the updates block. -->
+  <Style Selector="Border.banner">
+    <Setter Property="Background" Value="#0FEBAA28" />
+    <Setter Property="BorderBrush" Value="#59EBAA28" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="Padding" Value="20,14" />
+  </Style>
+  <Style Selector="Border.quietbanner">
+    <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RingSoftBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="Padding" Value="20,14" />
+  </Style>
+  <Style Selector="Border.hairline">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Background" Value="{StaticResource LineBrush}" />
+  </Style>
+
+  <!-- Picture cards (11.4): the ring and the glow warm, the picture grows 4 %, the name turns hot,
+       the hover lines open. Keyboard focus does what hover does. -->
+  <Style Selector="Border.ring">
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="BorderBrush" Value="{StaticResource RingSoftBrush}" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.3" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Border.glow">
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="BoxShadow" Value="0 40 100 -40 #00EBAA28" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.5" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <!-- The picture's own transitions (fade in, grow) are set by MediaImage itself. -->
+  <Style Selector=":is(Image).pic">
+    <Setter Property="RenderTransform" Value="scale(1)" />
+  </Style>
+  <Style Selector="TextBlock.cardname">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Foreground" Duration="0:0:0.3" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="StackPanel.hoverlines">
+    <Setter Property="MaxHeight" Value="0" />
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="RenderTransform" Value="translateY(6px)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="MaxHeight" Duration="0:0:0.3" Easing="CubicEaseOut" />
+        <DoubleTransition Property="Opacity" Duration="0:0:0.3" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.card:pointerover Border.ring, Button.card:focus-within Border.ring">
+    <Setter Property="BorderBrush" Value="{StaticResource RingAmberBrush}" />
+  </Style>
+  <Style Selector="Button.card:pointerover Border.glow, Button.card:focus-within Border.glow">
+    <Setter Property="BoxShadow" Value="0 40 100 -40 #8CEBAA28" />
+  </Style>
+  <Style Selector="Button.card:pointerover :is(Image).pic, Button.card:focus-within :is(Image).pic">
+    <Setter Property="RenderTransform" Value="scale(1.04)" />
+  </Style>
+  <Style Selector="Button.card:pointerover TextBlock.cardname, Button.card:focus-within TextBlock.cardname">
+    <Setter Property="Foreground" Value="{StaticResource HotBrush}" />
+  </Style>
+  <Style Selector="Button.card:pointerover StackPanel.hoverlines, Button.card:focus-within StackPanel.hoverlines">
+    <Setter Property="MaxHeight" Value="80" />
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="RenderTransform" Value="translateY(0px)" />
+  </Style>
+  <Style Selector="Button.card">
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderThickness="2" BorderBrush="{StaticResource AmberBrush}" CornerRadius="19" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+  </Style>
+
+  <!-- A capability row: a hairline under it; at 60 % strength when it is not here yet. -->
+  <Style Selector="Border.caprow">
+    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="Padding" Value="0,16" />
+  </Style>
+  <Style Selector="Border.caprow.coming">
+    <Setter Property="Opacity" Value="0.6" />
+  </Style>
+  <Style Selector="Border.thumb">
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+  </Style>
+
+  <!-- The engine lines inside a capability: the words lead, the brand follows. -->
+  <Style Selector="CheckBox.engine">
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="Padding" Value="8,0,0,0" />
+  </Style>
+
+  <!-- The install panel's component list. -->
+  <Style Selector="TextBlock.here">
+    <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
+  </Style>
+</Styles>

@@ -368,6 +368,6 @@ public static class Words
         return mb < 10 ? string.Create(inv, $"{mb:0.0} MB") : string.Create(inv, $"{mb:0} MB");
     }
 
-    /// <summary>"$49.99" from an amount in cents.</summary>
-    public static string Price(long cents) => $"${cents / 100}.{cents % 100:00}";
+    /// <summary>"$49.99" from an amount in cents; "$69" when there are none (4.6).</summary>
+    public static string Price(long cents) => cents % 100 == 0 ? $"${cents / 100}" : $"${cents / 100}.{cents % 100:00}";
 }

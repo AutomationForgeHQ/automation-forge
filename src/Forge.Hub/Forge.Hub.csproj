@@ -18,7 +18,7 @@
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
     <!-- The catalogue and the installer's set of stills, beside the executable (spec 12.4). tools/sync_hub_catalogue.py fills it. -->
-    <None Include="catalogue\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="catalogue\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>
 
   <ItemGroup>

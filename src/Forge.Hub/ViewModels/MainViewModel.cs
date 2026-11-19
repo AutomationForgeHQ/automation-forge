@@ -57,6 +57,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private EngineInstall? _selectedEngine;
     [ObservableProperty] private SetGroup? _selectedSet;
     [ObservableProperty] private string _sourceStamp = "";
+    [ObservableProperty] private string _checkedAt = "";
     [ObservableProperty] private string _status = "Ready.";
     [ObservableProperty] private bool _busy;
     [ObservableProperty] private bool _showDetails;
@@ -80,9 +81,6 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private bool _hasHubUpdate;
     [ObservableProperty] private bool _hasLegacyInstalls;
 
-    /// <summary>Which tab is on screen. Two of them, so a bool is the honest shape.</summary>
-    [ObservableProperty] private bool _isRunnersTab;
-
     /// <summary>
     /// Keys, in a drawer of their own.
     ///
@@ -104,18 +102,6 @@ public partial class MainViewModel : ViewModelBase
         ? $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Last look {last.CheckedAt:HH:mm}. Nothing installs by itself."
         : $"Looks every {UpdateWatcher.Interval.TotalHours:0} hours across every engine and project it installed into. Nothing installs by itself.";
 
-    /// <summary>The catalogue, which is what the window opens on.</summary>
-    public bool IsPluginsTab => !IsRunnersTab;
-
-    /// <summary>Kept as its own name because the drawer opens over a tab rather than replacing it.</summary>
-    public bool IsRunnersShown => IsRunnersTab;
-
-    partial void OnIsRunnersTabChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsPluginsTab));
-        OnPropertyChanged(nameof(IsRunnersShown));
-    }
-
     partial void OnShowKeysPanelChanged(bool value)
     {
         // One drawer at a time, the same rule Settings and the account already follow.
@@ -126,14 +112,6 @@ public partial class MainViewModel : ViewModelBase
         }
 
         OnPropertyChanged(nameof(ShowAnyPanel));
-    }
-
-    [RelayCommand] private void ShowPlugins() { IsRunnersTab = false; }
-    [RelayCommand]
-    private void ShowRunners()
-    {
-        IsRunnersTab = true;
-        _ = RefreshRentedAsync();
     }
 
     [RelayCommand] private void CloseKeys() => ShowKeysPanel = false;
@@ -191,7 +169,7 @@ public partial class MainViewModel : ViewModelBase
     public bool HasUpdates => UpdatesCount > 0;
     public string UpdatesLabel => UpdatesCount == 1 ? "1 update available" : $"{UpdatesCount} updates available";
 
-    public string HubVersion => $"hub {AppInfo.Version}";
+    public string HubVersion => $"Kovati Hub {AppInfo.Version}";
     public string DataDir => Paths.DataDir;
     public string InstallLocation => HubUpdater.IsInstalled
         ? $"Installed at {HubUpdater.InstallDir}"
@@ -205,7 +183,7 @@ public partial class MainViewModel : ViewModelBase
     }
 
     public string Channel => IsNightly ? Settings.Nightly : Settings.Stable;
-    public string HubUpdateLabel => _hubUpdate is null ? "" : $"hub {_hubUpdate.Version} available — {(HubUpdater.IsInstalled ? "update" : "download")}";
+    public string HubUpdateLabel => _hubUpdate is null ? "" : $"Kovati Hub {_hubUpdate.Version} is ready. {(HubUpdater.IsInstalled ? "Update" : "Download")}";
     public string HubUpdateAction => HubUpdater.IsInstalled ? "Update now" : "Open release";
 
     /// <summary>The designer's constructor; the app passes its shared settings and watcher.</summary>
@@ -230,8 +208,13 @@ public partial class MainViewModel : ViewModelBase
         _extraPluginRoot = _settings.ExtraPluginRoot;
         foreach (var e in EngineLocator.Find()) Engines.Add(e);
         var preferred = App.PreferredEngine is { } spec ? EngineLocator.Resolve(spec) : null;
-        SelectedEngine = Engines.FirstOrDefault(e => preferred is not null && string.Equals(e.Path.TrimEnd('\\', '/'), preferred.Path.TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase))
+        // An engine the editor named that discovery did not list (a source build elsewhere) is still a target.
+        if (preferred is not null && !Engines.Any(e => SamePath(e.Path, preferred.Path))) Engines.Add(preferred);
+        RestoreChosenEngine();
+        SelectedEngine = Engines.FirstOrDefault(e => preferred is not null && SamePath(e.Path, preferred.Path))
+                         ?? Engines.FirstOrDefault(e => HubState.LastTarget is { } last && SamePath(e.PluginRoot, last))
                          ?? Engines.FirstOrDefault();
+        InitV2();
         RefreshMachineSurface();
         _ = RefreshAsync();
         if (_settings.CheckForUpdates) _ = CheckHubUpdateAsync(quiet: true);
@@ -272,7 +255,7 @@ public partial class MainViewModel : ViewModelBase
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or InvalidDataException) { }
     }
 
-    partial void OnSelectedEngineChanged(EngineInstall? value) => Rebuild();
+    partial void OnSelectedEngineChanged(EngineInstall? value) { Rebuild(); RememberTarget(); }
     partial void OnUpdatesCountChanged(int value) { OnPropertyChanged(nameof(HasUpdates)); OnPropertyChanged(nameof(UpdatesLabel)); }
 
     partial void OnIsNightlyChanged(bool value)
@@ -306,22 +289,23 @@ public partial class MainViewModel : ViewModelBase
             var found = await _releases.MergeIntoAsync(manifest);
             _manifest = manifest;
             SourceStamp = $"{found.Releases} releases · checked {found.CheckedAt.ToLocalTime():HH:mm}{(found.FromCache || manifestCached ? " · offline copy" : "")}";
+            CheckedAt = found.CheckedAt.ToLocalTime().ToString("HH:mm");
             _state.Reload();
             // Ownership too, not just the catalogue. Buying happens in a browser,
             // and Refresh is what a person presses when they come back — without
             // this the row they just paid for still says Buy until the hub restarts.
             // LoadOwnedAsync rebuilds; only do it ourselves when signed out.
             if (_entitlements.IsSignedIn) await LoadOwnedAsync(); else Rebuild();
-            Say(found.Merged > 0 ? $"Found {found.Merged} release{(found.Merged == 1 ? "" : "s")} the manifest did not list yet." : "Up to date with the releases repository.");
+            Say(found.Merged > 0 ? $"Found {found.Merged} new release{(found.Merged == 1 ? "" : "s")}." : "Checked. Everything listed is current.");
         }
         catch (Exception ex)
         {
-            Say($"Could not load the catalogue: {ex.Message}");
+            Say($"Could not load the list of tools: {ex.Message}");
         }
         finally { Busy = false; }
     }
 
-    public bool IsSignedIn => _entitlements.IsSignedIn;
+    public bool IsSignedIn => _previewSignedIn || _entitlements.IsSignedIn;
     public bool HasAvatar => Avatar is not null;
     public bool ShowAnyPanel => ShowSettings || ShowAccount || ShowKeysPanel;
 
@@ -366,8 +350,8 @@ public partial class MainViewModel : ViewModelBase
             Owned.Clear();
             foreach (var id in owned.OrderBy(x => x)) Owned.Add(id);
             OwnedLine = owned.Count == 0
-                ? "Nothing on this account yet. Install adds a free plugin to it as it goes; paid ones are bought on the web."
-                : $"{owned.Count} plugin{(owned.Count == 1 ? "" : "s")} on this account.";
+                ? "Nothing on this account yet. Installing a free tool adds it. Paid tools are bought on the web."
+                : $"{owned.Count} tool{(owned.Count == 1 ? "" : "s")} on this account.";
         }
         catch (Exception ex) when (ex is EntitlementException or HttpRequestException)
         {
@@ -382,11 +366,11 @@ public partial class MainViewModel : ViewModelBase
     {
         if (!CloudConfig.Configured) { Say("Accounts are not configured in this build."); return; }
         if (_entitlements.IsSignedIn) return;
-        Say("Opening your browser to sign in — say yes there.");
+        Say("Opening your browser to sign in. Say yes there.");
         try
         {
             var account = await Handshake.SignInAsync(HubUpdater.OpenInBrowser, TimeSpan.FromMinutes(5));
-            if (account is null) { Say("Nothing arrived from the browser in five minutes; nothing changed."); return; }
+            if (account is null) { Say("Nothing arrived from the browser in five minutes. Nothing changed."); return; }
             _entitlements.SignIn(account);
             Say($"Signed in as {account.Email}.");
         }
@@ -616,9 +600,9 @@ public partial class MainViewModel : ViewModelBase
         KeysMissing = rows.Count(r => r.IsMissing);
 
         KeysLine = rows.Count == 0
-            ? "No installed plugin asks for a key."
+            ? "Nothing installed asks for a key."
             : KeysMissing == 0
-                ? $"{set} of {rows.Count} set. Machine-wide - the editor reads the same entries."
+                ? $"{set} of {rows.Count} set. Machine-wide: the editor reads the same entries."
                 : $"{set} of {rows.Count} set, {KeysMissing} still needed.";
     }
 
@@ -643,7 +627,7 @@ public partial class MainViewModel : ViewModelBase
             HubUpdateLine = newer is null
                 ? $"{AppInfo.Version} is the newest on the {Channel} channel."
                 : $"{newer.Version} is available{(newer.Prerelease ? " (nightly)" : "")}.";
-            if (!quiet || newer is not null) Say(newer is null ? "This hub is current." : $"A newer hub is available: {newer.Version}.");
+            if (!quiet || newer is not null) Say(newer is null ? "Kovati Hub is up to date." : $"Kovati Hub {newer.Version} is available.");
         }
         catch (Exception ex)
         {
@@ -664,15 +648,15 @@ public partial class MainViewModel : ViewModelBase
         Busy = true;
         try
         {
-            Status = $"Downloading hub {_hubUpdate.Version}…";
-            var file = await HubUpdater.DownloadAsync(_http, _hubUpdate, new Progress<double>(f => Status = $"Downloading hub {_hubUpdate.Version} — {(int)(f * 100)}%"));
-            Say($"Installing hub {_hubUpdate.Version}; the hub restarts by itself.");
+            Status = $"Downloading Kovati Hub {_hubUpdate.Version}…";
+            var file = await HubUpdater.DownloadAsync(_http, _hubUpdate, new Progress<double>(f => Status = $"Downloading Kovati Hub {_hubUpdate.Version}: {(int)(f * 100)} %"));
+            Say($"Installing Kovati Hub {_hubUpdate.Version}. It restarts by itself.");
             HubUpdater.RunInstaller(file);
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) desktop.Shutdown();
         }
         catch (Exception ex) when (ex is HttpRequestException or InvalidDataException or IOException or InvalidOperationException)
         {
-            Say($"Hub update failed: {ex.Message}");
+            Say($"Kovati Hub could not update: {ex.Message}");
             Busy = false;
         }
     }
@@ -688,7 +672,7 @@ public partial class MainViewModel : ViewModelBase
     {
         var keep = SelectedSet?.Id;
         Sets.Clear();
-        if (_manifest is null || Target is null) return;
+        if (_manifest is null || Target is null) { AfterRebuild(); return; }
         var engine = SelectedEngine!.Version;
         foreach (var set in _manifest.Sets)
         {
@@ -705,6 +689,7 @@ public partial class MainViewModel : ViewModelBase
         UpdatesCount = Sets.Sum(s => s.UpdateCount);
         InstalledCount = Sets.Sum(s => s.InstalledCount);
         HasLegacyInstalls = LegacyInstallCount() > 0;
+        AfterRebuild();
     }
 
     /// <summary>Plugin folders an older hub left in Engine/Plugins/AutomationForge of the selected engine.</summary>
@@ -787,7 +772,7 @@ public partial class MainViewModel : ViewModelBase
                     if (uninstall) { if (!installer.Uninstall(Target, id)) Say($"not installed: {id}"); continue; }
                     var p = _manifest.Plugin(id)!;
                     var v = p.Latest(SelectedEngine.Version, Channel);
-                    if (v is null) { Say($"skipped: {id} has no release for UE {SelectedEngine.Version}"); continue; }
+                    if (v is null) { Say($"{id} has no build for Unreal Engine {SelectedEngine.Version} yet."); continue; }
                     try
                     {
                         Status = $"Downloading {id} {v.Version}…";
@@ -796,7 +781,7 @@ public partial class MainViewModel : ViewModelBase
                     }
                     catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException or IOException)
                     {
-                        Say($"failed: {id} — {ex.Message}");
+                        Say($"failed: {id}: {ex.Message}");
                     }
                 }
             }
@@ -826,16 +811,16 @@ public partial class MainViewModel : ViewModelBase
             finally { p.Dispose(); }
         }
         if (running > 0)
-            Say($"Unreal Editor is running from this engine. A plugin it has loaded cannot be replaced — if the install fails, close the editor and try again.");
+            Say("Unreal Editor is open. A tool it has loaded cannot be replaced: if the install fails, close Unreal and try again.");
     }
 
     /// <summary>Relaunch this executable elevated, headless, then read back what it did.</summary>
     private async Task RunElevatedAsync(string verb, string[] ids)
     {
         var exe = Environment.ProcessPath;
-        if (exe is null) { Say("Cannot determine the hub executable to relaunch."); return; }
-        Say($"{Target!.Root} needs administrator rights — asking once.");
-        Status = "Waiting for administrator approval…";
+        if (exe is null) { Say("Kovati Hub could not find its own program file."); return; }
+        Say($"Windows will ask for permission once, to write to {Target!.Root}.");
+        Status = "Waiting for Windows permission…";
         var psi = new ProcessStartInfo { FileName = exe, UseShellExecute = true, Verb = "runas", CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden };
         psi.ArgumentList.Add(Elevated.Flag);
         psi.ArgumentList.Add(verb);
@@ -856,7 +841,7 @@ public partial class MainViewModel : ViewModelBase
         }
         catch (System.ComponentModel.Win32Exception)
         {
-            Say("Administrator approval was declined; nothing changed.");
+            Say("Windows permission was declined. Nothing changed.");
         }
     }
 
@@ -934,8 +919,8 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
     public string ActionLabel =>
         Latest is null ? "—"
         : !SignedIn ? "Sign in"
-        : NeedsPurchase ? "Buy"
-        : Installed is null ? (Owned ? "Install" : "Add & install")
+        : NeedsPurchase ? "Add to cart"
+        : Installed is null ? "Install"
         : HasUpdate ? "Update"
         : "Installed";
 

@@ -94,14 +94,14 @@ public partial class App : Application
 
     private void SetupTray()
     {
-        var open = new NativeMenuItem("Open Automation Forge");
+        var open = new NativeMenuItem("Open Kovati Hub");
         open.Click += (_, _) => ShowWindow();
         var check = new NativeMenuItem("Check for updates now");
         check.Click += async (_, _) =>
         {
             var r = await _watcher.CheckAsync();
-            if (r is null) Toasts.Show("Automation Forge", "Could not reach the releases. The last known state stands.");
-            else if (r.Count == 0) Toasts.Show("Automation Forge", "Everything is current.");
+            if (r is null) Toasts.Show("Kovati Hub", "Could not check for updates. Nothing changed.");
+            else if (r.Count == 0) Toasts.Show("Kovati Hub", "Everything is up to date.");
             else Announce(r, force: true);
         };
         var quit = new NativeMenuItem("Quit");
@@ -116,7 +116,7 @@ public partial class App : Application
         _tray = new TrayIcon
         {
             Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://AutomationForgeHub/Assets/forge.ico"))),
-            ToolTipText = "Automation Forge",
+            ToolTipText = "Kovati Hub",
             Menu = menu,
             IsVisible = true,
         };
@@ -129,9 +129,9 @@ public partial class App : Application
         if (_tray is null) return;
         _tray.ToolTipText = r.Count switch
         {
-            0 => "Automation Forge — up to date",
-            1 => "Automation Forge — 1 update",
-            var n => $"Automation Forge — {n} updates",
+            0 => "Kovati Hub: up to date",
+            1 => "Kovati Hub: 1 update",
+            var n => $"Kovati Hub: {n} updates",
         };
         if (_window?.DataContext is MainViewModel vm) _ = vm.RefreshQuietlyAsync();
     }
@@ -140,7 +140,7 @@ public partial class App : Application
     {
         if (!force && !_settings.NotifyOnUpdates) return;
         var names = r.Plugins.GroupBy(p => p.Plugin).Select(g => $"{g.Key} {g.First().To}").ToList();
-        if (r.Hub is { } hub) names.Add($"hub {hub.Version}");
+        if (r.Hub is { } hub) names.Add($"Kovati Hub {hub.Version}");
         if (names.Count == 0) return;
         var title = names.Count == 1 ? "1 update available" : $"{names.Count} updates available";
         var body = string.Join(" · ", names.Take(4)) + (names.Count > 4 ? $" · and {names.Count - 4} more" : "");

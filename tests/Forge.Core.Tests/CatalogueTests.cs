@@ -141,6 +141,6 @@ public class StageAndWordsTests
         Assert.Equal("1 capability", Words.Count(1, "capability", "capabilities"));
         Assert.Equal("3 updates", Words.Count(3, "update"));
         Assert.Equal("$49.99", Words.Price(4999));
-        Assert.Equal("$69.00", Words.Price(6900));
+        Assert.Equal("$69", Words.Price(6900));
     }
 }

@@ -195,7 +195,7 @@ its implementation isn't published. In practice that's almost always one of:
   Fab for long.
 
 None of that changes the account rule: whether a plugin is open, Fab or
-paid, it still has to be on your account before the hub will install it.
+paid, it still has to be on your account before Kovati Hub will install it.
 
 ## Keeping this page current
 

@@ -10,7 +10,7 @@
     <VersionPrefix>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)VERSION').Trim())</VersionPrefix>
     <Company>Bojan Andrejek / MetaWorx LLC</Company>
     <Authors>Bojan Andrejek</Authors>
-    <Product>Automation Forge</Product>
+    <Product>Kovati Hub</Product>
     <Copyright>© Bojan Andrejek / MetaWorx LLC</Copyright>
     <RepositoryUrl>https://github.com/AutomationForgeHQ/automation-forge</RepositoryUrl>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>

@@ -20,7 +20,15 @@ public static class Elevated
     public static int Run(string[] args)
     {
         var lines = new List<string>();
-        void Say(string s) { lines.Add(s); Console.WriteLine(s); }
+        // Each line goes to the log as it happens: the window follows the file and ticks components off (4.5).
+        Directory.CreateDirectory(Paths.DataDir);
+        try { File.WriteAllText(LogPath, ""); } catch (IOException) { }
+        void Say(string s)
+        {
+            lines.Add(s);
+            Console.WriteLine(s);
+            try { File.AppendAllLines(LogPath, [s]); } catch (IOException) { }
+        }
         try
         {
             var verb = args.Length > 0 ? args[0] : "";
@@ -38,7 +46,9 @@ public static class Elevated
             using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
             http.DefaultRequestHeaders.UserAgent.ParseAdd(AppInfo.UserAgent("hub-elevated"));
             var state = new InstallState();
-            var installer = new Installer(http, state, new AnonymousEntitlements(), Say);
+            // The signed-in account of this Windows user: an anonymous provider refuses every download (since
+            // 2026-09-06 nothing installs without an account), so an engine in Program Files could not install at all.
+            var installer = new Installer(http, state, new FirebaseEntitlements(http), Say);
 
             if (verb == "uninstall")
             {
@@ -61,6 +71,7 @@ public static class Elevated
                 if (p is null) { Say($"unknown plugin: {id}"); failures++; continue; }
                 var v = p.Latest(e.Version, channel);
                 if (v is null) { Say($"skipped: {id} has no {channel} release for UE {e.Version}"); continue; }
+                Say($"start: {id} {v.Version}");
                 try
                 {
                     var r = installer.InstallAsync(new InstallRequest(p, v, target)).GetAwaiter().GetResult();
@@ -81,8 +92,6 @@ public static class Elevated
 
         int Finish(int code)
         {
-            Directory.CreateDirectory(Paths.DataDir);
-            File.WriteAllLines(LogPath, lines);
             return code;
         }
     }

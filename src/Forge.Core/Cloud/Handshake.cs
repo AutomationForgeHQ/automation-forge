@@ -51,14 +51,14 @@ public static class Handshake
                     var account = Parse(body, state);
                     if (account is null)
                     {
-                        await WriteAsync(stream, "400 Bad Request", cors + "Content-Type: text/plain\r\n", "That sign-in did not match what this hub asked for. Start again from the hub.", cts.Token);
+                        await WriteAsync(stream, "400 Bad Request", cors + "Content-Type: text/plain\r\n", "That sign-in did not match what Kovati Hub asked for. Start again from Kovati Hub.", cts.Token);
                         continue;
                     }
                     var back = $"{CloudConfig.AppUrl.TrimEnd('/')}/connect/?done=1";
                     await WriteAsync(stream, "303 See Other", cors + $"Location: {back}\r\nContent-Type: text/plain\r\n", "Connected. You can close this tab.", cts.Token);
                     return account;
                 }
-                await WriteAsync(stream, "404 Not Found", cors + "Content-Type: text/plain\r\n", "Automation Forge hub is listening for its sign-in.", cts.Token);
+                await WriteAsync(stream, "404 Not Found", cors + "Content-Type: text/plain\r\n", "Kovati Hub is listening for its sign-in.", cts.Token);
             }
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)

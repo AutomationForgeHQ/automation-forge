@@ -46,6 +46,20 @@ public sealed class Catalogue
         Products.FirstOrDefault(p => p.Plugins.Contains(componentId, StringComparer.OrdinalIgnoreCase))
         ?? Products.FirstOrDefault(p => p.AgentPlugins.Contains(componentId, StringComparer.OrdinalIgnoreCase));
 
+    /// <summary>
+    /// An engine's short name in a sentence ("Kimodo engine", "Kimodo: about 20 GB…"): its name without the
+    /// name of the tool it extends, unless what is left is a generic word, then its whole name.
+    /// </summary>
+    public string ShortName(Product p)
+    {
+        if (Product(p.Extends) is { } parent && p.Name.StartsWith(parent.Name + " ", StringComparison.OrdinalIgnoreCase))
+        {
+            var rest = p.Name[(parent.Name.Length + 1)..];
+            return rest is "Local" or "Cloud" ? p.Name : rest;
+        }
+        return p.Name;
+    }
+
     /// <summary>The words for a price key ("free", "free-tier", "paid"), from the site's own labels.</summary>
     public string PriceLabel(string? price) =>
         price is not null && Labels.Price.TryGetValue(price, out var s) ? s
@@ -242,8 +256,7 @@ public sealed class Product
     /// <summary>The id the account sells it under; the first component when the catalogue names none.</summary>
     [JsonIgnore] public string? StoreKey => StoreId ?? MainComponent;
 
-    /// <summary>The short name of an engine in a sentence: its vendor's last word, else its name.</summary>
-    [JsonIgnore] public string ShortName => Vendor is { Length: > 0 } v ? v.Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1] : Name;
+
 }
 
 public sealed class ProductNeed

@@ -33,6 +33,9 @@ public partial class RunnerRow : ViewModelBase
     public string Plugin { get; }
     public string PluginDir { get; }
 
+    /// <summary>The editor plugin's menu name, as the installed version spells it (spec 4.5). Set by the window.</summary>
+    public static string MenuName { get; set; } = "Automation Forge";
+
     public string Title => string.IsNullOrWhiteSpace(_runner.DisplayName) ? _runner.Id : _runner.DisplayName;
 
     [ObservableProperty] private string _dockerLine = "";
@@ -99,7 +102,7 @@ public partial class RunnerRow : ViewModelBase
             NeedsAttention = true;
 
             StateLine = docker == DockerState.NotInstalled
-                ? "Install Docker Desktop, then set this runner up once inside the editor."
+                ? "Install Docker Desktop, then set this runner up once inside Unreal."
                 : "Start Docker Desktop, then this runner can be started from here.";
             return;
         }
@@ -116,8 +119,8 @@ public partial class RunnerRow : ViewModelBase
             // Said plainly, because the alternative is somebody waiting for a Start button that is
             // never coming. Creating it needs settings that live in the plugin.
             ContainerState.Missing =>
-                "No container yet. Set it up once in the editor — Tools > Automation Forge > "
-                + $"{Title} Runner — and it can be started from here afterwards.",
+                $"No container yet. Set it up once inside Unreal, in the {MenuName} menu, under {Title} Runner, "
+                + "and it can be started from here afterwards.",
 
             ContainerState.Stopped => "Stopped. Starting it builds nothing and downloads nothing.",
             ContainerState.Running => "Running.",

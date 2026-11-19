@@ -2,23 +2,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Forge.Hub.App"
              xmlns:local="using:Forge.Hub"
+             xmlns:vm="using:Forge.Hub.ViewModels"
              RequestedThemeVariant="Dark">
 
   <Application.DataTemplates>
     <local:ViewLocator />
+    <!-- A chip: the site's small pill for price, stage and ownership (spec 9.1, 11.3). -->
+    <DataTemplate DataType="vm:ChipModel">
+      <Border Classes="chip" Classes.free="{Binding IsFree}" Classes.paid="{Binding IsPaid}" Classes.stage="{Binding IsStage}"
+              Classes.soon="{Binding IsSoon}" Classes.labs="{Binding IsLabs}" Classes.onpicture="{Binding OnPicture}">
+        <TextBlock Classes="chip" Text="{Binding Text}" />
+      </Border>
+    </DataTemplate>
   </Application.DataTemplates>
 
-  <!-- The website's tokens, verbatim (website/app/globals.css), and its two typefaces, embedded. -->
+  <!-- Kovati's tokens, from the site (v2/app/globals.css) as the spec writes them for Avalonia (section 11). -->
   <Application.Resources>
-    <Color x:Key="Ink">#0a0a0b</Color>
-    <Color x:Key="Plate">#131317</Color>
-    <Color x:Key="Line">#26262b</Color>
-    <Color x:Key="LineStrong">#3a3a42</Color>
-    <Color x:Key="Bone">#edede9</Color>
-    <Color x:Key="Mute">#8a8a93</Color>
-    <Color x:Key="Dim">#7e7e87</Color>
-    <Color x:Key="Amber">#e39a2b</Color>
-    <Color x:Key="AmberDim">#8a6320</Color>
+    <Color x:Key="Ink">#08090A</Color>
+    <Color x:Key="Plate">#141619</Color>
+    <Color x:Key="Line">#25282D</Color>
+    <Color x:Key="LineStrong">#3A4049</Color>
+    <Color x:Key="Bone">#F1F0EC</Color>
+    <Color x:Key="Mute">#9098A5</Color>
+    <Color x:Key="Dim">#78859A</Color>
+    <Color x:Key="Amber">#EBAA28</Color>
+    <Color x:Key="Hot">#FFC44D</Color>
+    <Color x:Key="Steel">#667486</Color>
+    <Color x:Key="Good">#4CC76F</Color>
+    <Color x:Key="Bad">#C42B1C</Color>
 
     <SolidColorBrush x:Key="InkBrush" Color="{StaticResource Ink}" />
     <SolidColorBrush x:Key="PlateBrush" Color="{StaticResource Plate}" />
@@ -28,226 +39,53 @@
     <SolidColorBrush x:Key="MuteBrush" Color="{StaticResource Mute}" />
     <SolidColorBrush x:Key="DimBrush" Color="{StaticResource Dim}" />
     <SolidColorBrush x:Key="AmberBrush" Color="{StaticResource Amber}" />
+    <SolidColorBrush x:Key="HotBrush" Color="{StaticResource Hot}" />
+    <SolidColorBrush x:Key="GoodBrush" Color="{StaticResource Good}" />
+    <SolidColorBrush x:Key="BadBrush" Color="{StaticResource Bad}" />
 
-    <!-- Fluent's accent is ours: radios, checkboxes and selection highlights turn amber. -->
-    <Color x:Key="SystemAccentColor">#e39a2b</Color>
-    <Color x:Key="SystemAccentColorDark1">#c9862a</Color>
-    <Color x:Key="SystemAccentColorDark2">#a86f24</Color>
-    <Color x:Key="SystemAccentColorDark3">#8a6320</Color>
-    <Color x:Key="SystemAccentColorLight1">#e9ab4d</Color>
-    <Color x:Key="SystemAccentColorLight2">#efbd70</Color>
-    <Color x:Key="SystemAccentColorLight3">#f5cf94</Color>
+    <SolidColorBrush x:Key="Bone90Brush" Color="#E6F1F0EC" />
+    <SolidColorBrush x:Key="Bone85Brush" Color="#D9F1F0EC" />
+    <SolidColorBrush x:Key="Bone80Brush" Color="#CCF1F0EC" />
+    <SolidColorBrush x:Key="Bone75Brush" Color="#BFF1F0EC" />
+    <SolidColorBrush x:Key="Bone70Brush" Color="#B3F1F0EC" />
+    <SolidColorBrush x:Key="Bone60Brush" Color="#99F1F0EC" />
+    <SolidColorBrush x:Key="Bone50Brush" Color="#80F1F0EC" />
 
+    <SolidColorBrush x:Key="RingSoftBrush" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="RingMidBrush" Color="#26FFFFFF" />
+    <SolidColorBrush x:Key="RingStrongBrush" Color="#40FFFFFF" />
+    <SolidColorBrush x:Key="RingAmberBrush" Color="#73EBAA28" />
+    <SolidColorBrush x:Key="ChipDarkBrush" Color="#BF08090A" />
+    <SolidColorBrush x:Key="AmberWashBrush" Color="#26EBAA28" />
+    <SolidColorBrush x:Key="LabsWashBrush" Color="#1AEBAA28" />
+    <SolidColorBrush x:Key="ScrimBrush" Color="#B308090A" />
+    <SolidColorBrush x:Key="ScrimDeepBrush" Color="#D908090A" />
+    <SolidColorBrush x:Key="HoverBrush" Color="#0DFFFFFF" />
+
+    <!-- Fluent's accent is Kovati's amber: tick boxes, switches, selection. -->
+    <Color x:Key="SystemAccentColor">#EBAA28</Color>
+    <Color x:Key="SystemAccentColorDark1">#D29721</Color>
+    <Color x:Key="SystemAccentColorDark2">#B5811B</Color>
+    <Color x:Key="SystemAccentColorDark3">#8A6320</Color>
+    <Color x:Key="SystemAccentColorLight1">#F3B93A</Color>
+    <Color x:Key="SystemAccentColorLight2">#FFC44D</Color>
+    <Color x:Key="SystemAccentColorLight3">#FFC44D</Color>
+
+    <!-- Static cuts of Archivo (slice 0: Avalonia does not move a variable font's axes). -->
     <FontFamily x:Key="DisplayFont">avares://AutomationForgeHub/Assets/Fonts#Archivo</FontFamily>
-    <FontFamily x:Key="MonoFont">avares://AutomationForgeHub/Assets/Fonts#IBM Plex Mono</FontFamily>
     <FontFamily x:Key="WideFont">avares://AutomationForgeHub/Assets/Fonts#Archivo Display</FontFamily>
+    <FontFamily x:Key="MonoFont">avares://AutomationForgeHub/Assets/Fonts#IBM Plex Mono</FontFamily>
+
+    <!-- The Kovati mark, the drawing of account/components/KovatiMark.tsx on a 100 x 100 grid. -->
+    <StreamGeometry x:Key="MarkRing">M45.16 84.41 A34.75 34.75 0 1 1 54.84 84.41</StreamGeometry>
+    <StreamGeometry x:Key="MarkBone">M43.66 14.05 L56.34 14.05 L55.8 5.37 L44.2 5.37 Z M82.23 32.86 L86.14 44.92 L94.23 41.72 L90.65 30.7 Z M76.26 75.36 L66 82.81 L71.54 89.51 L80.92 82.7 Z M34 82.81 L23.74 75.36 L19.08 82.7 L28.46 89.51 Z M13.86 44.92 L17.77 32.86 L9.35 30.7 L5.77 41.72 Z M54.38 81.19 L55.29 87.63 L59.45 87.05 L58.54 80.61 Z M45.62 81.19 L44.71 87.63 L40.55 87.05 L41.46 80.61 Z M22 58.2 L32 53.5 L70 53.5 L70 59 L60 59 L56.5 65 L59.5 70.5 L59.5 76 L40.5 76 L40.5 70.5 L43.5 65 L40 59 L32 59 Z M35.62 41.48 L45.99 34.49 L54.38 46.92 L44.01 53.91 Z M47.44 41.36 L68.99 26.82 L71.56 30.64 L50.01 45.18 Z</StreamGeometry>
+    <StreamGeometry x:Key="MarkAmber">M42 50.93 L52.36 43.94 L54.38 46.92 L44.01 53.91 Z M38.2 51.0 L26.5 44.5 L28.6 49.2 Z M38.2 51.0 L25.0 51.4 L28.0 54.0 Z M38.2 51.0 L29.5 58.0 L33.2 56.2 Z</StreamGeometry>
   </Application.Resources>
 
   <Application.Styles>
     <FluentTheme />
-
-    <Style Selector="Window">
-      <Setter Property="Background" Value="{StaticResource InkBrush}" />
-      <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
-    </Style>
-    <Style Selector="TextBlock">
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-      <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
-    </Style>
-    <Style Selector="TextBlock.display">
-      <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="LetterSpacing" Value="-0.4" />
-    </Style>
-    <Style Selector="TextBlock.label">
-      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-      <Setter Property="FontSize" Value="10.5" />
-      <Setter Property="LetterSpacing" Value="1.6" />
-      <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
-    </Style>
-    <Style Selector="TextBlock.stamp">
-      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-      <Setter Property="FontSize" Value="11.5" />
-      <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
-    </Style>
-    <Style Selector="TextBlock.mono">
-      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-      <Setter Property="FontSize" Value="13" />
-    </Style>
-
-    <!-- Buttons: hairline rectangles, mono labels, amber on hover. -->
-    <Style Selector="Button">
-      <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Padding" Value="14,8" />
-      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-      <Setter Property="FontSize" Value="11.5" />
-      <Setter Property="BorderThickness" Value="1" />
-    </Style>
-    <Style Selector="Button.primary">
-      <Setter Property="Background" Value="{StaticResource BoneBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource BoneBrush}" />
-    </Style>
-    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource AmberBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
-    </Style>
-    <Style Selector="Button.primary:disabled /template/ ContentPresenter">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
-    </Style>
-    <Style Selector="Button.ghost">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
-    </Style>
-    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
-    </Style>
-    <!-- A ghost button that is the page you are on. Amber, like the rule under a chosen tab. -->
-    <Style Selector="Button.ghost.selected">
-      <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
-    </Style>
-    <Style Selector="Button.ghost.selected /template/ ContentPresenter">
-      <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
-    </Style>
-
-    <Style Selector="Button.ghost:disabled /template/ ContentPresenter">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
-    </Style>
-    <!-- Tabs: a label with a rule under the one you are on, rather than a box. -->
-    <Style Selector="Button.tab">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="0,0,0,2" />
-      <Setter Property="BorderBrush" Value="Transparent" />
-      <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
-      <Setter Property="Padding" Value="2,6" />
-      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-      <Setter Property="FontSize" Value="12.5" />
-    </Style>
-    <Style Selector="Button.tab:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-    </Style>
-    <Style Selector="Button.tab.selected">
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
-    </Style>
-    <Style Selector="Button.tab.selected /template/ ContentPresenter">
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-    </Style>
-
-    <Style Selector="Button.link">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
-      <Setter Property="Padding" Value="8,4" />
-    </Style>
-    <Style Selector="Button.link:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-    </Style>
-    <Style Selector="Button.link.amber">
-      <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
-    </Style>
-
-    <!-- The avatar button: no chrome of its own, the circle is the whole control. -->
-    <Style Selector="Button.avatar">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Padding" Value="0" />
-      <Setter Property="CornerRadius" Value="17" />
-    </Style>
-    <Style Selector="Button.avatar:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="Transparent" />
-    </Style>
-    <!-- Hover: the ring warms, like every other button's edge. -->
-    <Style Selector="Button.avatar:pointerover Ellipse.ring">
-      <Setter Property="Stroke" Value="{StaticResource AmberBrush}" />
-      <Setter Property="StrokeThickness" Value="1.5" />
-    </Style>
-    <Style Selector="Button.avatar:pointerover Path">
-      <Setter Property="Stroke" Value="{StaticResource BoneBrush}" />
-    </Style>
-    <Style Selector="MenuFlyoutPresenter">
-      <Setter Property="Background" Value="{StaticResource PlateBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Padding" Value="4" />
-    </Style>
-    <Style Selector="MenuFlyoutPresenter MenuItem">
-      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-      <Setter Property="FontSize" Value="12" />
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-      <Setter Property="Padding" Value="14,8" />
-      <Setter Property="CornerRadius" Value="0" />
-    </Style>
-
-    <!-- Choices in the settings panel: quiet controls, our type inside them. -->
-    <Style Selector="RadioButton">
-      <Setter Property="Padding" Value="10,0,0,0" />
-      <Setter Property="VerticalContentAlignment" Value="Top" />
-      <Setter Property="Margin" Value="0,2" />
-    </Style>
-    <Style Selector="CheckBox">
-      <Setter Property="Padding" Value="8,0,0,0" />
-      <Setter Property="MinHeight" Value="24" />
-    </Style>
-
-    <!-- Caption buttons: 46px targets, quiet until hovered; close warms to red like every Windows app. -->
-    <Style Selector="Button.caption">
-      <Setter Property="Background" Value="Transparent" />
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
-      <Setter Property="Width" Value="46" />
-      <Setter Property="Height" Value="38" />
-      <Setter Property="Padding" Value="0" />
-      <Setter Property="HorizontalContentAlignment" Value="Center" />
-      <Setter Property="VerticalContentAlignment" Value="Center" />
-    </Style>
-    <Style Selector="Button.caption:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource LineBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-    </Style>
-    <Style Selector="Button.caption.close:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#c42b1c" />
-      <Setter Property="Foreground" Value="White" />
-    </Style>
-
-    <!-- The set list: quiet rows, an amber edge on the selected one. -->
-    <Style Selector="ListBoxItem">
-      <Setter Property="Padding" Value="0" />
-      <Setter Property="BorderThickness" Value="2,0,0,0" />
-      <Setter Property="BorderBrush" Value="Transparent" />
-      <Setter Property="CornerRadius" Value="0" />
-    </Style>
-    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource InkBrush}" />
-    </Style>
-    <Style Selector="ListBoxItem:selected">
-      <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
-    </Style>
-    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-      <Setter Property="Background" Value="{StaticResource InkBrush}" />
-    </Style>
-
-    <Style Selector="ComboBox">
-      <Setter Property="CornerRadius" Value="0" />
-      <Setter Property="Background" Value="{StaticResource PlateBrush}" />
-      <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
-      <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
-      <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
-    </Style>
-    <Style Selector="ScrollBar">
-      <Setter Property="Background" Value="Transparent" />
-    </Style>
+    <StyleInclude Source="avares://AutomationForgeHub/Styles/Type.axaml" />
+    <StyleInclude Source="avares://AutomationForgeHub/Styles/Buttons.axaml" />
+    <StyleInclude Source="avares://AutomationForgeHub/Styles/Cards.axaml" />
   </Application.Styles>
 </Application>

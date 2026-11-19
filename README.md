@@ -1,19 +1,21 @@
-# Automation Forge
+# Kovati Hub and the forge CLI
+
+The repository keeps its name, `automation-forge`: installed Hubs, CI and the account service find releases here (Kovati Hub v2 spec, 10.2).
 
 PlayableOps for Unreal Engine 5.8 — motion, voice, faces, meshes, materials and staging generated or recorded in the editor and run as one pipeline, by you and the agents working beside you, so your team plays the design before the assets exist. It's the first implementation of **PlayableOps**: turning creative intent into content a game can actually play, review, trace and safely replace.
 
-This repository is the product's front door: the release **manifest**, the `forge` command-line installer, the hub, and the public documentation. Each open plugin has its own repository under this organisation; builds for every free plugin are published on [`releases`](https://github.com/AutomationForgeHQ/releases).
+This repository is the product's front door: the release **manifest**, the `forge` command-line installer, Kovati Hub, and the public documentation. Each open plugin has its own repository under this organisation; builds for every free plugin are published on [`releases`](https://github.com/AutomationForgeHQ/releases).
 
 Built by [Kovati](https://kovati.dev), founded by MetaWorx LLC. © Bojan Andrejek / MetaWorx LLC.
 
 ## Documentation
 
-This README is the technical reference: the manifest's shape, the hub and CLI, machine configuration, releases. For everything else — what each Forge set does, how open/Fab/paid is decided, the PlayableOps argument, getting your first plugin installed — see the **[docs/ wiki](docs/README.md)**:
+This README is the technical reference: the manifest's shape, Kovati Hub and CLI, machine configuration, releases. For everything else — what each Forge set does, how open/Fab/paid is decided, the PlayableOps argument, getting your first plugin installed — see the **[docs/ wiki](docs/README.md)**:
 
 - [docs/PLAYABLE-OPS.md](docs/PLAYABLE-OPS.md) — the category, in short: the playable gap, graduation, Trinity architecture.
 - [docs/PLUGINS.md](docs/PLUGINS.md) — every Forge set's goal, current features and honest status.
 - [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md) — open, Fab and paid, explained, with the full per-plugin table.
-- [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) — install the hub, sign in, get a set running.
+- [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) — install Kovati Hub, sign in, get a set running.
 - [docs/ACCOUNTS.md](docs/ACCOUNTS.md) — the account system in depth.
 - [docs/MANIFESTO.md](docs/MANIFESTO.md) — PlayableOps as a manifesto.
 
@@ -21,7 +23,7 @@ Elsewhere: the [site](https://kovati.dev), the [account app](https://app.kovati.
 
 ## The manifest
 
-[`manifest.json`](manifest.json) is the one document the hub, the `forge` CLI and the website read to know what exists and where to get it. It is generated, never edited by hand — every plugin release regenerates it from CI, and by hand it is:
+[`manifest.json`](manifest.json) is the one document Kovati Hub, the `forge` CLI and the website read to know what exists and where to get it. It is generated, never edited by hand — every plugin release regenerates it from CI, and by hand it is:
 
 ```
 python tools/build_manifest.py --forge <path to the forge monorepo>
@@ -69,16 +71,16 @@ Shape, abridged:
 }
 ```
 
-Versions are newest first per engine. `changelog` is what the hub's **What's new** shows: every section
+Versions are newest first per engine. `changelog` is what Kovati Hub's **What's new** shows: every section
 newer than the installed version, up to the one offered. It is read from the monorepo rather than from
 the releases, so a `paid` plugin has its notes here too. A paid plugin's versions carry `url`, `symbols`
 and `notes` as `null`, because the account app hands out the build after an entitlement check. A `fab` or `paid` plugin's package carries binaries and public headers only; an `open` plugin's carries its source. Until the product domain exists the manifest is served from this repository's raw URL.
 
-## The hub and the CLI
+## Kovati Hub and the CLI
 
 **Download:** [`AutomationForge-Setup.exe`](https://github.com/AutomationForgeHQ/automation-forge/releases/latest/download/AutomationForge-Setup.exe)
-— Windows 10/11 x64, per-user, no administrator prompt. It installs the hub and
-`forge`, adds `forge` to PATH, and can start the hub with Windows. Portable:
+— Windows 10/11 x64, per-user, no administrator prompt. It installs Kovati Hub and
+`forge`, adds `forge` to PATH, and can start Kovati Hub with Windows. Portable:
 [`AutomationForge-Hub-win-x64.zip`](https://github.com/AutomationForgeHQ/automation-forge/releases/latest/download/AutomationForge-Hub-win-x64.zip),
 [`forge-win-x64.zip`](https://github.com/AutomationForgeHQ/automation-forge/releases/latest/download/forge-win-x64.zip),
 [`SHA256SUMS.txt`](https://github.com/AutomationForgeHQ/automation-forge/releases/latest/download/SHA256SUMS.txt).
@@ -99,7 +101,7 @@ forge migrate                       move an older hub's engine installs into Mar
 forge enable MontageForge --project C:\Games\MyGame   the .uproject edit
 forge channel [stable|nightly]      the channel both surfaces follow
 forge claim <set|plugin>            add free plugins to your account, without installing
-forge login · logout · whoami       one account for the site, the hub and the CLI
+forge login · logout · whoami       one account for the site, Kovati Hub and the CLI
 ```
 
 Nothing installs without an account. Every plugin is added to one first: a
@@ -107,14 +109,14 @@ free plugin is claimed as it installs, a paid one is bought on the account
 site. Signing in opens that site in the browser; when you say yes there, the
 session is handed to this machine over the loopback and kept under DPAPI — no
 password passes through the desktop.
-Creating an account, signing the hub in, and how it all works:
+Creating an account, signing Kovati Hub in, and how it all works:
 [docs/ACCOUNTS.md](docs/ACCOUNTS.md). In an engine, plugins go to
 `Engine/Plugins/Marketplace/AutomationForge`, beside what Fab installs: on a launcher
 engine that is the only folder whose build rules UnrealBuildTool compiles on demand,
 and a plugin anywhere else in `Engine/Plugins` stops every C++ build on that engine.
 Hubs before 0.4.3 used `Engine/Plugins/AutomationForge`; install, update, uninstall
-and `forge migrate` move those installs over, and the hub offers it in its footer.
-A target under Program Files makes the CLI relaunch itself elevated once. The hub (`src/Forge.Hub`, Avalonia) is the same
+and `forge migrate` move those installs over, and Kovati Hub offers it in its footer.
+A target under Program Files makes the CLI relaunch itself elevated once. Kovati Hub (`src/Forge.Hub`, Avalonia) is the same
 core with a window, and it is resident: an icon by the clock, a check every four
 hours over every engine and project it installed into, a Windows notification
 when something new appears, and it replaces itself through the installer when a
@@ -123,7 +125,7 @@ newer hub is released. Settings
 keep running in the tray, notifications, and one extra folder of plugins to look
 at.
 
-## What the hub does for a machine
+## What Kovati Hub does for a machine
 
 Two tabs and three drawers, added in 0.3.0.
 
@@ -146,9 +148,9 @@ the entries the plugins use, so a key set in either place is set for both.
 
 ### How it knows any of that: `Config/ForgeMachine.json`
 
-**The hub cannot ask a plugin anything.** It is a separate process that may run
+**Kovati Hub cannot ask a plugin anything.** It is a separate process that may run
 with no editor open at all. So a plugin *declares* what it needs from the machine
-in `Config/ForgeMachine.json`, and the hub reads it — nothing here is hard-coded,
+in `Config/ForgeMachine.json`, and Kovati Hub reads it — nothing here is hard-coded,
 and a plugin written next year needs no change to this application.
 
 It only works if the file is actually in the package, which is less obvious than
@@ -172,8 +174,8 @@ pages were empty for anything installed from one. Plugins now carry a
   "runners": [ {
     "id": "Kimodo",
     "displayName": "Kimodo",
-    "compose": "Runner/docker-compose.yml",   // the editor uses it; the hub only reports it
-    "composeProject": "runner",               // how the hub finds the container, by label
+    "compose": "Runner/docker-compose.yml",   // the editor uses it; Kovati Hub only reports it
+    "composeProject": "runner",               // how Kovati Hub finds the container, by label
     "service": "runner",
     "image": "motionforge/kimodo-runner:1.0",
     "signatureLabel": "com.blackcode.motionforge.runner",
@@ -185,7 +187,7 @@ pages were empty for anything installed from one. Plugins now carry a
 
 The keys block is exactly the static half of the editor's own `FForgeKeyProvider`.
 The other half is closures over the plugin's credential store, which cannot cross
-a process boundary — so the hub reads the metadata from the file and performs the
+a process boundary — so Kovati Hub reads the metadata from the file and performs the
 operations itself, against the same vault entry.
 
 **The blob is UTF-8 and not null-terminated.** The plugins write it with
@@ -196,20 +198,20 @@ decodes as mojibake.
 ### Where it looks, and what it deliberately does not do
 
 Three roots: **every engine's** `Plugins/Marketplace/AutomationForge` (and the
-older `Plugins/AutomationForge` until it is moved), **everywhere the hub
+older `Plugins/AutomationForge` until it is moved), **everywhere Kovati Hub
 has installed** (from its own receipts, which covers project installs), and **one
 folder named in Settings** — for whoever is writing a plugin, whose working tree
 is not a release and never will be one.
 
 Three things stay in the editor, and the reason is the same each time: they need
-knowledge the hub does not have.
+knowledge Kovati Hub does not have.
 
 - **Creating a container.** The compose file interpolates a model cache, a token
-  and a signature that only the plugin knows. The hub finds containers by the
+  and a signature that only the plugin knows. Kovati Hub finds containers by the
   labels compose stamps on them, and starts and stops them by id, which needs
   none of that.
 - **Renting a GPU.** Which card, in which region, under what price ceiling is a
-  decision made against what a model needs. The hub lists what is rented, says
+  decision made against what a model needs. Kovati Hub lists what is rented, says
   what it costs, and stops or releases it.
 - **Testing a key.** One authenticated call in the provider's own shape. Offering
   it here would mean a second copy of every provider's authentication.
@@ -222,8 +224,8 @@ knowledge the hub does not have.
   does not match the file, builds with `build.yml`, and publishes.
 - `nightly.yml` builds `main` every night it moved, as
   `<VERSION>-nightly.<yyyymmdd>`, a GitHub pre-release; nightlies older than
-  fourteen days are pruned. The hub's **nightly** channel sees pre-releases
-  (of the hub and of the plugins — a plugin pre-release on `releases` is a
+  fourteen days are pruned. Kovati Hub's **nightly** channel sees pre-releases
+  (of Kovati Hub and of the plugins — a plugin pre-release on `releases` is a
   nightly there too); **stable** never does. On nightly, whichever is newest
   wins, so a stable release published after a nightly takes over.
 - `tools/publish.ps1 [-Version x.y.z]` is the whole build locally — the same

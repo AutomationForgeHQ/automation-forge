@@ -1,4 +1,4 @@
-; Automation Forge — the Windows installer for the hub and the forge CLI.
+; Kovati Hub: the Windows installer for Kovati Hub and the forge CLI.
 ;
 ; Built by tools/publish.ps1 (locally or in CI), which passes:
 ;   /DAppVersion=0.2.0            the version people see (may carry -nightly.yyyymmdd)
@@ -20,7 +20,10 @@
   #define SourceDir "..\dist"
 #endif
 
-#define AppName "Automation Forge"
+#define AppName "Kovati Hub"
+; The install folder, the AppId, the executable and the output name keep their old names (spec 10.2):
+; installed Hubs update themselves by finding AutomationForge-Setup.exe and this AppId.
+#define LegacyName "Automation Forge"
 #define AppPublisher "Bojan Andrejek / MetaWorx LLC"
 #define AppURL "https://github.com/AutomationForgeHQ/automation-forge"
 #define HubExe "AutomationForgeHub.exe"
@@ -40,8 +43,10 @@ VersionInfoVersion={#FileVersion}
 VersionInfoCompany={#AppPublisher}
 VersionInfoProductName={#AppName}
 VersionInfoDescription={#AppName} setup
-DefaultDirName={userpf}\Automation Forge
+DefaultDirName={userpf}\{#LegacyName}
 DefaultGroupName={#AppName}
+; An upgrade from 0.4.x must not keep the old "Automation Forge" Start menu folder.
+UsePreviousGroup=no
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
 PrivilegesRequired=lowest
@@ -72,6 +77,17 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "{#SourceDir}\hub\{#HubExe}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourceDir}\cli\forge.exe"; DestDir: "{app}"; Flags: ignoreversion
+; The catalogue and the installer's set of stills (spec 12.4), read by the Hub and by forge install --track.
+Source: "{#SourceDir}\hub\catalogue\*"; DestDir: "{app}\catalogue"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[InstallDelete]
+; The 0.4.x shortcuts, so the Start menu has one entry, "Kovati Hub".
+Type: files; Name: "{autoprograms}\{#LegacyName}\{#LegacyName}.lnk"
+Type: dirifempty; Name: "{autoprograms}\{#LegacyName}"
+Type: files; Name: "{autoprograms}\{#LegacyName}.lnk"
+Type: files; Name: "{autodesktop}\{#LegacyName}.lnk"
+; The catalogue is replaced whole, so a picture the new one no longer names does not linger.
+Type: filesandordirs; Name: "{app}\catalogue"
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#HubExe}"

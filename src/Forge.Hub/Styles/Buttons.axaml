@@ -1,0 +1,225 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Buttons (spec 11.3): pills. Primary amber, quiet with a ring, links in bone 70 %, round 40 px. -->
+  <Style Selector="Button">
+    <Setter Property="FontFamily" Value="{StaticResource DisplayFont}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="CornerRadius" Value="22" />
+    <Setter Property="Padding" Value="24,0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderThickness="2" BorderBrush="{StaticResource AmberBrush}" CornerRadius="24" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource AmberBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Height" Value="44" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource HotBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+  </Style>
+  <Style Selector="Button.primary:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource AmberBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+  </Style>
+  <Style Selector="Button.primary:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource LineBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
+  </Style>
+  <Style Selector="Button.large">
+    <Setter Property="Height" Value="48" />
+    <Setter Property="CornerRadius" Value="24" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="FontSize" Value="15" />
+  </Style>
+  <Style Selector="Button.small">
+    <Setter Property="Height" Value="34" />
+    <Setter Property="Padding" Value="16,0" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="CornerRadius" Value="17" />
+  </Style>
+
+  <Style Selector="Button.quiet, Button.ghost">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineStrongBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Height" Value="44" />
+  </Style>
+  <Style Selector="Button.ghost">
+    <Setter Property="Height" Value="34" />
+    <Setter Property="Padding" Value="16,0" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="CornerRadius" Value="17" />
+  </Style>
+  <Style Selector="Button.quiet:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{StaticResource BoneBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+  </Style>
+  <Style Selector="Button.quiet:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.ghost:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
+  </Style>
+
+  <Style Selector="Button.link">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource Bone70Brush}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+  </Style>
+  <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+  </Style>
+  <Style Selector="Button.link:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Button.link:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource DimBrush}" />
+  </Style>
+  <Style Selector="Button.link.amber">
+    <Setter Property="Foreground" Value="{StaticResource AmberBrush}" />
+  </Style>
+  <Style Selector="Button.link.amber:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{StaticResource HotBrush}" />
+  </Style>
+  <Style Selector="Button.link.mute">
+    <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
+  </Style>
+  <Style Selector="Button.link.smalltext">
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+
+  <Style Selector="Button.round">
+    <Setter Property="Width" Value="40" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource RingMidBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector="Button.round:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource PlateBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource BoneBrush}" />
+  </Style>
+
+  <!-- A whole card or row that opens something. No chrome of its own: the card is the look. -->
+  <Style Selector="Button.plain">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Button.plain:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.plain:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <!-- The places in the bar: text 14 in mute; the current one bone with a 4 px amber dot under it. -->
+  <Style Selector="Button.place">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="Height" Value="56" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+  <Style Selector="Button.place:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.place:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+  </Style>
+  <Style Selector="Button.place.selected">
+    <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+    <Setter Property="FontWeight" Value="Medium" />
+  </Style>
+  <Style Selector="Button.place Ellipse.dot">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="Button.place.selected Ellipse.dot">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+
+  <!-- Tabs inside a page (Library): text with a rule under the current one. -->
+  <Style Selector="Button.tab">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0,0,0,2" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
+    <Setter Property="Padding" Value="0,8" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="FontSize" Value="15" />
+  </Style>
+  <Style Selector="Button.tab:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+  </Style>
+  <Style Selector="Button.tab.selected">
+    <Setter Property="Foreground" Value="{StaticResource BoneBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource AmberBrush}" />
+  </Style>
+
+  <!-- Window buttons: 46 x 56, quiet until hovered; close warms to Windows red. -->
+  <Style Selector="Button.caption">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource MuteBrush}" />
+    <Setter Property="Width" Value="46" />
+    <Setter Property="Height" Value="56" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="0" />
+  </Style>
+  <Style Selector="Button.caption:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource LineBrush}" />
+  </Style>
+  <Style Selector="Button.caption.close:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource BadBrush}" />
+  </Style>
+
+  <!-- The account circle: no chrome, the circle is the control. -->
+  <Style Selector="Button.avatar">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="4" />
+    <Setter Property="CornerRadius" Value="20" />
+  </Style>
+  <Style Selector="Button.avatar:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.avatar:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Button.avatar:pointerover Ellipse.ring">
+    <Setter Property="Stroke" Value="{StaticResource AmberBrush}" />
+  </Style>
+
+  <!-- A row in the account menu: a title and a mute line, the whole row a target. -->
+  <Style Selector="Button.menurow">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="Button.menurow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource HoverBrush}" />
+  </Style>
+</Styles>

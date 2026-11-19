@@ -4,18 +4,18 @@ The short path from nothing installed to a Forge set running in your
 project.
 
 **Prefer to watch?** [The whole setup in under eight minutes](https://youtu.be/qROAvFtDoBw) —
-the hub installed and signed in, sets installed and updated, and the plugins
+Kovati Hub installed and signed in, sets installed and updated, and the plugins
 turned on in a project.
 
-## 1. Get the hub
+## 1. Get Kovati Hub
 
 Download from **[kovati.dev/download](https://kovati.dev/download)**, or
 take the assets directly from the [latest
 release](https://github.com/AutomationForgeHQ/automation-forge/releases/latest):
 
 - **`AutomationForge-Setup.exe`** — the installer. Per-user, no
-  administrator prompt. Installs the hub and the `forge` command line, adds
-  `forge` to `PATH`, and can start the hub with Windows.
+  administrator prompt. Installs Kovati Hub and the `forge` command line, adds
+  `forge` to `PATH`, and can start Kovati Hub with Windows.
 - **Portable**, if you'd rather not install anything: `AutomationForge-Hub-win-x64.zip`
   and `forge-win-x64.zip` separately, plus `SHA256SUMS.txt` to check them.
 
@@ -26,16 +26,16 @@ Windows will ask you to confirm the first run.
 
 ## 2. Create an account and sign in
 
-Nothing installs without one. In the hub, top right: **Sign in.** It opens
+Nothing installs without one. In Kovati Hub, top right: **Sign in.** It opens
 [app.kovati.dev](https://app.kovati.dev) in your browser — create an
 account there with Google, GitHub, or email and password — and say **Yes,
 connect it** when asked. No password ever passes through the desktop; see
-[ACCOUNTS.md](ACCOUNTS.md) for exactly how that works and what the hub and
+[ACCOUNTS.md](ACCOUNTS.md) for exactly how that works and what Kovati Hub and
 CLI show once you're in.
 
 ## 3. Add a Forge set
 
-In the hub's **Plugins** tab, pick a set — say, MotionForge — and press
+In Kovati Hub's **Plugins** tab, pick a set — say, MotionForge — and press
 **Add & install**. Free plugins are added to your account and installed in
 the same click; a paid member of a set is named and left out until you buy
 it. The same works from the CLI:
@@ -45,7 +45,7 @@ forge install motionforge
 ```
 
 `forge list` shows every set, what's on your account, and what's installed;
-`forge engines` shows which Unreal installations the hub found. The full
+`forge engines` shows which Unreal installations Kovati Hub found. The full
 command reference is in the [repository root README](../README.md#the-hub-and-the-cli).
 
 ## 4. Open Unreal
@@ -69,7 +69,7 @@ work.
 
 - [PLUGINS.md](PLUGINS.md) — what each set does and its honest status.
 - [DISTRIBUTION.md](DISTRIBUTION.md) — which plugins are open, Fab or paid.
-- The hub checks for updates every four hours and shows a Windows
+- Kovati Hub checks for updates every four hours and shows a Windows
   notification when one's ready; `forge update` does the same from the CLI.
   **What's new**, beside a plugin's Update button, lists every release since
   the version you have — skipped ones included — before you take it.
@@ -77,10 +77,10 @@ work.
 ## If something needs a provider key or a local runner
 
 Some sets need an API key (a hosted voice or motion provider) or a local
-model runner (a Docker container, or a GPU rented by the hour). The hub's
+model runner (a Docker container, or a GPU rented by the hour). Kovati Hub's
 **Keys** and **Runners** drawers cover both — keys go straight into the
 Windows Credential Manager, and a runner can be started or stopped from
 there before you open the editor. See the root README's [machine
 configuration](../README.md#how-it-knows-any-of-that-configforgemachinejson)
-section for what a plugin declares and why the hub — not the editor — is
+section for what a plugin declares and why Kovati Hub — not the editor — is
 what starts and stops a rented GPU.
