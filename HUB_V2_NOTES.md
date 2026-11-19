@@ -18,3 +18,30 @@ no desktop window):
 | 3 | `SKCodec` on an animated WebP from `v2/public/media/motionforge/card.mp4` (12.2's ffmpeg line) | **Yes.** SkiaSharp 3.119.4 opens it as WebP: 480 × 600, 67 frames, 83/84 ms each (5.58 s), 447 KB. Frame 33 decoded with its required frame and drawn into an Avalonia `Bitmap`. The film-strip fallback is not needed. | `hub_slice0_3_webp_frame.png` |
 
 The images are in `C:\UNREAL\Colony_NP24\.playwright-mcp\` (outside this repository).
+
+## What is built (slices 1 to 4)
+
+Slice 5 (loops and the film overlay) and slice 6 (the cart, the offline strip, `kovatihub:`) are not started: the
+first waits on the website's WebP loops and a public catalogue address, the second on the account app's cart.
+
+## Run it beside the installed Hub
+
+    git -C C:\UNREAL\AutomationForge switch hub-v2
+    dotnet build C:\UNREAL\AutomationForge\Forge.sln
+    $env:FORGE_HUB_INSTANCE = 'v2'                                   # its own mutex and events: the installed Hub is left alone
+    $env:FORGE_DATA_DIR = 'D:\UNREAL\ColonyDownloads\hub-v2-data'    # a throwaway data folder: signed out, no receipts
+    $env:FORGE_MEDIA_URL = 'C:\UNREAL\AutomationForge-website\v2\public'   # optional: the products' interface shots
+    & C:\UNREAL\AutomationForge\src\Forge.Hub\bin\Debug\net9.0-windows10.0.17763.0\AutomationForgeHub.exe
+
+Quit it from its tray icon, or with the same `FORGE_HUB_INSTANCE`: `AutomationForgeHub.exe --quit`.
+Leave `FORGE_DATA_DIR` out to see your real receipts and sign-in (it then writes `hub-state.json` beside them; an
+older Hub ignores that file). `FORGE_ENGINES=<folder>` limits it to one engine folder, e.g. a throwaway one.
+
+Other switches for local work: `FORGE_CATALOGUE=<file>`, `FORGE_MANIFEST_URL=<file>`, `FORGE_RELEASES_API=off`,
+`FORGE_HUB_SNAPSHOT=<file.png>` (draws the window itself into a PNG eight seconds after it opens).
+
+## Checks
+
+    dotnet test tests/Forge.Core.Tests                               # planner, catalogue, checklist, updates, hub-state
+    src/forge/bin/Debug/net9.0/forge.exe install --track animation --dry-run [--agents]
+    dotnet run --project tests/Forge.Hub.Snapshots -- <out dir> screens   # every screen, headless, from fixed data

@@ -74,6 +74,7 @@ public partial class App : Application
         _window.Show();
         if (_window.WindowState == WindowState.Minimized) _window.WindowState = WindowState.Normal;
         _window.Activate();
+        SnapshotOnce(_window);
     }
 
     private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
@@ -145,6 +146,28 @@ public partial class App : Application
         var body = string.Join(" · ", names.Take(4)) + (names.Count > 4 ? $" · and {names.Count - 4} more" : "");
         Toasts.Show(title, body);
     }
+    /// <summary>
+    /// FORGE_HUB_SNAPSHOT=&lt;file.png&gt;: eight seconds after the window first shows, draw the window itself (not the
+    /// desktop) into that PNG. For checking a development build by eye; nothing happens without the variable.
+    /// </summary>
+    private static bool _snapshotTaken;
+    private static void SnapshotOnce(Window window)
+    {
+        if (_snapshotTaken || Environment.GetEnvironmentVariable("FORGE_HUB_SNAPSHOT") is not { Length: > 0 } file) return;
+        _snapshotTaken = true;
+        DispatcherTimer.RunOnce(() =>
+        {
+            try
+            {
+                var size = new PixelSize((int)window.Bounds.Width, (int)window.Bounds.Height);
+                using var rtb = new Avalonia.Media.Imaging.RenderTargetBitmap(size);
+                rtb.Render(window);
+                rtb.Save(file);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) { }
+        }, TimeSpan.FromSeconds(8));
+    }
+
     /// <summary>The window on Library, Updates: where a notification or a tray check that found something lands (8.1).</summary>
     public void ShowUpdates()
     {
