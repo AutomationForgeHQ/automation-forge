@@ -381,6 +381,14 @@
               </Grid>
               <TextBlock Classes="small" TextWrapping="Wrap"
                          Text="When this is on, every tool you install also gets agent access. Unreal's own Model Context Protocol plugin does the talking; the agent connects to the editor." />
+              <StackPanel Spacing="8" IsVisible="{Binding ShowAddAgentAccess}" Margin="0,4,0,0">
+                <TextBlock Classes="small" Text="{Binding AddAgentAccessLine}" Foreground="{StaticResource Bone90Brush}" TextWrapping="Wrap" />
+                <Button Classes="quiet small" Content="Add agent access to them" Command="{Binding AddAgentAccessCommand}" HorizontalAlignment="Left" />
+              </StackPanel>
+              <StackPanel Spacing="6" IsVisible="{Binding ShowRemoveAgentAccess}" Margin="0,4,0,0">
+                <TextBlock Classes="small" Text="Agent access stays installed until you remove it." TextWrapping="Wrap" />
+                <Button Classes="link smalltext" Content="{Binding RemoveAgentAccessLabel}" Command="{Binding RemoveAgentAccessCommand}" />
+              </StackPanel>
             </StackPanel>
 
             <StackPanel Spacing="10">

@@ -111,6 +111,7 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(AgentAccessSetting));
         OnPropertyChanged(nameof(ShowLabsSetting));
         RunnerRow.MenuName = EditorMenuName();
+        AnnounceAgentActions();
         OnPropertyChanged(nameof(IsSignedIn));
         OnPropertyChanged(nameof(AccountInitial));
         CurrentPage?.Refresh();
@@ -240,7 +241,7 @@ public partial class MainViewModel
     public bool AgentAccessSetting
     {
         get => HubState.AgentsOn;
-        set { SetAgentAccess(value); OnPropertyChanged(); CurrentPage?.Refresh(); }
+        set { SetAgentAccess(value); OnPropertyChanged(); AnnounceAgentActions(); CurrentPage?.Refresh(); }
     }
 
     public bool ShowLabsSetting

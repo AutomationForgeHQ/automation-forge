@@ -93,34 +93,40 @@
         </Grid>
       </Border>
 
-      <!-- Returning, slice 1: the updates line first, or one quiet line when all is current. -->
-      <Border Classes="banner" IsVisible="{Binding HasUpdates}" Margin="0,0,0,28">
+      <!-- Returning (4.2): the updates first, then what is left to set up; one quiet line when all is well. -->
+      <Border Classes="banner" IsVisible="{Binding HasUpdates}" Margin="0,0,0,14">
         <Grid ColumnDefinitions="*,Auto,Auto">
-          <TextBlock Text="{Binding UpdatesLine}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+            <TextBlock Text="{Binding UpdatesLine}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBlock Classes="small" Text="{Binding UpdatesByTrack}" FontSize="14" VerticalAlignment="Center" />
+          </StackPanel>
           <Button Grid.Column="1" Classes="link" Content="See what changed" Command="{Binding SeeEverythingCommand}" Margin="0,0,20,0" VerticalAlignment="Center" />
           <Button Grid.Column="2" Classes="primary small" Content="Update all" Command="{Binding UpdateAllCommand}" />
         </Grid>
       </Border>
-      <TextBlock Classes="small" Text="{Binding QuietLine}" Margin="0,0,0,26">
-        <TextBlock.IsVisible>
-          <MultiBinding Converter="{x:Static BoolConverters.And}">
-            <Binding Path="IsReturning" />
-            <Binding Path="!HasUpdates" />
-          </MultiBinding>
-        </TextBlock.IsVisible>
-      </TextBlock>
-
+      <ItemsControl ItemsSource="{Binding SetupLines}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:SetupLineModel">
+            <Border Classes="quietbanner" Margin="0,0,0,14">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+                  <TextBlock Classes="small" Text="{Binding Line}" FontSize="14" VerticalAlignment="Center" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="quiet small" Content="Continue" Command="{Binding ContinueCommand}" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <TextBlock Classes="small" Text="{Binding QuietLine}" IsVisible="{Binding ShowQuiet}" Margin="0,0,0,14" FontSize="14" />
       <StackPanel IsVisible="{Binding IsFirstRun}" Spacing="10" Margin="0,4,0,30">
         <TextBlock Classes="label amber" Text="START HERE" />
         <TextBlock Classes="display-xl" Text="What do you want to make?" Margin="0,4,0,0" />
         <TextBlock Classes="lede" Text="Pick a track to see what it installs. Nothing is downloaded until you say so." />
       </StackPanel>
 
-      <StackPanel IsVisible="{Binding IsReturning}" Spacing="6" Margin="0,0,0,16">
-        <TextBlock Classes="label" Text="YOUR TRACKS" IsVisible="{Binding HasYourTracks}" />
-      </StackPanel>
-
-      <!-- First run: all four doors. Returning: yours first, then the others under ADD A TRACK. -->
+      <!-- First run: all four doors. -->
       <ItemsControl ItemsSource="{Binding Tracks}" ItemTemplate="{StaticResource TrackDoor}" IsVisible="{Binding IsFirstRun}">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
@@ -129,29 +135,80 @@
         </ItemsControl.ItemsPanel>
       </ItemsControl>
 
-      <ItemsControl ItemsSource="{Binding YourTracks}" ItemTemplate="{StaticResource TrackDoor}" IsVisible="{Binding IsReturning}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <UniformGrid Columns="4" ColumnSpacing="20" RowSpacing="20" />
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-      </ItemsControl>
-      <TextBlock Classes="label" Text="ADD A TRACK" Margin="0,32,0,16">
-        <TextBlock.IsVisible>
-          <MultiBinding Converter="{x:Static BoolConverters.And}">
-            <Binding Path="IsReturning" />
-            <Binding Path="HasOtherTracks" />
-          </MultiBinding>
-        </TextBlock.IsVisible>
-      </TextBlock>
-      <ItemsControl ItemsSource="{Binding OtherTracks}" ItemTemplate="{StaticResource SmallDoor}" IsVisible="{Binding IsReturning}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <StackPanel Orientation="Horizontal" Spacing="20" />
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-      </ItemsControl>
+      <!-- Returning: your tracks as wide cards, two in a row. -->
+      <StackPanel IsVisible="{Binding IsReturning}">
+        <TextBlock Classes="label" Text="YOUR TRACKS" IsVisible="{Binding HasYourTracks}" Margin="0,18,0,12" />
+        <ItemsControl ItemsSource="{Binding YourTracks}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="2" ColumnSpacing="20" RowSpacing="20" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:WideTrackModel">
+              <Button Classes="plain card" Command="{Binding OpenCommand}" Height="150" HorizontalAlignment="Stretch" AutomationProperties.Name="{Binding Name}">
+                <Border Classes="glow">
+                  <Panel>
+                    <Border Background="{StaticResource PlateBrush}" CornerRadius="16" />
+                    <Grid ColumnDefinitions="110,*" Margin="6">
+                      <Border CornerRadius="10" ClipToBounds="True" Width="110" Height="138" Background="{StaticResource InkBrush}">
+                        <c:MediaImage Classes="pic" Path="{Binding Door}" DecodeWidth="110" />
+                      </Border>
+                      <Grid Grid.Column="1" Margin="20,10,14,8" RowDefinitions="Auto,Auto,Auto,*,Auto">
+                        <TextBlock Classes="display-s cardname" Text="{Binding Name}" />
+                        <TextBlock Grid.Row="1" Text="{Binding CapabilitiesLine}" FontSize="14" Foreground="{StaticResource Bone80Brush}" Margin="0,8,0,0" />
+                        <TextBlock Grid.Row="2" Text="{Binding StateLine}" FontSize="13" Classes.amber="{Binding StateIsAmber}" Classes.mute="{Binding !StateIsAmber}" Margin="0,3,0,0" />
+                        <Grid Grid.Row="4" ColumnDefinitions="*,Auto">
+                          <TextBlock Classes="small" Text="{Binding InstalledNames}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                          <TextBlock Grid.Column="1" Text="Open →" FontSize="13" FontWeight="Medium" Margin="12,0,0,0" VerticalAlignment="Center" />
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    <Border Classes="ring" />
+                  </Panel>
+                </Border>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
+        <Grid ColumnDefinitions="*,24,*" Margin="0,32,0,0">
+          <StackPanel IsVisible="{Binding HasOtherTracks}">
+            <TextBlock Classes="label" Text="ADD A TRACK" Margin="0,0,0,12" />
+            <ItemsControl ItemsSource="{Binding OtherTracks}" ItemTemplate="{StaticResource SmallDoor}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" Spacing="20" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
+          </StackPanel>
+          <StackPanel Grid.Column="2" IsVisible="{Binding HasNewOnAccount}">
+            <TextBlock Classes="label" Text="NEW ON YOUR ACCOUNT" Margin="0,0,0,12" />
+            <ItemsControl ItemsSource="{Binding NewOnAccount}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:OwnedRowModel">
+                  <Border Classes="panel" Padding="10" Margin="0,0,0,10">
+                    <Grid ColumnDefinitions="64,*,Auto">
+                      <Border CornerRadius="8" ClipToBounds="True" Width="64" Height="48" Background="{StaticResource InkBrush}">
+                        <c:MediaImage Path="{Binding Picture}" DecodeWidth="64" />
+                      </Border>
+                      <StackPanel Grid.Column="1" Margin="14,0" VerticalAlignment="Center" Spacing="3">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                          <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" />
+                          <ItemsControl ItemsSource="{Binding Chips}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Classes="small" Text="{Binding Line}" />
+                      </StackPanel>
+                      <Button Grid.Column="2" Classes="primary small" Content="Install" Command="{Binding InstallCommand}" VerticalAlignment="Center" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Grid>
+      </StackPanel>
       <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,26,0,0">
         <TextBlock Classes="small" Text="Already know what you need?" VerticalAlignment="Center" />
         <Button Classes="link" Content="See everything on this machine →" Command="{Binding SeeEverythingCommand}" FontSize="13" />

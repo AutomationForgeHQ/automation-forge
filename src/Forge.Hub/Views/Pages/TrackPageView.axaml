@@ -214,6 +214,7 @@
               </StackPanel>
               <TextBlock Text="{Binding PanelMessage}" IsVisible="{Binding HasPanelMessage}" FontSize="13" Foreground="{StaticResource AmberBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
 
+              <Button Classes="link amber smalltext" Content="{Binding ChecklistLink}" Command="{Binding OpenChecklistCommand}" IsVisible="{Binding HasChecklistLink}" Margin="0,14,0,0" />
               <Button Classes="link smalltext" Content="{Binding ShowComponentsLabel}" Command="{Binding ToggleComponentsCommand}" Margin="0,14,0,0" />
 
               <!-- Show components (4.4): the only place on this page where component ids appear. -->
@@ -312,8 +313,101 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
               <Button Classes="primary large" Content="Continue" Command="{Binding InstallCommand}" IsVisible="{Binding Stopped}" Margin="0,18,0,0" />
-              <Button Classes="primary large" Content="Open the set-up guide ↗" Command="{Binding OpenGuideCommand}" IsVisible="{Binding !Stopped}" Margin="0,18,0,0" />
-              <Button Classes="link smalltext" Content="Back to the install panel" Command="{Binding BackToPanelCommand}" Margin="0,14,0,0" />
+              <Button Classes="primary large" Content="Finish setting up" Command="{Binding FinishSettingUpCommand}" IsVisible="{Binding !Stopped}" Margin="0,18,0,0" />
+              <StackPanel Orientation="Horizontal" Spacing="18" Margin="0,14,0,0">
+                <Button Classes="link smalltext" Content="Open the set-up guide ↗" Command="{Binding OpenGuideCommand}" />
+                <Button Classes="link smalltext" Content="Back to the install panel" Command="{Binding BackToPanelCommand}" />
+              </StackPanel>
+            </StackPanel>
+
+            <!-- The set-up checklist (4.5): per track, from what was installed; every step ticks itself. -->
+            <StackPanel IsVisible="{Binding IsChecklist}" Spacing="0">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="label amber" Text="FINISH SETTING UP" />
+                <TextBlock Grid.Column="1" Classes="mono" Text="{Binding ChecklistCount}" Foreground="{StaticResource MuteBrush}" />
+              </Grid>
+              <TextBlock Classes="display-m" Text="{Binding Track.Name}" Margin="0,8,0,0" />
+              <Border Classes="banner" IsVisible="{Binding ChecklistReady}" Margin="0,14,0,0" Padding="16,10">
+                <TextBlock Text="{Binding ReadyLine}" FontSize="14" FontWeight="SemiBold" />
+              </Border>
+              <ItemsControl ItemsSource="{Binding Steps}" Margin="0,14,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:StepModel">
+                    <Grid ColumnDefinitions="24,*" Margin="0,0,0,14">
+                      <Panel VerticalAlignment="Top" Margin="0,3,0,0" HorizontalAlignment="Left">
+                        <Ellipse Width="14" Height="14" Stroke="{StaticResource LineStrongBrush}" StrokeThickness="1.3" IsVisible="{Binding !Done}" />
+                        <Border Width="16" Height="16" CornerRadius="8" Background="#264CC76F" IsVisible="{Binding Done}">
+                          <Path Data="{StaticResource Tick}" Stroke="{StaticResource GoodBrush}" StrokeThickness="1.6" Stretch="Uniform" Width="9" Height="8" />
+                        </Border>
+                      </Panel>
+                      <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
+                        <TextBlock Classes="small" Text="{Binding Line}" IsVisible="{Binding HasLine}" TextWrapping="Wrap" />
+
+                        <!-- The project step. -->
+                        <StackPanel IsVisible="{Binding ShowChooseProject}" Spacing="6" Margin="0,4,0,0">
+                          <Button Classes="quiet small" Content="Choose a project…" Command="{Binding Page.ChooseProjectCommand}" HorizontalAlignment="Left" />
+                          <ItemsControl ItemsSource="{Binding Page.RememberedProjects}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="x:String">
+                                <Button Classes="link smalltext" Content="{Binding StringFormat='Use {0}'}" CommandParameter="{Binding}"
+                                        Command="{Binding $parent[UserControl].((p:TrackPageViewModel)DataContext).UseProjectCommand}" Margin="0,2" />
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </StackPanel>
+                        <Button Classes="link smalltext" Content="Add another project" Command="{Binding Page.ChooseProjectCommand}" IsVisible="{Binding ShowAnotherProject}" />
+
+                        <!-- An engine step: one block per installed engine, a line per need. -->
+                        <ItemsControl ItemsSource="{Binding Engines}" IsVisible="{Binding HasEngines}" Margin="0,4,0,0">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="p:EngineBlockModel">
+                              <StackPanel Spacing="4" Margin="0,4,0,6">
+                                <TextBlock Text="{Binding Title}" FontSize="13" Foreground="{StaticResource Bone80Brush}" TextWrapping="Wrap" />
+                                <ItemsControl ItemsSource="{Binding Lines}">
+                                  <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="p:LineModel">
+                                      <Grid ColumnDefinitions="18,*,Auto" Margin="6,2,0,2">
+                                        <Ellipse Width="10" Height="10" Stroke="{StaticResource LineStrongBrush}" StrokeThickness="1.2" IsVisible="{Binding Open}" VerticalAlignment="Top" Margin="0,3,0,0" HorizontalAlignment="Left" />
+                                        <Path Data="{StaticResource Tick}" Stroke="{StaticResource GoodBrush}" StrokeThickness="1.5" Stretch="Uniform" Width="10" Height="9" IsVisible="{Binding Met}" VerticalAlignment="Top" Margin="0,3,0,0" HorizontalAlignment="Left" />
+                                        <TextBlock Text="i" FontSize="11" FontStyle="Italic" Foreground="{StaticResource MuteBrush}" IsVisible="{Binding Info}" VerticalAlignment="Top" Margin="2,1,0,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Text}" FontSize="13" LineHeight="18" TextWrapping="Wrap" Foreground="{StaticResource Bone90Brush}" />
+                                        <Button Grid.Column="2" Classes="link amber smalltext" Content="Add key" Command="{Binding Page.AddKeyCommand}" CommandParameter="{Binding KeyId}" IsVisible="{Binding ShowAddKey}" Margin="8,0,0,0" VerticalAlignment="Top" />
+                                        <Button Grid.Column="2" Classes="link amber smalltext" Content="Get Docker Desktop ↗" Command="{Binding Page.GetDockerCommand}" IsVisible="{Binding ShowGetDocker}" Margin="8,0,0,0" VerticalAlignment="Top" />
+                                      </Grid>
+                                    </DataTemplate>
+                                  </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Classes="small" Text="{Binding OptionalLine}" IsVisible="{Binding HasOptional}" FontSize="12" TextWrapping="Wrap" Margin="6,0,0,0" />
+                              </StackPanel>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- A tool's own key (Translation needs your DeepL key). -->
+                        <ItemsControl ItemsSource="{Binding Lines}" IsVisible="{Binding HasLines}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="p:LineModel">
+                              <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                                <TextBlock Text="{Binding Text}" FontSize="13" Foreground="{StaticResource Bone90Brush}" />
+                                <Button Grid.Column="1" Classes="link amber smalltext" Content="Add key" Command="{Binding Page.AddKeyCommand}" CommandParameter="{Binding KeyId}" IsVisible="{Binding ShowAddKey}" />
+                              </Grid>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- The first result. -->
+                        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsFirstResult}" Margin="0,4,0,0">
+                          <Button Classes="quiet small" Content="Open the guide ↗" Command="{Binding Page.OpenFirstGuideCommand}" CommandParameter="{Binding}" />
+                          <Button Classes="quiet small" Content="{Binding OpenProjectLabel}" Command="{Binding Page.OpenRememberedProjectCommand}" IsVisible="{Binding ShowOpenProject}" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{Binding ProjectMessage}" IsVisible="{Binding HasProjectMessage}" FontSize="13" Foreground="{StaticResource AmberBrush}" TextWrapping="Wrap" Margin="0,0,0,10" />
+              <Button Classes="link smalltext" Content="Hide this list" Command="{Binding HideChecklistCommand}" />
             </StackPanel>
           </Panel>
         </ScrollViewer>

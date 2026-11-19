@@ -41,6 +41,7 @@ internal static class Screens
         NoEngine();
         SignedIn();
         Returning();
+        Setup();
         Console.WriteLine($"done: {outDir}");
     }
 
@@ -197,6 +198,84 @@ internal static class Screens
         window.Close();
     }
 
+    /// <summary>Slice 2: a track installed through its page, its checklist ticking itself, and the full returning Home.</summary>
+    private static void Setup()
+    {
+        var project = Path.Combine(_scratch, "setup", "MyGame", "MyGame.uproject");
+        var (window, vm) = Open("setup", receipts:
+        [
+            ("AutomationForgeHub", "0.2.5"), ("MotionForge", "0.4.1"), ("MotionForgeKimodo", "0.5.1"),
+            ("MotionForgeUthana", "0.2.1"), ("MontageForge", "0.1.3"), ("SpeechForge", "0.2.2"),
+        ], prepare: (root, data) =>
+        {
+            Directory.CreateDirectory(Path.Combine(root, "MotionForgeKimodo", "Config"));
+            File.WriteAllText(Path.Combine(root, "MotionForgeKimodo", "Config", "ForgeMachine.json"), """
+                { "keys": [
+                    { "id": "HuggingFace", "scope": "general", "displayName": "Hugging Face token", "vaultEntry": "KovatiHubSnapshot/HuggingFace", "optional": false },
+                    { "id": "Runpod", "scope": "general", "displayName": "Runpod", "vaultEntry": "KovatiHubSnapshot/Runpod", "optional": true } ],
+                  "runners": [ { "id": "Kimodo", "displayName": "Kimodo", "compose": "Runner/docker-compose.yml", "composeProject": "kovati-snapshot-kimodo", "service": "runner" } ] }
+                """);
+            Directory.CreateDirectory(Path.Combine(root, "MotionForgeUthana", "Config"));
+            File.WriteAllText(Path.Combine(root, "MotionForgeUthana", "Config", "ForgeMachine.json"), """
+                { "keys": [ { "id": "MotionForge.Uthana", "scope": "plugin", "displayName": "Uthana", "vaultEntry": "KovatiHubSnapshot/Uthana" } ] }
+                """);
+            File.WriteAllText(Path.Combine(data, "hub-state.json"), JsonSerializer.Serialize(new
+            {
+                schemaVersion = 1, agentAccess = false, showLabs = false, lastTarget = root,
+                tracks = new[] { new { track = "animation", target = root, installedAt = "2026-11-19T02:14:00Z", capabilities = new[] { "motion", "gameplay" },
+                    engines = new Dictionary<string, string[]> { ["motion"] = ["motionforge-kimodo", "motionforge-uthana"] }, checklistHidden = false, firstResultOpened = false } },
+                projects = Array.Empty<object>(), pins = new Dictionary<string, string>(),
+            }));
+            Directory.CreateDirectory(Path.GetDirectoryName(project)!);
+            File.WriteAllText(project, """{ "FileVersion": 3, "EngineAssociation": "5.8", "Plugins": [ { "Name": "ModelingToolsEditorMode", "Enabled": true } ] }""");
+        });
+        var facts = new FakeFacts();
+        vm.FactsOverride = facts;
+        vm.PreviewAccount("Bojan Andrejek", "bojan@kovati.dev", ["MotionForge", "MontageForge", "PerformanceForge"]);
+        vm.GoHome();
+        Snap.Pump(1500);
+        Shot(window, "hub_home_returning_full");
+
+        var track = OpenTrack(vm, "animation");
+        Snap.Pump(1500);
+        Console.WriteLine($"  checklist: {track.ChecklistCount}, mode {track.Mode}");
+        Shot(window, "hub_track_animation_checklist");
+
+        track.UseProjectCommand.Execute(project);
+        Snap.Pump(1200);
+        var enabled = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(project))!["Plugins"]!.AsArray()
+            .Select(n => n!["Name"]!.GetValue<string>()).ToList();
+        Console.WriteLine($"  project now enables: {string.Join(", ", enabled)}");
+
+        facts.Keys.Add("HuggingFace");
+        Snap.Pump(6000); // the 5-second self-check
+        Console.WriteLine($"  after the token: {track.ChecklistCount}");
+        Shot(window, "hub_track_animation_checklist_progress");
+
+        track.HideChecklistCommand.Execute(null);
+        Snap.Pump(500);
+        Console.WriteLine($"  hidden: link '{track.ChecklistLink}' visible={track.HasChecklistLink}");
+        Shot(window, "hub_track_animation_checklist_hidden");
+
+        vm.SetAgentAccess(true);
+        vm.AgentAccessSetting = true;
+        vm.ToggleSettingsCommand.Execute(null);
+        Snap.Pump(400);
+        Console.WriteLine($"  settings: {vm.AddAgentAccessLine} -> {string.Join(", ", vm.MissingAgentAccess().Select(x => x.Id))}");
+        Shot(window, "hub_drawer_settings_agents");
+        window.Close();
+    }
+
+    private sealed class FakeFacts : Core.Catalogue.IMachineFacts
+    {
+        private readonly LiveMachineFacts _live = new();
+        public HashSet<string> Keys { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public bool KeySet(Core.Machine.DeclaredKey key) => Keys.Contains(key.Id);
+        public Core.Machine.DockerState Docker() => Core.Machine.DockerState.NotInstalled;
+        public Core.Machine.ContainerState Runner(Core.Machine.DeclaredRunner runner) => Core.Machine.ContainerState.Missing;
+        public bool? ProjectEnabled(string uproject, string plugin) => _live.ProjectEnabled(uproject, plugin);
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────
 
     private static bool Want(string name) => _only.Length == 0 || _only.Any(o => name.Contains(o, StringComparison.OrdinalIgnoreCase));
@@ -234,7 +313,7 @@ internal static class Screens
         Snap.Pump(300);
     }
 
-    private static (MainWindow window, MainViewModel vm) Open(string scenario, (string id, string version)[] receipts, bool engine = true)
+    private static (MainWindow window, MainViewModel vm) Open(string scenario, (string id, string version)[] receipts, bool engine = true, Action<string, string>? prepare = null)
     {
         var data = Path.Combine(_scratch, scenario, "data");
         var engineDir = Path.Combine(_scratch, scenario, "UE_5.8");
@@ -267,6 +346,7 @@ internal static class Screens
             return new { plugin = r.id, version = r.version, engine = "5.8", channel = "stable", targetKind = "engine", targetRoot = root, path = dir, installedAt = "2026-11-01T10:00:00Z" };
         }).ToList();
         File.WriteAllText(Path.Combine(data, "installed.json"), JsonSerializer.Serialize(items));
+        prepare?.Invoke(root, data);
 
         var settings = Settings.Load();
         var vm = new MainViewModel(settings, null);

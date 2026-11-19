@@ -6,7 +6,7 @@ using Forge.Core.Catalogue;
 
 namespace Forge.Hub.ViewModels.Pages;
 
-public enum PanelMode { Ready, SigningIn, Installing, Done }
+public enum PanelMode { Ready, SigningIn, Installing, Done, Checklist }
 
 /// <summary>
 /// A track page (4.3): the track's picture and words, its capabilities in the site's order, and the install
@@ -108,6 +108,7 @@ public sealed partial class TrackPageViewModel : PageViewModel
         OnPropertyChanged(nameof(IsInstalling));
         OnPropertyChanged(nameof(IsDone));
         OnPropertyChanged(nameof(RowsLocked));
+        OnPropertyChanged(nameof(IsChecklist));
         foreach (var r in Rows) r.Locked = RowsLocked;
     }
 
@@ -327,6 +328,7 @@ public sealed partial class TrackPageViewModel : PageViewModel
         OnPropertyChanged(nameof(TargetLabel));
         OnPropertyChanged(nameof(PaymentsLive));
         Recompute();
+        _ = RefreshChecklistAsync(openIfDue: true);
     }
 
     private TrackSelection RememberedOrDefault(PlanInputs inputs)
