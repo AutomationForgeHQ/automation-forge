@@ -57,8 +57,13 @@ public partial class MainWindow : Window
     /// <summary>A row of the account menu or the gear menu was chosen: the menu closes.</summary>
     private void MenuRow_Click(object? sender, RoutedEventArgs e)
     {
-        AvatarButton.Flyout?.Hide();
-        GearButton.Flyout?.Hide();
+        // After the row's command has run, not before: Click is raised ahead of the command, and closing the
+        // menu here takes the row out of the tree, so its command binding is gone by the time the button reads it.
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            AvatarButton.Flyout?.Hide();
+            GearButton.Flyout?.Hide();
+        });
     }
 
     /// <summary>Enter opens the first result; Esc empties the field.</summary>
