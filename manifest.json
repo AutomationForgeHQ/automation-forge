@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-29T12:11:44Z",
+  "generatedAt": "2026-11-19T00:15:13Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -971,6 +971,11 @@
       ],
       "changelog": [
         {
+          "version": "0.3.2",
+          "date": "2026-11-19",
+          "body": "### Fixed\n- Post-processing steps now receive the definition's main picture. A step that paints from the picture\n  the mesh was made from was told there was none."
+        },
+        {
           "version": "0.3.1",
           "date": "2026-10-04",
           "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
@@ -1057,6 +1062,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.4.0",
+          "date": "2026-11-19",
+          "body": "### Added\n- **Aholo Lux3D, a third hosted provider.** Mesh generation on `G1` and `G1-Turbo` - from one\n  picture, from up to 32 views (`imgs`), or from words with a `style` - with `faceCount`,\n  `enablePbr`, `aiPredictSize` and `customSize` under the vendor's own names. G1-Turbo is listed at\n  1 credit (about 1.5 cents), the cheapest mesh in the plugin by far. Its key goes on the Keys page\n  beside Meshy's and Tripo's.\n- **Two Lux3D picture pipelines**: `multimodal-to-image` for a reference picture from words, a\n  picture or both, and `image-to-four-view`, which turns one picture into four views of the same\n  object for multi-view reconstruction.\n- **Two Lux3D post steps that work on any mesh**, a Meshy or Tripo take or one modelled in the\n  project: `mesh-retopology` (a face budget, quad edge flow, and a bake of base colour, metallic and\n  roughness) and `material-transfer` (repaint from a picture).\n- **Tripo Texture v3.5**, on both Tripo steps. The generators gain **texture_version**, which pins\n  the texture model independently of the model that builds the shape; the retexture step gains the\n  same choice as **model**, where it had v3.0 hard-coded. Left alone both are unsent and the vendor\n  derives them, so an existing definition keeps producing exactly what it produced.\n- **`delight`** - take the reference picture's own lighting out before painting from it, on by the\n  vendor's default. Read only by v3.5, so it is greyed out and unsent on the older texture models\n  rather than left looking applied.\n- **`texture_quality: fast`** - the fastest tier, same texture size and **the same credits** as\n  standard; what it buys is time. It exists only on v3.5, and asking for it elsewhere is refused\n  here - by the step and again by the provider - because Tripo refuses it too rather than painting\n  at standard and charging for it. The retexture step's cost line now names the tier and the texture\n  model it will send.\n\n### Compatibility\n- Needs MeshForge 0.3.2 for `material-transfer` to paint from the definition's main picture. A picture\n  chosen in the step works either way.\n\n### Known issues\n- Lux3D has no seed, and its generation, retopology bake and material transfer return no normal map.\n- Pictures and meshes are uploaded to Aholo, whose terms allow model training on uploads and generated\n  outputs. Read its terms before sending work you cannot share; the README summarizes them."
+        },
         {
           "version": "0.3.0",
           "date": "2026-09-21",
