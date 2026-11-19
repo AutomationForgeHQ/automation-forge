@@ -40,6 +40,7 @@
 
     <FontFamily x:Key="DisplayFont">avares://AutomationForgeHub/Assets/Fonts#Archivo</FontFamily>
     <FontFamily x:Key="MonoFont">avares://AutomationForgeHub/Assets/Fonts#IBM Plex Mono</FontFamily>
+    <FontFamily x:Key="WideFont">avares://AutomationForgeHub/Assets/Fonts#Archivo Display</FontFamily>
   </Application.Resources>
 
   <Application.Styles>
