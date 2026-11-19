@@ -9,7 +9,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>AutomationForgeHub</AssemblyName>
     <RootNamespace>Forge.Hub</RootNamespace>
-    <ApplicationIcon>Assets\forge.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\kovati.ico</ApplicationIcon>
     <!-- The beta's title: Windows shows it in Task Manager and the notification toolkit registers it as the name on toasts. -->
     <AssemblyTitle>Kovati Hub (beta)</AssemblyTitle>
     <Description>Kovati Hub installs and updates Kovati's tools for Unreal Engine.</Description>

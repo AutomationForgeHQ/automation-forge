@@ -10,7 +10,7 @@
         x:DataType="vm:MainViewModel"
         Width="1180" Height="760" MinWidth="1040" MinHeight="640"
         Background="{StaticResource InkBrush}"
-        Icon="/Assets/forge.ico"
+        Icon="/Assets/kovati.ico"
         ExtendClientAreaToDecorationsHint="True"
         WindowDecorations="BorderOnly"
         ExtendClientAreaTitleBarHeightHint="-1"

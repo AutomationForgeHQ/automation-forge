@@ -121,7 +121,7 @@ public partial class App : Application
 
         _tray = new TrayIcon
         {
-            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://AutomationForgeHub/Assets/forge.ico"))),
+            Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://AutomationForgeHub/Assets/kovati.ico"))),
             ToolTipText = HubIdentity.DisplayName,
             Menu = menu,
             IsVisible = true,
