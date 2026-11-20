@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    A local stand-in for the account API's licence route and the three Firebase calls the Hub makes, so the licence
+    screens of a real Hub window (a dev instance with its own data folder) can be exercised before the server is live.
+    Not in Forge.sln on purpose: nothing ships from here. See Program.cs for how to run it.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Forge.Core\Forge.Core.csproj" />
+    <Compile Include="..\..\tests\Shared\LicenceSigning.cs" Link="Shared\LicenceSigning.cs" />
+  </ItemGroup>
+
+</Project>
