@@ -1,7 +1,7 @@
 ; Kovati Hub (beta): the Windows installer for Kovati Hub v2 and the forge CLI.
 ;
 ; Built by tools/publish.ps1 (locally or in CI), which passes:
-;   /DAppVersion=0.5.0-beta.3    the version people see (may carry -nightly.yyyymmdd)
+;   /DAppVersion=0.5.0-beta.4    the version people see (may carry -nightly.yyyymmdd)
 ;   /DFileVersion=0.5.0.0         the numeric version Windows file properties need
 ;   /DSourceDir=<dist folder>     where hub\KovatiHub.exe and cli\forge.exe are
 ;
