@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-20T20:30:51Z",
+  "generatedAt": "2026-11-20T20:34:03Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -2729,7 +2729,20 @@
       "distribution": "paid",
       "dependencies": [],
       "source": null,
-      "versions": [],
+      "versions": [
+        {
+          "version": "0.4.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "sha256": "db97104f566737a1dee1c6f00ec7f681f087b1454f4eda7686896878ecc9cbe7",
+          "size": 452949571,
+          "releasedAt": "2026-11-20T20:30:28Z",
+          "url": null,
+          "symbols": null,
+          "notes": null
+        }
+      ],
       "changelog": [
         {
           "version": "0.4.0",
@@ -3423,6 +3436,18 @@
       ],
       "source": "https://github.com/AutomationForgeHQ/TerrainForgeToolset",
       "versions": [
+        {
+          "version": "0.1.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/terrainforgetoolset-v0.1.1/TerrainForgeToolset-0.1.1-UE5.8-Win64.zip",
+          "size": 208174,
+          "sha256": "9c00b68af2d620ad746d1d6e46a98425bd54d8f71045313c66bf1a62cf60995c",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/terrainforgetoolset-v0.1.1/TerrainForgeToolset-0.1.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-11-20T20:33:31Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/terrainforgetoolset-v0.1.1"
+        },
         {
           "version": "0.1.0",
           "engine": "5.8",
