@@ -32,17 +32,23 @@ public sealed class AccountCatalogue
 
     private static string CachePath => Path.Combine(Paths.DataDir, "account-catalogue.json");
 
-    /// <summary>The cached answer when it is younger than a day; otherwise the network; otherwise null.</summary>
-    public static async Task<AccountCatalogue?> GetAsync(HttpClient http, bool offline = false, CancellationToken ct = default)
+    /// <summary>Read an answer of GET {api}/catalogue. Fields this build does not know are ignored; absent ones keep their defaults.</summary>
+    public static AccountCatalogue? Parse(string json) => JsonSerializer.Deserialize<AccountCatalogue>(json, Json);
+
+    /// <summary>
+    /// The cached answer when it is younger than a day; otherwise the network; otherwise null. <paramref name="force"/>
+    /// (Check now) asks the network first and keeps the cached answer when the network fails.
+    /// </summary>
+    public static async Task<AccountCatalogue?> GetAsync(HttpClient http, bool offline = false, CancellationToken ct = default, bool force = false)
     {
         var cached = ReadCache();
-        if (cached is not null && DateTimeOffset.UtcNow - cached.ReadAt < TimeSpan.FromDays(1)) return cached;
-        if (offline) return null;
+        if (!force && cached is not null && DateTimeOffset.UtcNow - cached.ReadAt < TimeSpan.FromDays(1)) return cached;
+        if (offline) return force ? cached : null;
         try
         {
             var text = await http.GetStringAsync($"{CloudConfig.ApiUrl}/catalogue", ct);
-            var fresh = JsonSerializer.Deserialize<AccountCatalogue>(text, Json);
-            if (fresh is null) return null;
+            var fresh = Parse(text);
+            if (fresh is null) return force ? cached : null;
             fresh.ReadAt = DateTimeOffset.UtcNow;
             Directory.CreateDirectory(Paths.DataDir);
             await File.WriteAllTextAsync(CachePath, text, ct);
@@ -50,7 +56,7 @@ public sealed class AccountCatalogue
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or IOException)
         {
-            return null;
+            return force ? cached : null;
         }
     }
 
@@ -70,9 +76,63 @@ public sealed class AccountCatalogue
 public sealed class AccountPlugin
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("price")] public AccountPrice? Price { get; set; }
     [JsonPropertyName("forSale")] public bool ForSale { get; set; }
     [JsonPropertyName("released")] public bool Released { get; set; }
+
+    /// <summary>
+    /// A paid plugin's free tier: "lite" or "trial", or null (free plugins, paid ones without one, and an API older than
+    /// the field). Anyone signed in may download its free-tier builds; the licence decides what they unlock.
+    /// </summary>
+    [JsonPropertyName("tier")] public string? Tier { get; set; }
+    /// <summary>The first version a free-tier download may have (x.y.z). Older builds need a licence.</summary>
+    [JsonPropertyName("tierSince")] public string? TierSince { get; set; }
+    /// <summary>The plugin this one comes with (bought with another), or null.</summary>
+    [JsonPropertyName("includedWith")] public string? IncludedWith { get; set; }
+    [JsonPropertyName("versions")] public List<AccountVersion> Versions { get; set; } = [];
+
+    /// <summary>The free tier when it is one this build knows ("lite", "trial"); anything else reads as none, so a typo never opens a download.</summary>
+    [JsonIgnore] public string? FreeTier => Tier is "lite" or "trial" ? Tier : null;
+
+    /// <summary>
+    /// Whether an account that does not hold the plugin by a licensed route may download this build: the offer's
+    /// `freeTier` for the version when it lists one, else the version against `tierSince`. False without a free tier.
+    /// </summary>
+    public bool ServesFreeTier(Manifest.VersionInfo v)
+    {
+        if (FreeTier is null) return false;
+        var listed = Versions.FirstOrDefault(x => x.Version == v.Version && string.Equals(x.Engine, v.Engine, StringComparison.OrdinalIgnoreCase)
+                                                  && x.FreeTier is not null);
+        if (listed is not null) return listed.FreeTier == true;
+        return PlainVersion.AtLeast(v.Version, TierSince);
+    }
+}
+
+public sealed class AccountVersion
+{
+    [JsonPropertyName("version")] public string Version { get; set; } = "";
+    [JsonPropertyName("engine")] public string Engine { get; set; } = "";
+    [JsonPropertyName("platform")] public string? Platform { get; set; }
+    [JsonPropertyName("channel")] public string? Channel { get; set; }
+    /// <summary>Null in an answer older than the field.</summary>
+    [JsonPropertyName("freeTier")] public bool? FreeTier { get; set; }
+}
+
+/// <summary>Plain x.y.z versions, compared as the account API compares them (freetier.ts): anything else is never at or above a floor.</summary>
+public static class PlainVersion
+{
+    private static readonly System.Text.RegularExpressions.Regex Plain = new(@"^(\d{1,6})\.(\d{1,6})\.(\d{1,6})$");
+
+    public static (int, int, int)? Parse(string? v)
+    {
+        var m = v is null ? null : Plain.Match(v.Trim());
+        return m is { Success: true } ? (int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value)) : null;
+    }
+
+    /// <summary>version >= floor, both plain x.y.z; false when either is not.</summary>
+    public static bool AtLeast(string? version, string? floor) =>
+        Parse(version) is { } v && Parse(floor) is { } f && v.CompareTo(f) >= 0;
 }
 
 public sealed class AccountPrice

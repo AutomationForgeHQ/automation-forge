@@ -45,7 +45,11 @@ public interface IEntitlementProvider
 
 public sealed record ClaimResult(IReadOnlyList<string> Added, IReadOnlyList<string> AlreadyOwned, IReadOnlyList<string> Paid);
 
-public sealed record ResolvedDownload(string Url, string? Sha256, long? Size, DateTimeOffset ExpiresAt);
+public sealed record ResolvedDownload(string Url, string? Sha256, long? Size, DateTimeOffset ExpiresAt)
+{
+    /// <summary>"lite" or "trial" when the account service served a paid plugin's free-tier build; nothing was granted.</summary>
+    public string? FreeTier { get; init; }
+}
 
 /// <summary>No account. Owns nothing, fetches nothing.</summary>
 public sealed class AnonymousEntitlements : IEntitlementProvider

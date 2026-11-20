@@ -111,6 +111,8 @@ public class CatalogueTests
         var c = Fixtures.Catalogue();
         var m = Fixtures.Manifest();
         var tf = c.Product("terrainforge")!;
+        // The guard itself: the shipped catalogue marks it live since 20 November 2026 (beta 7), so it is set back here.
+        tf.FreeTierLive = false;
         Assert.Equal("paid", ProductFacts.PriceKey(tf, m));
         Assert.True(ProductFacts.FreeTierPromised(tf, m));
         tf.FreeTierLive = true;

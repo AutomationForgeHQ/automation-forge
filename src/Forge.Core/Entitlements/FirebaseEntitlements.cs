@@ -37,6 +37,7 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
     {
         _account = account;
         _owned = null;
+        _licensed = null; _licensedRead = false;
         _auth.Forget();
         AuthState.Save(account);
         // A licence left by another account is never shown as this one's.
@@ -48,6 +49,7 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
     {
         _account = null;
         _owned = null;
+        _licensed = null; _licensedRead = false;
         _auth.Forget();
         AuthState.Clear();
         new Licence.LicenceStore().Delete();
@@ -60,7 +62,7 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
             : _auth.IdTokenAsync(_account.RefreshToken, ct);
 
     /// <summary>Forget what was read about ownership; the next question asks again.</summary>
-    public void Invalidate() => _owned = null;
+    public void Invalidate() { _owned = null; _licensed = null; _licensedRead = false; }
 
     /// <summary>Ask Firebase who this session is now — name, photo, providers — and remember it. Null when signed out or unreachable.</summary>
     public async Task<StoredAccount?> RefreshProfileAsync(CancellationToken ct = default)
@@ -113,6 +115,48 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
         return _owned = owned;
     }
 
+    /// <summary>
+    /// The paid plugins this account holds by a licensed route (bought, gifted, Fab, a tester grant: GET {api}/me
+    /// `licensed`). A paid plugin held only by a preview claim is not among them: it runs as its free tier. Null when the
+    /// answer has no such field (an API older than it), when signed out, or when the account service cannot be reached:
+    /// then whatever the account holds counts, the rule before free tiers.
+    /// </summary>
+    public async Task<IReadOnlySet<string>?> LicensedAsync(CancellationToken ct = default)
+    {
+        if (_licensedRead) return _licensed;
+        if (_account is null) return null;
+        try
+        {
+            var token = await _auth.IdTokenAsync(_account.RefreshToken, ct);
+            using var req = new HttpRequestMessage(HttpMethod.Get, $"{CloudConfig.ApiUrl}/me");
+            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            using var resp = await _http.SendAsync(req, ct);
+            if (!resp.IsSuccessStatusCode) return null;
+            _licensed = ParseLicensed(await resp.Content.ReadAsStringAsync(ct));
+            _licensedRead = true;
+            return _licensed;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or EntitlementException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>`licensed` of a GET {api}/me answer; null when the field is not there or is not a list.</summary>
+    public static IReadOnlySet<string>? ParseLicensed(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        if (doc.RootElement.ValueKind != JsonValueKind.Object
+            || !doc.RootElement.TryGetProperty("licensed", out var list) || list.ValueKind != JsonValueKind.Array) return null;
+        var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var v in list.EnumerateArray())
+            if (v.ValueKind == JsonValueKind.String && v.GetString() is { Length: > 0 } id) set.Add(id);
+        return set;
+    }
+
+    private IReadOnlySet<string>? _licensed;
+    private bool _licensedRead;
+
     public async Task<bool> OwnsAsync(PluginInfo plugin, CancellationToken ct = default) =>
         _account is not null && (await OwnedAsync(ct)).Contains(plugin.Id);
 
@@ -120,6 +164,7 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
     {
         var r = await PostAsync<ClaimResponse>("claim", new { plugins = pluginIds.ToArray() }, ct);
         _owned = null; // the record changed
+        _licensedRead = false;
         return new ClaimResult(r.Added, r.AlreadyOwned, r.Paid);
     }
 
@@ -142,7 +187,10 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
     }
 
     private static ResolvedDownload ToResolved(DownloadResponse d) =>
-        new(d.Url, d.Sha256, d.Size, DateTimeOffset.TryParse(d.ExpiresAt, out var e) ? e : DateTimeOffset.UtcNow.AddMinutes(5));
+        new(d.Url, d.Sha256, d.Size, DateTimeOffset.TryParse(d.ExpiresAt, out var e) ? e : DateTimeOffset.UtcNow.AddMinutes(5))
+        {
+            FreeTier = d.FreeTier is "lite" or "trial" ? d.FreeTier : null,
+        };
 
     /// <summary>One call to the account API, with the ID token; an error body becomes an EntitlementException carrying its code.</summary>
     private async Task<T> PostAsync<T>(string route, object body, CancellationToken ct)
@@ -176,5 +224,6 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
         [property: JsonPropertyName("url")] string Url,
         [property: JsonPropertyName("sha256")] string? Sha256,
         [property: JsonPropertyName("size")] long? Size,
-        [property: JsonPropertyName("expiresAt")] string? ExpiresAt);
+        [property: JsonPropertyName("expiresAt")] string? ExpiresAt,
+        [property: JsonPropertyName("freeTier")] string? FreeTier = null);
 }

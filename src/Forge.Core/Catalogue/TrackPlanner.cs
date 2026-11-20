@@ -32,6 +32,14 @@ public sealed record PlanInputs
     /// <summary>engine or project. Only an engine install carries the editor plugin.</summary>
     public string TargetKind { get; init; } = "engine";
     public IReadOnlySet<string> Owned { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// The paid plugins the account holds by a licensed route (GET me `licensed`, and what the licence on this computer
+    /// lists). Null when the account service did not say: then <see cref="Owned"/> counts as licensed, the rule before
+    /// free tiers.
+    /// </summary>
+    public IReadOnlySet<string>? Licensed { get; init; }
+    /// <summary>The account service's offers (GET catalogue): prices, and each paid plugin's free tier and its builds. Null until read.</summary>
+    public Cloud.AccountCatalogue? Offers { get; init; }
     public bool SignedIn { get; init; }
     public bool AgentAccess { get; init; }
     public bool ShowLabs { get; init; }
@@ -105,7 +113,12 @@ public sealed record PlanItem(
     PlanRole Role,
     string? Capability,
     string? Product,
-    string? NeededBy);
+    string? NeededBy,
+    string? FreeTier = null)
+{
+    /// <summary>A paid plugin's free-tier build ("lite", "trial"): it runs as Lite until a licence makes it Full.</summary>
+    public bool IsFreeTier => FreeTier is not null;
+}
 
 /// <summary>A component that was left out, with the sentence that says why (5.2, last row).</summary>
 public sealed record PlanDrop(string Id, string Reason, string Message);
@@ -148,7 +161,10 @@ public static class TrackPlanner
         var latest = first?.Latest(inputs.Engine, inputs.Channel);
         if (first is null || latest is null) return ProductStatus.Coming;
         if (Stages.Of(latest.Version) == Stage.Labs) return ProductStatus.Labs;
-        if (product.Plugins.Any(id => m.Plugin(id) is { IsPaid: true } && !inputs.Owned.Contains(id) && !inputs.Has(id)))
+        // Paid and not to be had: not on the account, or a free tier whose builds here are all below its floor. A free
+        // tier with a build for this engine is Available: it installs as Lite.
+        if (product.Plugins.Any(id => m.Plugin(id) is { IsPaid: true } p && !inputs.Has(id)
+                                      && FreeTiers.AccessOf(p, inputs) is PaidAccess.NotOwned or PaidAccess.NeedsLicence))
             return ProductStatus.NeedsPurchase;
         if (inputs.Has(product.Plugins[0]))
             return HasUpdate(product, inputs) ? ProductStatus.Update : ProductStatus.Installed;
@@ -184,7 +200,8 @@ public static class TrackPlanner
     {
         if (!inputs.Installed.TryGetValue(id, out var have)) return null;
         if (inputs.Pins.ContainsKey(id)) return null;
-        var latest = inputs.Manifest.Plugin(id)?.Latest(inputs.Engine, inputs.Channel);
+        // The build this account may have: a free-tier one updates to the newest free-tier build, never below the floor.
+        var latest = inputs.Manifest.Plugin(id) is { } plugin ? FreeTiers.BuildFor(plugin, inputs) : null;
         return latest is not null && IsNewer(latest.Version, have) ? latest.Version : null;
     }
 
@@ -304,15 +321,24 @@ public static class TrackPlanner
             }
         }
 
-        // 5: nothing paid that the account does not hold, nor anything that depends on it.
+        // 5: nothing paid that the account cannot have, nor anything that depends on it. A paid plugin with a free tier
+        // stays, as its newest free-tier build (step 8); one whose builds here are all below the floor needs a licence.
         var dropped = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var o in order)
         {
             var p = m.Plugin(o.id)!;
-            if (p.IsPaid && !inputs.Owned.Contains(p.Id) && !inputs.Has(p.Id))
+            if (!p.IsPaid || inputs.Has(p.Id)) continue;
+            switch (FreeTiers.AccessOf(p, inputs))
             {
-                dropped.Add(p.Id);
-                drops.Add(new PlanDrop(p.Id, "not-owned", $"{Display(cat, p.Id)} is not on your account."));
+                case PaidAccess.NotOwned:
+                    dropped.Add(p.Id);
+                    drops.Add(new PlanDrop(p.Id, "not-owned", $"{Display(cat, p.Id)} is not on your account."));
+                    break;
+                case PaidAccess.NeedsLicence:
+                    dropped.Add(p.Id);
+                    drops.Add(new PlanDrop(p.Id, "needs-licence", FreeTiers.NeedsLicenceLine(Display(cat, p.Id),
+                        p.Latest(inputs.Engine, inputs.Channel)?.Version, FreeTiers.TierOf(p.Id, inputs), FreeTiers.FloorOf(p.Id, inputs))));
+                    break;
             }
         }
 
@@ -366,12 +392,17 @@ public static class TrackPlanner
             var p = m.Plugin(o.id)!;
             if (!inputs.Installed.ContainsKey(p.Id) && inputs.ProvidedElsewhere.TryGetValue(p.Id, out var elsewhere))
                 return new PlanItem(p.Id, PlanAction.Current, elsewhere, elsewhere, 0, o.role, o.cap, o.product, o.neededBy);
-            var latest = p.Latest(inputs.Engine, inputs.Channel)!;
             inputs.Installed.TryGetValue(p.Id, out var have);
+            // The build this account may have: the newest, or for a free tier the newest free-tier build. None (installed,
+            // held without a licence, every build here below the floor): it stays as it is.
+            var build = FreeTiers.BuildFor(p, inputs);
+            if (build is null)
+                return new PlanItem(p.Id, PlanAction.Current, have ?? "", have, 0, o.role, o.cap, o.product, o.neededBy);
+            var tier = FreeTiers.AccessOf(p, inputs) == PaidAccess.FreeTier ? FreeTiers.TierOf(p.Id, inputs) : null;
             var action = have is null ? PlanAction.Install
-                : inputs.Pins.ContainsKey(p.Id) || !IsNewer(latest.Version, have) ? PlanAction.Current
+                : inputs.Pins.ContainsKey(p.Id) || !IsNewer(build.Version, have) ? PlanAction.Current
                 : PlanAction.Update;
-            return new PlanItem(p.Id, action, latest.Version, have, latest.Size, o.role, o.cap, o.product, o.neededBy);
+            return new PlanItem(p.Id, action, build.Version, have, build.Size, o.role, o.cap, o.product, o.neededBy, tier);
         }).ToList();
 
         return new TrackPlan { Track = track.Slug, Items = items, Drops = drops, Capabilities = passed };
@@ -391,7 +422,7 @@ public static class TrackPlanner
         bool CanHave(PluginInfo p) =>
             inputs.ProvidedElsewhere.ContainsKey(p.Id)
             || p.Latest(inputs.Engine, inputs.Channel) is not null
-               && !(p.IsPaid && !inputs.Owned.Contains(p.Id) && !inputs.Installed.ContainsKey(p.Id));
+               && FreeTiers.AccessOf(p, inputs) is PaidAccess.Free or PaidAccess.Full or PaidAccess.FreeTier;
         foreach (var a in entries)
             foreach (var id in new[] { a.Plugin }.Concat(inputs.AgentAccess ? a.AgentPlugins : []))
             {
@@ -431,6 +462,59 @@ public static class ProductFacts
     /// <summary>"A free tier is planned. Today this is the full version." applies.</summary>
     public static bool FreeTierPromised(Product product, Manifest.Manifest manifest) =>
         product.Price == "free-tier" && product.FreeTierLive != true && PriceKey(product, manifest) == "paid";
+
+    /// <summary>
+    /// The free tier really exists today: the catalogue says `freeTierLive`, or the account service's offer for one of its
+    /// paid components has a tier (an older bundled catalogue does not stop a free tier the account already serves).
+    /// </summary>
+    public static bool FreeTierLive(Product product, PlanInputs inputs) =>
+        product.FreeTierLive == true || product.Plugins.Any(id => inputs.Manifest.Plugin(id) is { IsPaid: true } && FreeTiers.TierOf(id, inputs) is not null);
+
+    /// <summary>The price word key, with the account service's tiers taken into account.</summary>
+    public static string PriceKey(Product product, PlanInputs inputs)
+    {
+        if (product.Price is "free-tier" or "paid" && FreeTierLive(product, inputs)
+            && product.Plugins.Any(id => inputs.Manifest.Plugin(id) is { IsPaid: true }))
+            return "free-tier";
+        return PriceKey(product, inputs.Manifest);
+    }
+
+    public static bool FreeTierPromised(Product product, PlanInputs inputs) =>
+        product.Price == "free-tier" && !FreeTierLive(product, inputs) && PriceKey(product, inputs) == "paid";
+
+    /// <summary>
+    /// "Owned": every paid component is held in full (licensed, or held at all when it has no free tier). Never true for a
+    /// product that runs as its free tier, and never for a free product.
+    /// </summary>
+    public static bool Owned(Product product, PlanInputs inputs)
+    {
+        var paid = product.Plugins.Select(id => inputs.Manifest.Plugin(id)).Where(p => p is { IsPaid: true }).ToList();
+        return paid.Count > 0 && paid.All(p => FreeTiers.IsLicensed(p!.Id, inputs) || FreeTiers.TierOf(p.Id, inputs) is null && inputs.Owned.Contains(p.Id));
+    }
+
+    /// <summary>
+    /// "lite" or "trial" when this account would have the product as its free tier (a paid component not held licensed,
+    /// with a free-tier build here); null otherwise, also when one of its paid components cannot be had at all.
+    /// </summary>
+    public static string? FreeTierOf(Product product, PlanInputs inputs)
+    {
+        string? tier = null;
+        foreach (var id in product.Plugins)
+        {
+            if (inputs.Manifest.Plugin(id) is not { IsPaid: true } p) continue;
+            switch (FreeTiers.AccessOf(p, inputs))
+            {
+                case PaidAccess.FreeTier: tier ??= FreeTiers.TierOf(p.Id, inputs); break;
+                case PaidAccess.Full: break;
+                default: return null;
+            }
+        }
+        return tier;
+    }
+
+    /// <summary>The plugin a product's store id comes with (the offer's `includedWith`), when the account does not hold it.</summary>
+    public static string? IncludedWith(Product product, PlanInputs inputs) =>
+        product.StoreKey is { } key && inputs.Offers?.Plugin(key)?.IncludedWith is { Length: > 0 } parent && !inputs.Owned.Contains(key) ? parent : null;
 }
 
 /// <summary>The house rules for numbers in sentences (section 2).</summary>
