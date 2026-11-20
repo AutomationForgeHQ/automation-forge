@@ -186,6 +186,12 @@ public class PluginRowStateTests
         Assert.Equal(("paid · needs a licence", "Buy Full", RowAction.Buy), (r.Status, r.ActionLabel, r.Action));
         Assert.False(r.CanBuyFull); // the main button is the Buy
         Assert.Equal("Version 0.1.0 of TerrainForge needs a licence. The free Lite tier starts with 0.2.0.", r.StatusTip);
+        // Nothing is installed and nothing can install as Lite: no line may say it "runs as Lite". Restore stays.
+        Assert.Equal("", r.LicenceLine);
+        Assert.True(r.CanRestoreLicence);
+        // A copy that is installed here (an older build bought before) still says where its licence stands.
+        var installed = Row("TerrainForge", Inputs(licensed: []), TestManifest(Build("0.1.0", "2026-10-29T12:09:11Z")), installed: "0.1.0", licence: NotLicensed);
+        Assert.Equal("Not licensed: this runs as Lite", installed.LicenceLine);
     }
 
     [Fact]

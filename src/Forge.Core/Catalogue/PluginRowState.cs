@@ -90,6 +90,8 @@ public sealed record PluginRowState
         {
             if (!IsPaid || Licence is not { } l) return "";
             if (l.Standing == LicenceStanding.SignedOut && !Installed) return "";
+            // Every build for this engine is below the free tier's floor and none is here: nothing "runs as Lite".
+            if (Access == PaidAccess.NeedsLicence && !Installed && !l.CountsAsLicensed) return "";
             return LicenceWords.Line(l, TierLive, Tier == "trial");
         }
     }

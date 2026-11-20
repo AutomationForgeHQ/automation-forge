@@ -174,11 +174,46 @@ public class FreeTierTests
             var tf = TestManifest().Plugin("TerrainForge")!;
             Assert.Equal(PaidAccess.Full, FreeTiers.AccessOf(tf, Inputs(licensed: set)));
 
-            // The API did not say at all: null stays null (holding counts), whatever the licence lists.
-            Assert.Null(FreeTiers.LicensedNow(null, snap));
-            // An expired licence does not count.
+            // The API did not say at all (offline: what the account holds could not be read either): the licence on this
+            // computer still counts, beside what the account is known to hold.
+            var offline = FreeTiers.LicensedNow(null, snap, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MeshForgeGarment" })!;
+            Assert.Contains("TerrainForge", offline);
+            Assert.Contains("MeshForgeGarment", offline);
+            Assert.Equal(PaidAccess.Full, FreeTiers.AccessOf(tf, Inputs(licensed: offline)));
+            // An expired licence does not count; with the API silent too, null stays null (holding counts).
             var old = new LicenceSnapshot(store.Load(), store.LoadCheck(), uid, now.AddDays(31));
             Assert.DoesNotContain("TerrainForge", FreeTiers.LicensedNow(new HashSet<string>(), old)!);
+            Assert.Null(FreeTiers.LicensedNow(null, old));
+            Assert.Null(FreeTiers.LicensedNow(null, null));
+        }
+        finally { dir.Delete(true); }
+    }
+
+    [Fact]
+    public void Offline_in_the_grace_days_a_bought_copy_is_not_offered_as_Lite()
+    {
+        // 25 days since the last refresh, the account service unreachable (GET me and users/{uid} both failed: nothing
+        // known held, `licensed` unknown). The licence still counts, so the row is Full, not "Lite" with "Buy Full".
+        var dir = Directory.CreateTempSubdirectory("forge-freetier-");
+        try
+        {
+            const string uid = "0123456789abcdef0123456789abcdef";
+            var key = TestLicenceKey.Generate("dev1");
+            var store = new LicenceStore(dir.FullName, key.Ring(), isDefaultDataDir: false);
+            var now = DateTimeOffset.UtcNow;
+            Assert.Equal(LicenceSave.Stored, store.Offer(key.Envelope(LicencePayload.SubjectFor(uid), now.AddDays(-25),
+                new Dictionary<string, (string, string, int)> { ["TerrainForge"] = ("bought", "2026-11-20", 1) }), uid, out _));
+            var snap = new LicenceSnapshot(store.Load(), store.LoadCheck(), uid, now);
+            Assert.Equal(LicenceStanding.OfflineGrace, snap.For("TerrainForge").Standing);
+
+            var licensed = FreeTiers.LicensedNow(null, snap, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            var tf = TestManifest().Plugin("TerrainForge")!;
+            Assert.Equal(PaidAccess.Full, FreeTiers.AccessOf(tf, Inputs(licensed: licensed!)));
+
+            // Past the 30 days it no longer counts: Lite again, as the plugin itself will run.
+            var late = new LicenceSnapshot(store.Load(), store.LoadCheck(), uid, now.AddDays(6));
+            Assert.Null(FreeTiers.LicensedNow(null, late, new HashSet<string>()));
+            Assert.Equal(PaidAccess.FreeTier, FreeTiers.AccessOf(tf, Inputs(licensed: [])));
         }
         finally { dir.Delete(true); }
     }

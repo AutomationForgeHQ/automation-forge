@@ -139,7 +139,7 @@ public partial class MainViewModel
         Engine = SelectedEngine.Version,
         Channel = Channel,
         Owned = _owned,
-        Licensed = _entitlements.IsSignedIn ? FreeTiers.LicensedNow(_licensed, LicenceSnapshot) : null,
+        Licensed = _entitlements.IsSignedIn ? FreeTiers.LicensedNow(_licensed, LicenceSnapshot, _owned) : null,
         Offers = _offers,
     };
 

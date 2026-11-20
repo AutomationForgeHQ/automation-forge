@@ -93,15 +93,28 @@ public static class FreeTiers
     /// <summary>
     /// The paid plugins this account holds licensed: what the account service said (GET me `licensed`), and what the
     /// licence on this computer lists as current, so a purchase counts as soon as the licence refresh brings it, before
-    /// what the account holds is read again. Null when the account service did not say (Kovati Hub: LicensedNow).
+    /// what the account holds is read again. Null when the account service did not say (Kovati Hub: LicensedNow) and the
+    /// licence lists nothing current: then holding counts, the rule before free tiers.
+    ///
+    /// When the account service did not say (offline: the window could not read what the account holds either) but the
+    /// licence on this computer lists a product as current (or in its offline grace), that product counts as licensed,
+    /// beside whatever the account is known to hold (<paramref name="owned"/>). Otherwise a bought copy read as Lite with
+    /// "Buy Full" next to "Offline, 5 days left".
     /// </summary>
-    public static IReadOnlySet<string>? LicensedNow(IReadOnlySet<string>? fromAccount, LicenceSnapshot? licence)
+    public static IReadOnlySet<string>? LicensedNow(IReadOnlySet<string>? fromAccount, LicenceSnapshot? licence, IReadOnlySet<string>? owned = null)
     {
-        if (fromAccount is null) return null;
-        var set = new HashSet<string>(fromAccount, StringComparer.OrdinalIgnoreCase);
+        var fromLicence = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         if (licence is not null)
             foreach (var id in licence.Payload?.Products.Keys ?? Enumerable.Empty<string>())
-                if (licence.For(id).CountsAsLicensed) set.Add(id);
+                if (licence.For(id).CountsAsLicensed) fromLicence.Add(id);
+        if (fromAccount is null)
+        {
+            if (fromLicence.Count == 0) return null;
+            fromLicence.UnionWith(owned ?? Enumerable.Empty<string>());
+            return fromLicence;
+        }
+        var set = new HashSet<string>(fromAccount, StringComparer.OrdinalIgnoreCase);
+        set.UnionWith(fromLicence);
         return set;
     }
 

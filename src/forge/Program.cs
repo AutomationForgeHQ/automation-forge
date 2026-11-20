@@ -514,7 +514,7 @@ async Task<AccessInputs> AccessInputsAsync(string engineVersion, string channel,
     new()
     {
         Engine = engineVersion, Channel = channel, Owned = owned,
-        Licensed = entitlements.IsSignedIn ? FreeTiers.LicensedNow(await entitlements.LicensedAsync(ct), LicenceFor().Snapshot()) : null,
+        Licensed = entitlements.IsSignedIn ? FreeTiers.LicensedNow(await entitlements.LicensedAsync(ct), LicenceFor().Snapshot(), owned) : null,
         Offers = await AccountCatalogue.GetAsync(http, offline, ct),
     };
 
