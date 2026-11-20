@@ -12,7 +12,7 @@ The file started with 0.4.3. The notes for 0.4.1 and 0.4.2 are copied from their
 to 0.4.0 were released without notes, so their sections were written afterwards from the commits that went into
 each one.
 
-## 0.4.5 — unreleased
+## 0.4.5 — 2026-11-20
 
 ### Added
 - **Paid plugins unlock through a licence the hub keeps up to date.** SkinForge and TerrainForge are one build with
@@ -34,6 +34,9 @@ each one.
 ### Fixed
 - **Installing into an engine that needs administrator rights works again.** The elevated helper did not use your
   sign-in, so every install into an engine under `Program Files` stopped with *"Sign in to install"*.
+- **A plugin row fits the smallest window.** When its buttons do not fit beside the name (Remove, What's new and Update,
+  or Buy Full and Install Lite), they move to a line of their own instead of pushing the name out of the row and the
+  last button past the window's edge.
 
 ### If a tool you bought still says Lite
 Open the hub and press **Refresh** (or **Check for updates now** in the tray menu, or **Restore licence** on the

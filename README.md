@@ -100,6 +100,9 @@ forge enable MontageForge --project C:\Games\MyGame   the .uproject edit
 forge channel [stable|nightly]      the channel both surfaces follow
 forge claim <set|plugin>            add free plugins to your account, without installing
 forge login · logout · whoami       one account for the site, the hub and the CLI
+forge licence [--json]              the licence paid plugins read: what it covers, until when
+forge licence refresh [--json]      fetch it now (exit 0 current, 4 not signed in, 5 not now, 7 did not verify, 8 off)
+forge licence path                  where licence.json is
 ```
 
 Nothing installs without an account. Every plugin is added to one first: a
