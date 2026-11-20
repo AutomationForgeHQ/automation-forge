@@ -530,6 +530,21 @@
               <TextBlock Classes="small" Text="{Binding HubUpdateLine}" TextWrapping="Wrap" />
             </StackPanel>
 
+            <!-- LICENCE (licensing step 2): what the paid tools will check, and the one action, which is only the refresh. -->
+            <StackPanel Spacing="8" IsVisible="{Binding HasLicenceSection}">
+              <TextBlock Classes="label" Text="LICENCE" />
+              <StackPanel Spacing="4" IsVisible="{Binding HasLicence}">
+                <TextBlock Text="{Binding LicenceAccountLine}" FontSize="14" FontWeight="Medium" TextWrapping="Wrap" />
+                <TextBlock Classes="small" Text="{Binding LicenceCoversLine}" TextWrapping="Wrap" />
+                <TextBlock Classes="small" Text="{Binding LicenceRefreshedLine}" />
+                <TextBlock Classes="small" Text="{Binding LicenceValidLine}" />
+                <TextBlock Classes="small" Text="{Binding LicenceKeyLine}" TextWrapping="Wrap" />
+              </StackPanel>
+              <TextBlock Classes="small" Text="{Binding NoLicenceLine}" IsVisible="{Binding !HasLicence}" />
+              <TextBlock Classes="small" Text="{Binding LicenceSettingsLine}" TextWrapping="Wrap" />
+              <Button Classes="quiet small" Content="{Binding RestoreLicenceLabel}" Command="{Binding RestoreLicenceCommand}" HorizontalAlignment="Left" />
+            </StackPanel>
+
             <StackPanel Spacing="10">
               <TextBlock Classes="label" Text="BACKGROUND" />
               <CheckBox IsChecked="{Binding RunInBackground, Mode=TwoWay}">

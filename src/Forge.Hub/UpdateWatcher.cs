@@ -54,6 +54,12 @@ public sealed class UpdateWatcher : IDisposable
     /// <summary>The catalogue fetched with this check was new and was written to the cache (12.5).</summary>
     public event Action? CatalogueUpdated;
 
+    /// <summary>The watcher stored a newer licence, or removed one the server refused.</summary>
+    public event Action? LicenceChanged;
+
+    // The stored sign-in, read at each check: the tray watcher runs with no window and no view model.
+    private readonly Forge.Core.Licence.LicenceService _licence;
+
     /// <summary>A check that found versions not announced before. The list is their keys (plugin@version, hub@version).</summary>
     public event Action<WatchResult, IReadOnlyList<string>>? NewFindings;
 
@@ -64,6 +70,7 @@ public sealed class UpdateWatcher : IDisposable
         _manifest = new ManifestClient(_http);
         _releases = new ReleaseDiscovery(_http);
         _hub = new HubReleases(_http);
+        _licence = Forge.Core.Licence.LicenceService.ForStoredAccount(_http);
     }
 
     public void Start(TimeSpan firstDelay)
@@ -93,6 +100,14 @@ public sealed class UpdateWatcher : IDisposable
         await _gate.WaitAsync(ct);
         try
         {
+            // The licence rides on it too (once the last good fetch is 20 hours old); it never fails the check either.
+            try
+            {
+                var outcome = await _licence.RefreshAsync(force: false, ct);
+                if (outcome is Forge.Core.Licence.LicenceFetchOutcome.Updated or Forge.Core.Licence.LicenceFetchOutcome.Refused) LicenceChanged?.Invoke();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) { }
+
             // The catalogue rides on the same rhythm; it never fails the check.
             if (ViewModels.MainViewModel.CatalogueFetchEnabled
                 && await new Forge.Core.Catalogue.CatalogueClient(_http).FetchAsync(ct) == Forge.Core.Catalogue.CatalogueFetch.Updated)

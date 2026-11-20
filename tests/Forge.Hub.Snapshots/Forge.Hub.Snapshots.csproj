@@ -19,6 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Licence screens sign with a throwaway key made at run time (tests/Shared). -->
+    <Compile Include="..\Shared\LicenceSigning.cs" Link="Shared\LicenceSigning.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Forge.Hub\Forge.Hub.csproj" />
   </ItemGroup>
 

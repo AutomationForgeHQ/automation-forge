@@ -291,6 +291,12 @@ public sealed partial class InstalledRowModel : ObservableObject
         Pinned = pinned;
         Stage = stage;
         Notes = notes;
+        // The licence line, for a paid tool's own row only (licensing step 2).
+        if (product is not null && indent == 0 && product.MainComponent == id)
+        {
+            LicenceLine = page.Hub.LicenceLineOf(product);
+            CanRestoreLicence = page.Hub.CanRestoreLicenceFor(product);
+        }
     }
 
     public static InstalledRowModel For(LibraryPageViewModel page, Product? product, string id, PlanInputs inputs, string name, string type, int indent)
@@ -320,6 +326,9 @@ public sealed partial class InstalledRowModel : ObservableObject
     public string StateLine => Pinned ? $"Pinned at {Version}" : Newer is null ? "Up to date" : $"Update to {Newer}";
     public bool CanPin => Product is not null && !Pinned && Indent == 0;
     public bool CanUnpin => Product is not null && Pinned && Indent == 0;
+    public string LicenceLine { get; } = "";
+    public bool HasLicenceLine => LicenceLine.Length > 0;
+    public bool CanRestoreLicence { get; }
 
     [ObservableProperty] private bool _notesOpen;
 
@@ -329,4 +338,5 @@ public sealed partial class InstalledRowModel : ObservableObject
     [RelayCommand] private void Unpin() { if (Product is not null) _page.Hub.Unpin(Product); }
     [RelayCommand] private void ShowComponents() => _page.Hub.ShowComponentsFor(Id);
     [RelayCommand] private Task Remove() => _page.Hub.RemoveComponentAsync(Id);
+    [RelayCommand] private Task RestoreLicence() => _page.Hub.RestoreLicenceCommand.ExecuteAsync(null);
 }
