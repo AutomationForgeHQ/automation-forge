@@ -12,6 +12,8 @@ public sealed class InstallResult
     public required string Version { get; init; }
     public required string Path { get; init; }
     public required string Outcome { get; init; } // installed · updated · already-current · skipped
+    /// <summary>"lite" or "trial" when this was a paid plugin's free-tier build.</summary>
+    public string? FreeTier { get; init; }
 }
 
 /// <summary>
@@ -73,7 +75,9 @@ public sealed class Installer
         if (!_entitlements.IsSignedIn) throw new EntitlementException(AnonymousEntitlements.SignInMessage, "unauthenticated");
         var ownedBefore = await _entitlements.OwnsAsync(plugin, ct);
         var download = await _entitlements.ResolveDownloadAsync(plugin, version, ct);
-        if (!ownedBefore) _log($"added to your account: {plugin.Id}");
+        // A paid plugin's free-tier build is served without adding anything to the account.
+        if (download.FreeTier is { } tier) _log($"free tier: {plugin.Id} installs as {(tier == "trial" ? "a trial" : "Lite")}; a licence makes it Full");
+        else if (!ownedBefore && !plugin.IsPaid) _log($"added to your account: {plugin.Id}");
 
         var archive = await DownloadAsync(download.Url, plugin.Id, version, progress, ct);
         VerifyChecksum(archive, version.Sha256 ?? download.Sha256);
@@ -98,7 +102,7 @@ public sealed class Installer
                 InstalledAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
             });
             _log($"{outcome}: {plugin.Id} {version.Version} → {dest}");
-            return new InstallResult { Plugin = plugin.Id, Version = version.Version, Path = dest, Outcome = outcome };
+            return new InstallResult { Plugin = plugin.Id, Version = version.Version, Path = dest, Outcome = outcome, FreeTier = download.FreeTier };
         }
         finally
         {

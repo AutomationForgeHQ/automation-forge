@@ -11,6 +11,13 @@ public static class Paths
 
     public static string DownloadDir => Path.Combine(DataDir, "downloads");
 
+    /// <summary>
+    /// The signed licence the paid plugins read: %LOCALAPPDATA%\AutomationForge\licence.json. A stable contract
+    /// (the beta Hub's HUB_V2_NOTES.md, "The licence file"); under FORGE_DATA_DIR it is in that folder instead.
+    /// The 0.4.x Hub and Kovati Hub, installed side by side, keep this one file.
+    /// </summary>
+    public static string LicenceFile => Path.Combine(DataDir, Licence.LicenceStore.FileName);
+
     /// <summary>The folder our plugins are installed into, inside an engine or a project. Readable names, one place.</summary>
     public const string PluginFolder = "AutomationForge";
 }
