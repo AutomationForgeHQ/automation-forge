@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-19T00:21:58Z",
+  "generatedAt": "2026-11-20T18:39:56Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -66,6 +66,8 @@
         "MeshForge",
         "MeshForgeCloud",
         "MeshForgeGarment",
+        "MeshForgeGarmentMetaHuman",
+        "MeshForgeGarmentMetaHumanToolset",
         "MeshForgeGarmentToolset",
         "MeshForgeToolset",
         "MeshForgeTrellis",
@@ -983,6 +985,11 @@
       ],
       "changelog": [
         {
+          "version": "0.3.3",
+          "date": null,
+          "body": "### Fixed\n- A post step that turns one skeletal mesh into another (such as Parametric outfit) no longer hides the original static mesh from the steps after it, so a clothing item made later in the chain gets its pickup mesh and icon again."
+        },
+        {
           "version": "0.3.2",
           "date": "2026-11-19",
           "body": "### Fixed\n- Post-processing steps now receive the definition's main picture. A step that paints from the picture\n  the mesh was made from was told there was none."
@@ -1138,6 +1145,11 @@
       ],
       "changelog": [
         {
+          "version": "0.3.0",
+          "date": null,
+          "body": "### Added\n- **MeshForge Garment for MetaHuman comes with this plugin.** It turns one wrapped garment into a parametric outfit that fits any body made with the MetaHuman sliders.\n- **Garment Outfit:** an ordered list of garments on one body, fitted as fixed layers with no simulation. Each garment is pushed off the body and off everything beneath it, a tucked garment is pressed under the next one first, and each comes out as its own skeletal mesh with repaired weights.\n- **Test tab** in the Garment Studio: see each stage of the wrap and play the result on a built-in skin test or any animation of the skeleton, with the transferred, welded or repaired weights. Nothing is saved.\n- **Clearance Solver** on the fit step, off by default: one soft push per vertex, then relax passes, so nothing is left inside the body with less crease damage.\n- Two experimental options on the wardrobe skinning step, both off by default: **Weld For Weights** solves across UV seams, so an AI-made garment is no longer thousands of pieces, and **Repair Steep Weights** re-solves vertices whose weights change too fast along an edge."
+        },
+        {
           "version": "0.2.1",
           "date": "2026-10-04",
           "body": "### Changed\n- The licence now names Bojan Andrejek / MetaWorx LLC as the licensor, and questions about it go to bojan@kovati.dev. The terms are otherwise unchanged."
@@ -1156,6 +1168,43 @@
           "version": "0.1.0",
           "date": "2026-09-07",
           "body": "- Initial release: garment fit (Place and Fit modes), the two-bone articulation solver, and the wardrobe skinning post step with automatic retry escalation for AI-generated garment normals.\n- Shipped the rule and its enforcement: a garment binds to the target body mesh, not the shared `USkeleton` \u2014 verified per-bone against the reference pose before saving, not just trusted.\n- Added Unreal inpainting as a separate, chainable skeletal post step.\n- Added the MetaHuman face auto-discovery and neck-seam weld so the body doesn't need manual \"additional meshes\" entries.\n- Fixed the self-test to capture actual polygon/edge snapshots rather than just their counts.\n- Documented the detail-preserving CC5 shirt solver result \u2014 first user-accepted example, not a claim that arbitrary clothing is solved (see `PRESERVATION_RESULTS.md`)."
+        }
+      ]
+    },
+    {
+      "id": "MeshForgeGarmentMetaHuman",
+      "set": "meshforge",
+      "role": "post",
+      "distribution": "paid",
+      "dependencies": [
+        "MeshForge",
+        "MeshWeightRemap"
+      ],
+      "source": null,
+      "versions": [],
+      "changelog": [
+        {
+          "version": "0.1.0",
+          "date": null,
+          "body": "### Added\n- **Parametric outfit**, a MeshForge post step after wardrobe skinning. One wrapped garment becomes one skeletal mesh with a morph per MetaHuman body slider, plus a resizable outfit asset, a wardrobe item and a fit record. It fits bodies made with the MetaHuman sliders within about 1.3 cm of Epic's own fit, measured on bodies it was not made from.\n- Moving a face rig onto a changed body without the cloud, so a resized MetaHuman keeps its own face.\n\n### Known issues\n- Experimental. Not tested in a packaged build.\n- MetaHumans that were not made with the body sliders (rigged or scanned people) miss by 2.5\u20133.8 cm and need a per-person correction. On a plain Blueprint the outfit only fits through the Narrative wardrobe route; outside it the morph weights stay at zero.\n- A garment cut for one body type keeps that cut (a women's suit stays a women's suit on a masculine body)."
+        }
+      ]
+    },
+    {
+      "id": "MeshForgeGarmentMetaHumanToolset",
+      "set": "meshforge",
+      "role": "toolset",
+      "distribution": "open",
+      "dependencies": [
+        "MeshForgeGarmentMetaHuman"
+      ],
+      "source": null,
+      "versions": [],
+      "changelog": [
+        {
+          "version": "0.1.0",
+          "date": null,
+          "body": "### Added\n- Agent tools for MeshForge Garment for MetaHuman: make one wrapped garment into a parametric outfit, fit it to characters, and put it on them.\n\n### Compatibility\n- Needs MeshForgeGarmentMetaHuman 0.1.0."
         }
       ]
     },
@@ -1196,6 +1245,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.2.0",
+          "date": null,
+          "body": "### Added\n- An agent tool to fit a Garment Outfit (FitGarmentOutfit), and access to the Garment Studio's Test tab from the command route.\n\n### Compatibility\n- Needs MeshForgeGarment 0.3.0."
+        },
         {
           "version": "0.1.1",
           "date": "2026-10-04",
@@ -1885,6 +1939,11 @@
       ],
       "changelog": [
         {
+          "version": "0.4.2",
+          "date": null,
+          "body": "### Fixed\n- Previewing a take on a character whose provider mesh has no skeleton (for example a copied mesh whose skeleton was left behind) now stops with a message that names the mesh and says how to fix it, instead of crashing the editor."
+        },
+        {
           "version": "0.4.1",
           "date": "2026-10-04",
           "body": "### Fixed\n- The library's price for a selection, and the definition window's Generate button, now say when a\n  price is a provider's published rate rather than one you entered, as the cost lines already did. The\n  library's footer and its confirmation name the rate; the button reads \"at list price\" and its\n  tooltip says whose.\n\n### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
@@ -2046,6 +2105,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.5.2",
+          "date": null,
+          "body": "### Changed\n- The model stays loaded between jobs. A fresh prompt took 30 to 36 seconds on an RTX 5080 laptop and now takes 3.0 to 3.6 seconds in the runner, including the first job after a start. The take is identical to one from a fresh process with the same seed. If the resident worker cannot start, the job runs the old way.\n\n### Fixed\n- The demo no longer loads a second 16 GB text encoder when it starts before the encoder service is ready. The container now uses about 17 GB instead of up to 29 GB.\n\n### Compatibility\n- The runner changed, so existing images read Drifted and need a rebuild."
+        },
         {
           "version": "0.5.1",
           "date": "2026-10-04",
@@ -2668,6 +2732,41 @@
       "versions": [],
       "changelog": [
         {
+          "version": "0.3.5",
+          "date": null,
+          "body": "### Added\n- **Glowing marks come in a colour.** LED, UV circuit and the lit barcode now have a Colour choice:\n  cyan-teal (the default), magenta or amber. The glow spills a few millimetres onto the skin round\n  it, and the part under the skin is darker, so the mark still reads when the light is off. The\n  LED cores are at full brightness.\n- **`SkinForge::RenderReady(Set, Version)`**, for scripts. It says whether a version's baked\n  materials are compiled, its textures built and its glow maps resident, and lists what is still\n  pending. Poll it before taking a picture.\n\n### Changed\n- **Scars and wounds remade from clinical photographs** in the starter library:\n  - **Cut, claw and surgical scars:** the line changes width along its length, is raised and\n    puckered where it has healed, and the surgical scar shows its suture-track dots. The healed\n    tissue reads on medium and dark skin, not only pale skin.\n  - **Bullet and shrapnel scars** have a visible crater and pucker, with the skin pulled in round\n    them and deeper height, so they read at a normal viewing distance.\n  - **Graze** is less red and less busy: a wet raw patch, then a scab.\n  - **Stab wound** is bigger and stronger.\n  - **Bruise** is as strong as the black eye, with soft swelling. On Day 4 its edge turns\n    yellow-green round a purple core.\n  - **Fresh cigarette burns and burn blisters** have uneven raw centres that look wet and dark, not\n    rings that glow.\n  - **Staples** are visible steel: grey-silver, shiny and raised, about 6 mm across.\n- **Small marks have twice the texture resolution.** Jacks, acne, bullet and shrapnel scars,\n  cigarette burns and the small tattoos stay crisp up close.\n- **A fresh tattoo is less glossy.** Its own Fresh roughness offset is now -0.05 (was -0.15).\n- **Face paint and skin detail:**\n  - **The Cracked look of the paints cracks and flakes.** Camo, finger stripes, mud, soot, blood smear and the war band dry into a network of fine cracks with flakes gone. Before, it barely changed, or showed smooth wavy lines.\n  - **Camo** is matte olive, brown and black greasepaint with the pores showing through, and thin, uneven edges with no straight side.\n  - **Finger stripes** are dragged and streaky, with dry gaps, in a darker red ochre.\n  - **Mud** is a lighter grey-tan, so it shows on dark skin.\n  - **Sweat** has beads, droplets and run trails that change only the shine and add a little relief. The orange stain on \"Dripping\" is gone.\n  - **Freckles** have a Sun control from a winter dusting to dense, dark summer freckles.\n  - **Sunburn** has a Strength control, from a blush to a deep red burn with a slight sheen and thin peeling.\n- **Healed scars read on any skin.** The \"Healed pale\" look of the cut, claw, surgical and shrapnel scars is\n  clearly paler than dark skin and a touch paler on fair skin. The healed tissue is smoother and slightly\n  glossier, and stands a little proud or sunken. The fresh stages are unchanged.\n- **The healing surgical scar** varies in width and has suture tracks across it and a broken-up tone.\n- **The black eye on Day 4** keeps its purple in the lid crease and under the lashes, round it a mottled\n  yellow-green that breaks up into the skin, with soft, irregular edges.\n- **Summer freckles** are denser and darker across the nose and cheekbones.\n- **The glowing barcode lights every bar evenly**, in all three colours. Before, thin bars glowed less, so\n  part of the code looked dimmer.\n\n### Fixed\n- **A fresh tattoo's broad dark fills no longer glare like chrome.** The ointment film thins out to\n  a quarter where the ink is dense, so a black fill reads as wet ink. It stays full on the red halo\n  and on the skin between lines.\n- **Glow now shows on a MetaHuman in every session.** 0.3.4's glow could vanish for two reasons:\n  - **Its maps never streamed in after the editor restarted.** A glow map is named only by a\n    material instance's override, so it had no streaming data: the editor kept its smallest mip\n    and the glow averaged away. Glow maps are now always resident, about 11 MB for a 4K map.\n    Re-bake older glow versions.\n  - **The colour washed to pale pink or white.** A MetaHuman's skin is drawn through Unreal's\n    subsurface pass, which took the glow with it and lost its colour, so cyan and amber looked the\n    same. The glow copy now shades glowing texels as Default Lit, so the glow skips that pass under\n    any `r.SSS.Checkerboard` setting, and darkens the skin under the glow by the glow's strength, as\n    over an implant. Cyan, magenta and amber keep their colour. A skin with a fixed subsurface\n    model divides the glow by its colour instead, which is right with checkerboard SSS on.\n  - **The material copy compiled in the background.** A set's first glowing bake makes a copy of\n    the skin material, and until its shaders finish the editor draws the skin without the glow.\n    The bake still returns at once. Its notes now say which materials glow, from which copy and at\n    what intensity, and whether shaders are still compiling. An editor notification stays up until\n    they are done."
+        },
+        {
+          "version": "0.3.4",
+          "date": null,
+          "body": "### Added\n- **Glowing marks glow on a MetaHuman.** LED, UV ink and the lit barcode now light up on a baked\n  MetaHuman. Before, its skin material had no emissive input, so the glow was dropped.\n  - When a set has a glowing layer and the skin has no emissive texture, the bake writes a glow map\n    beside the skin's colour map.\n  - It also makes a copy of the skin's parent material, with an emissive input added\n    (\"SkinForge Emissive\" and \"SkinForge Emissive Intensity\").\n  - Copies of the material instances between that copy and the slot are made too, with their\n    settings kept. All of these copies go in the set's `Glow` folder and are reused by later bakes.\n  - The baked instance derives from those copies. The MetaHuman's own materials are never changed.\n  - Sets without a glowing layer bake as before.\n- **Glow Intensity**, on a skin set (under Bake, default 30, which reads as a lit mark under a low-key\n  studio light; daylight scenes need more). It sets how bright that glow is. You can\n  change it later on the baked instance.\n- **Apply remakes a glowing face's per-actor instances.** A MetaHuman Blueprint makes per-actor\n  material instances for its face, and these cannot take the glow as they are. Apply now remakes\n  them from the glow version, keeping their own values, and Revert makes them again from what they\n  came from.\n\n### Changed\n- **The fresh ointment sheen stays off hardware.** On marks laid over the skin (chrome, titanium,\n  plates), a fresh_ring shines only on the skin round the piece. The metal keeps its own roughness.\n- **The \"Just fitted\" presets of the hard-surface marks** (Neural jack, Data jack, Port array,\n  Chrome ring) now redden and swell the skin round the implant. Their Irritation control drives\n  fresh_ring.\n\n### Fixed\n- **A Fresh session tattoo no longer looks wrapped in cling film.** The 0.3.3 ointment sheen lowered\n  roughness by 0.22 over the whole piece, so under an ordinary key light it showed as a white specular\n  patch that hid the red halo and made red fills read almost white. It now lowers roughness by 0.07.\n  A mark's own Fresh roughness offset still adds on top inside the ink. Albedo is not changed."
+        },
+        {
+          "version": "0.3.3",
+          "date": null,
+          "body": "### Added\n- **Upscale Base Color**, on a skin set (Off, 4K or 8K, under Bake). Base colour maps smaller than\n  that size are enlarged before the marks are drawn into them, so fine-line ink stays crisp on a body\n  that a Cinematic MetaHuman bakes at 4K. It is off by default. An 8K map takes about 256 MB of memory\n  while baking (twice that with Keep Skin Detail), and four times a 4K map's GPU memory and disk.\n\n### Fixed\n- **A Fresh session tattoo now looks freshly done.** Before, it barely differed from a healed one.\n  - The inflamed halo is wider (2.5 mm) and stronger, and it is full even round a single fine line.\n  - The halo is a shift of the skin's own colour, so it is red on fair skin and a warm flush on dark\n    skin, and it never turns black ink maroon.\n  - The lines stand slightly proud, and the halo is a little swollen.\n  - A glossy ointment film covers the piece and its halo, not only the ink's own coverage.\n  - The starter tattoos' presets need no change.\n- **Applying over another skin set's version replaces it.** An actor wearing a version from a\n  different set holds none of this set's originals, so Apply left that version on. A material that\n  SkinForge baked from one of this set's originals is now replaced like this set's own versions,\n  and Revert puts the original back. The result names what it replaced.\n- **A glowing mark on a material with no emissive input is reported.** A MetaHuman's baked skin\n  material has no emissive texture, so a glow cannot be baked into it. The bake now says so, where it\n  used to leave the glow out silently. Its colour, relief and shine still bake. To make it glow, give\n  the skin material an emissive input, or place a separate emissive mesh over the mark."
+        },
+        {
+          "version": "0.3.2",
+          "date": null,
+          "body": "### Added\n- **Normal Replace for hard-surface marks** (`normal_replace` in the starter format, 0 to 1, also a\n  control target). It flattens the skin's own normal under the mark before the mark's own normal is\n  laid on, so a jack, plate or implant shows only its machined forms. *Pore Smoothing* only blurs\n  the skin's normal (by about 2 mm on an 8K face) and keeps anything coarser, so it is still the\n  setting for scar tissue.\n- **Library chips from packs.** When marks carry a `pack:<name>` tag, the library builds its chips\n  from those packs; a mark without one goes under its category. Marks tagged `hidden` stay out of\n  the library, and tools still reach them. Importing marks refreshes an open panel.\n\n### Changed\n- **The starter library is now five packs of 60 marks.** Each pack is a library chip and a\n  `pack:` tag. Run *Add Starter Decals* once to get the new cards. Marks already placed in a\n  project keep working.\n  - **Ink (17 tattoos).**\n    - New: koi and waves, tiger and peonies, snake and dagger, traditional rose, skull and\n      roses, hand-lettered script, dotwork mandala, fine-line geometric, stick and poke,\n      circuit traces, knuckle symbols.\n    - Kept: the Japanese dragon, traditional dragon head, butterflies, blackwork sleeve,\n      black-and-grey portrait and swallow.\n    - Every tattoo has colour slots, Healed and Faded stages, *Wear*, *Fresh* and presets.\n  - **Scars & Wounds (19).**\n    - Wounds: stitches (fresh, healing, out), a laceration (fresh, clotted, crusted), a graze,\n      surgical staples, butterfly strips, a stitched gash, a stab wound, a bullet wound.\n    - Scars: keloid, bullet scar, shrapnel, acne pitting, plus the cut, claw and surgical\n      scars.\n    - Burns: burn blisters, cigarette burns.\n    - Bruises: a black eye by day, and the bruise.\n    - The wounds are built from clinical reference images as shifts of the skin's own colour,\n      so they suit every skin. Blood, thread, crust and tape are real materials, with raised\n      stitches and scabs and sunken wound beds.\n    - Wounds have *Wet* and *Depth*. Healing scars have *Pigment*: pale, pink or dark.\n  - **Cyber (9).**\n    - New: a neural jack and a data jack with machined bezels and sockets and no skin pores\n      on the metal, a port array, a chrome ring, augment seam lines, a subdermal plate, and a\n      UV circuit in glowing ink.\n    - Kept: the subdermal LED and the glowing barcode.\n    - The skin round an implant is irritated or healed, set by *Irritation*.\n  - **Paint & Grime (8):** a war band with real drips, finger stripes, dots and dashes, kohl,\n    a blood smear, mud and dirt, soot and camo. Each has recolourable slots and a *Wear*\n    setting that cracks and flakes it.\n  - **Skin Detail (7):** forearm, hand and temple veins, freckles, moles, a sweat sheen and a\n    sunburn flush.\n  - The new designs were made with OpenAI image generation; Kovati owns the output.\n    `SOURCES.json` lists every source image with its prompt.\n  - The calibration pattern is tagged `hidden`, so the library leaves it out.\n\n### Fixed\n- **Fresh tattoos keep black ink black.** The fresh ring's redness and swelling now sit in the skin\n  round the lines, not under them, where they turned black ink maroon."
+        },
+        {
+          "version": "0.3.1",
+          "date": null,
+          "body": "### Added\n- **`ink_blowout`, a new control target:** a faint, blue-shifted haze 1 to 3 mm round a tattoo's line\n  work, as when ink spread too deep. It brings back the blown-out look of the v3 tattoos as a\n  setting on any ink mark. The details are in `DECAL_FORMAT_v4.md`, section 7.\n\n### Changed\n- **A smaller, curated starter library of 20 marks.** The best of the earlier marks are kept, with new\n  tattoo designs and face paint. Run *Add Starter Decals* once to get the new cards.\n  - **Tattoos:**\n    - a colour Japanese dragon back piece, 38 x 57 cm at 4K;\n    - an American traditional dragon head;\n    - fine-line butterflies;\n    - a blackwork geometric forearm sleeve;\n    - a black-and-grey portrait;\n    - the swallow.\n  - Every tattoo has ink-colour slots, Healed and Faded stages, *Wear*, *Fresh* and four presets.\n  - The first five were designed with OpenAI image generation; Kovati owns the output. They were\n    converted to ink slots with crisp line work at full size.\n  - **Face paint, a new Paint category:** a war band across the eyes, cheek stripes and an ash\n    stripe. They are matte, keep the skin's pores, and have a *Wear* setting that dries them,\n    cracks them and flakes them off.\n  - **Kept:** the cut, claw, surgical and burn scars, the bruise and the puncture; the neural jack,\n    data jack, subdermal LED and glowing barcode.\n  - **Removed:** the other starter marks. Marks already placed in a project keep working.\n\n### Fixed\n- **Apply now covers a MetaHuman's body in a level.** On a Cinematic MetaHuman, the Body component\n  draws its mesh's own material, with no override. Apply now sets an override with the version's\n  material on any component slot that draws one of the set's originals, and Revert puts the\n  original back.\n- **The per-actor face textures survive that change.** Setting the Body override reruns the\n  Blueprint's construction script, which rebuilt the face instances and dropped the textures set a\n  moment before. Apply now changes references first and the per-actor instances last.\n- **A target's state reads right with several versions.** An instance that only an older version\n  replaces no longer makes the target read \"Mixed\" under a newer one.\n- **A skeletal mesh asset is no longer \"Unused\".** In Unreal 5.8 a skeletal mesh's material list is\n  a transient property, so Apply skipped it. It now reads and writes the mesh's slots directly.\n- **Big wrapped marks stay on the skin they face.**\n  - Wrapped layers now respect *Min Facing* and a depth (the larger of the layer's Depth and half\n    the mark's larger side), as planar layers always did.\n  - A back piece no longer carries over the shoulders onto the jaw and arms, or round the neck to\n    the throat.\n  - The wrap keeps only the part of its patch joined to the skin under its centre, so the inside of\n    the lips can no longer catch stretched ink from a back piece.\n  - Checked with Tattoo_DragonBack at 45 and 55 cm on a Cinematic MetaHuman: the face, throat and\n    jaw are clean, and the ink stops at the sides of the neck with a soft edge.\n- **A back piece no longer reaches the teeth.** At a level of detail that only the face mesh has, a\n  layer's centre is far from every surface, and every slot was then allowed. Now the nearest skin\n  is used.\n\n### Known issues\n- A wrapped band round a limb reaches about 80\u00b0 each side of its centre. A full ring needs two\n  layers, or a lower *Min Facing*."
+        },
+        {
+          "version": "0.3.0",
+          "date": null,
+          "body": "### Added\n- **Starter library v4: 43 marks**, by the art agent. Each mark is one card, with its stages,\n  inks, controls and presets.\n  - **Scars:** Cut, Surgical, Claw, Burn, Bullet, Keloid, Acne and Shrapnel heal along their\n    stages. Each has a Pigment choice (pale, pink or dark tissue) and a Depth slider.\n  - **Wounds:** Laceration, Stitches, Graze and Puncture have Wet and Depth. A bruise covers day 1,\n    day 4 and day 10.\n  - **Tattoos:** every tattoo is an ink-slot mark, with its inks in the order Colour, Accent, Shade\n    and Line. Each has Healed and Faded stages, Wear and Fresh controls, and presets.\n  - **New tattoo designs:** fine-line script, dagger, dotwork, barcode, a rose, a Celtic band, a\n    swallow, a clipper ship for the chest, and a 45 cm irezumi dragon back piece (up to 55 cm).\n  - **Cyber:** neural and data jacks heal from Irritated to Healed. A skin plate, a glowing barcode\n    and a shoulder hardpoint are new, and the subdermal LED glows.\n  - **Licences:** every image is our own work, made procedurally, and is listed in `SOURCES.json`.\n    One item is flagged for a licence check before sale: lettering rendered from a system font.\n- **Changed marks:**\n  - The v3 per-stage and per-variant decals are merged into these marks: the cut stages,\n    `_Old`, `_Faded` and `_Blowout`.\n  - `Scar_Slash_Fresh` becomes Wound_Laceration.\n  - The tribal blade band is replaced by the Celtic band, because cultural marks are not copied.\n  - Scar_Sunken is dropped.\n  - Their old assets keep working where they are used, but they are no longer updated.\n- **Marks with stages, inks and controls (format v4).** A mark can hold several looks along the\n  layer's *Age*: a cut that goes from fresh to scabbed, healing and old. The bake blends the two\n  stages around the Age, image by image. When their blends differ, it lays each one on and\n  cross-fades the results.\n- **Ink slots.** A tattoo can be drawn once as an ID image, with one part of the design per\n  channel. Each layer then picks the ink for each part, so the same design can be black and grey,\n  a red and blue traditional piece, or a faded green one.\n- **Controls made of data.** A mark names its own sliders, switches and choices, such as Wear,\n  Fresh, Pigment or Depth. Each drives a fixed list of things the bake knows: ink depth, density,\n  blue-green drift, broken lines, a fresh red ring, the scar's lightness and colour, shine, relief,\n  pore smoothing and glow. **Presets** set them all at once.\n- **The library has chips.** They are built from the marks' categories, so a new category needs no\n  code change. The library also has a search box (names, tags and places on the body),\n  **Favourites** (star a card) and **Recent** (the last eight stamped). The chip you last used and\n  your stars are remembered per person.\n- **Stamp once or keep stamping.** A switch in the library sets it, and it is remembered per\n  person. *Stamp once* (the default) puts the mark down after one stamp and selects the new layer.\n  **Shift + click** always stamps and keeps the mark picked. A click on a layer now selects it, even\n  with a mark picked, and **Alt + click** stamps over a layer on purpose. A line under the viewport\n  says what a click does now.\n- **The layer's Look:** only the mark's own settings are shown: size (up to the mark's own\n  ceiling), turn, opacity, Mirror, Age when the mark has stages, presets, its controls and one\n  swatch per ink. Every channel setting is still there, under **Advanced**.\n- **The live preview matches the bake.** The Projection view now runs the bake's own compositor\n  over copies of the skin's textures (at up to 2048 px) and shows them in the skin's own\n  materials. Ink, Tone, stages, inks and controls are all visible as you move a slider, without\n  baking. Virtual-textured MetaHuman maps work too.\n- **Mirror** per layer, for the other side of the body. A mark that contains letters\n  (`mirror_text: false`) never flips.\n- **Apply reaches a MetaHuman placed in a level.** Its face materials are dynamic instances that\n  its construction script makes. Apply now sets the version's baked textures on those instances,\n  and Revert puts their own textures back. This lasts only until the construction script runs\n  again (moving the actor, compiling its Blueprint or reloading the level), and it is never saved.\n  The result says so. To keep a version on a character, apply it to its Blueprint or its assets.\n\n### Changed\n- **The hardcoded Age effect is gone.** Age now moves a layer through its mark's stages, and a mark\n  that should fade or spread does so through its own controls. A mark with one stage ignores Age.\n  This also ends the pale box that Age drew over the whole stamp area of a Tone mark.\n- Controls' tone changes are always masked, so no setting can tint the projector square.\n\n### Fixed\n- **Text came out mirrored** on some wrapped stamps, such as on the left temple. The wrap built\n  its frame from a left-handed basis, and the quaternion made from that basis flipped an axis on\n  some orientations. The frame is now a true rotation, and a guard turns any mirrored patch back.\n- **Face stamps no longer reach the teeth, eyes or lashes.** A layer reaches only the skin its\n  centre is on, plus the surfaces joined to that skin at a seam, such as a MetaHuman's face and\n  body at the neck. This works at every LOD.\n\n### Compatibility\n- Decals and sets from 0.2 load as they are. A decal is a mark with one stage, and a v3 ink decal\n  has one ink, \"Ink\", which is the layer's Tint. The starter manifest takes `\"version\": 4` and\n  still reads versions 3 and 2.\n- Layers that used Age on a one-stage decal now bake without the old ageing.\n\n### Known issues\n- A per-actor apply does not survive the construction script. A component that re-applies after\n  construction would make it last; it is not built yet.\n- The preview builds its texture copies through the engine's texture build, so each slider stop\n  adds a small entry to the local derived-data cache."
+        },
+        {
+          "version": "0.2.0",
+          "date": null,
+          "body": "### Added\n- **Blend modes for colour, per decal, with a per-layer override.** *Over* is as before.\n  *Ink* multiplies the ink into the skin, so its tone and pores carry on through a tattoo on\n  any skin colour. The ink is softened and slightly desaturated by its *Ink Depth* (mm under\n  the skin). *Tone* shifts the skin's own colour (lighter, redder, paler, less saturated)\n  instead of painting one. A scar made once reads right on fair and on dark skin. A Tone decal\n  can carry a `_Tone` image of the shift, or take it from its painted colour against the skin\n  it was painted on.\n- **Keep Skin Detail** for Over: puts the skin's pore-scale light and dark back over paint.\n- **Relative channels:** each one-value channel (roughness, specular, metallic, AO, fuzz,\n  scatter) can be *Absolute* (as before), an *Offset* of the skin's value or a *Scale* of it.\n  So a scar is shinier than the skin around it without flattening that skin's own variation.\n- **Fuzz and Scatter channels.** New MetaHuman sets write fuzz into SRMF alpha and scatter into\n  `Scatter Baked`, so scar tissue and metal can lose their peach fuzz and scatter less.\n- **Pore Smoothing:** takes the skin's own pores out of the normal map under a scar and keeps\n  the larger forms.\n- **Age and Seed per layer.** Age spreads, fades and blue-greens ink, and turns red scars pale.\n  Seed warps a stamp slightly, so two copies of one decal differ.\n- The starter manifest (`starter_decals.json`) takes the new keys: `blend`, `ink_depth_mm`,\n  `keep_detail`, `tone_saturation`, `tone_reference`, `pore_smooth`, `<channel>_offset`,\n  `<channel>_scale`, `<channel>_mode`, `fuzz` and `scatter`. Images can be named `_Tone`,\n  `_Fuzz` and `_Scatter`.\n- Offscreen captures take a light direction and brightness, for grazing-light checks of relief\n  and scar shine.\n- **Starter decal library v3: 42 decals, up from 22, all generated by us.** Scars come in healing\n  stages (cut fresh, scabbed, healing, old; surgical fresh, healing, old) plus claw, burn,\n  keloid, sunken, acne and bullet scars. Bruises come in three stages by day. Tattoos come\n  fresh, healed, faded and blown out, with five new designs. Ports and plates have a groove,\n  lip and seam ring in the skin around them. Scars and bruises use Tone, tattoos use Ink, and\n  metal uses Over. Every existing decal name is kept.\n\n### Compatibility\n- Decals and sets made before this version bake exactly as before. New fields default to\n  Over and Absolute, with no fuzz or scatter. Existing sets keep the target maps they were saved\n  with; reset a set's Target Maps to get fuzz and scatter.\n\n### Known issues\n- The live Projection preview still shows every decal as Over. Ink, Tone, the relative\n  channels, Age and Seed show only in the bake."
+        },
+        {
           "version": "0.1.0",
           "date": null,
           "body": "### Added\n- First version. Stamp scars, tattoos, ports and other marks onto any mesh as layers, preview\n  them live, then bake them into new copies of the mesh's textures and new material instances.\n  The original textures and materials are never edited.\n- Versions: every bake is a named version in its own folder, with the layers it was made from,\n  so a character can keep *Clean*, *Scarred* and *Veteran* side by side and bring any of them\n  back to edit.\n- Apply and Revert: point the assets and actors that use the original materials at a version's\n  materials, and back. A target's state is read from its references, so it stays right after\n  undo or a manual edit.\n- A larger starter decal set: fresh and old scars, tattoos, and mechanical ports, plates and\n  vents, generated by `Resources/StarterDecals/make_starter_decals.py`."
@@ -2685,6 +2784,21 @@
       "source": null,
       "versions": [],
       "changelog": [
+        {
+          "version": "0.3.1",
+          "date": null,
+          "body": "### Added\n- `IsSkinSetRenderReady` says whether a version is ready to photograph: its baked materials'\n  shaders are compiled, its textures built and its glow maps resident. It lists what is still\n  pending. A set's first glowing bake compiles a copy of the skin material in the background, so\n  poll this in separate calls after Apply and before a capture."
+        },
+        {
+          "version": "0.3.0",
+          "date": null,
+          "body": "### Added\n- `EditSkinLayer` sets a mark's own settings. `\"Controls\"` takes values by control name, with a\n  choice given by its option name. `\"Slots\"` takes an ink per slot, as sRGB `[r,g,b]`, `\"#RRGGBB\"`\n  or linear `{R,G,B}`; `null` resets it. `\"Preset\"` takes a preset's name. The result adds\n  `ResolvedControls` and `ResolvedSlots`.\n- `ArmSkinDecal` picks a mark in the panel's library, as a click on its card does, and can set the\n  stamp mode: `\"once\"` or `\"keep\"`.\n- `DescribeSkinMark` gives a mark's stages, ink slots, controls (and what they drive) and presets.\n- `ImportSkinMarks` makes a folder of mark images and its `starter_decals.json` into mark assets\n  under `/Game/_Generated/`: your own library, written in the starter format.\n- `ClickSkinForgeViewport` takes `bShift` (stamp and keep the mark picked) and `bAlt` (stamp over a\n  layer). Its result ends with the panel's state.\n\n### Changed\n- `ApplySkinVersion` and `DescribeSkinApply` reach the material instances that a placed actor's\n  construction script makes (a MetaHuman in a level). The apply report says the change is\n  in memory only."
+        },
+        {
+          "version": "0.2.0",
+          "date": null,
+          "body": "### Added\n- `EditSkinLayer`: change some properties of one layer of a set by name (blend mode, ink depth,\n  age, seed, strengths, decal), as the panel's layer details do. A misspelt name is an error.\n- `CaptureSkinPreview` takes `LightFrom`, `LightBrightness` and `SkyBrightness`, for grazing-light\n  checks."
+        },
         {
           "version": "0.1.0",
           "date": null,
@@ -2775,6 +2889,11 @@
       ],
       "changelog": [
         {
+          "version": "0.2.4",
+          "date": null,
+          "body": "### Added\n- The Speech Library can be opened on any page (Write, Cast, Produce and the rest) with chosen lines already selected, so a script or an agent can take you straight to where the work is.\n- **Send Conversation Context**, an option under Project Settings \u25b8 Automation Forge \u25b8 SpeechForge \u25b8 Conversation Context. It is off by default, and off behaves exactly as before (one previous line and its request id). On, each line is sent with lines before and after it from every speaker in conversation order, and is linked to the same speaker's earlier takes. Three numbers set how much: lines before (3), lines after (2) and linked takes (3; zero links none). It fixes a voice drifting in pitch from line to line, and short lines that sounded cut from another recording. It only applies on a model that takes stitching context, and it is not part of a line's content hash, so switching it marks nothing stale.\n\n### Fixed\n- Localising a bank now translates each line with the scene around it: up to 12 lines at a time, with the cast and the lines before and after as context, and with the source language stated (the bank's, else the project's authoring language). Short lines on their own were mistranslated before, for example \"Go on. Breathe it in.\" came back as \"assimilate it\" in Spanish, and \"Then we plant the first one for her.\" lost the planting.\n- Character names are protected and come back untranslated; titles such as \"Commander\" still translate.\n- Nothing is written to the bank unless every translation request succeeds.\n\n### Known issues\n- With Send Conversation Context on, the lines after a line are the ones that name it as their predecessor; where a dialogue branches, the first branch in authoring order is used."
+        },
+        {
           "version": "0.2.3",
           "date": "2026-10-04",
           "body": "### Changed\n- Copyright and licence notices now name Bojan Andrejek / MetaWorx LLC. It is still Apache 2.0, and nothing about how you may use it changed."
@@ -2830,6 +2949,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.4",
+          "date": null,
+          "body": "### Fixed\n- Names and [bracketed] delivery tags now come back exactly as sent.\n- Uses DeepL's quality-optimised model where your plan has it.\n- The billed character count is now DeepL's real figure; it showed 0 before.\n\n### Compatibility\n- Needs SpeechForge 0.2.4 for the scene context and protected names."
+        },
         {
           "version": "0.1.3",
           "date": "2026-10-04",
@@ -2900,6 +3024,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.3",
+          "date": null,
+          "body": "### Added\n- Works with SpeechForge's new *Send Conversation Context* option: a line carrying the same speaker's earlier takes sends the newest three as `previous_request_ids`, and the text after the line as `next_text`.\n- `eleven_v4` and `eleven_v4_turbo` are in the character-limit table at 10,000 characters each. Before, they fell back to 5,000. To use `eleven_v4`, set it as the model on the voice profile or as the project default; it takes audio tags, stitching context and any stability value.\n\n### Compatibility\n- Needs SpeechForge 0.2.4 or later."
+        },
         {
           "version": "0.1.2",
           "date": "2026-10-04",
@@ -2989,6 +3118,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.2.4",
+          "date": null,
+          "body": "### Added\n- `ShowSpeechLibraryPage`: an agent tool that opens the Speech Library on a bank's page of your choice, with lines selected.\n\n### Fixed\n- The editor no longer logs six \"is not AICallable and will not be added as a Tool\" errors at startup. Internal callbacks (`ListSpeechTakeRows`, `GetSpeechLineSoundPath` and the four `...ByPath` take helpers) are marked as not for agents.\n\n### Compatibility\n- Needs SpeechForge 0.2.4."
+        },
         {
           "version": "0.2.3",
           "date": "2026-10-04",
@@ -3262,6 +3396,11 @@
         }
       ],
       "changelog": [
+        {
+          "version": "0.1.1",
+          "date": null,
+          "body": "### Added\n- **RainShadow node.** It follows the air along a prevailing wind: slopes the wind climbs get more rain, the lee of a range gets less, and the air recovers with distance.\n- **Natural outline** for Volcano, Crater, Plateau and Mountain: uneven bays in place of the same repeating petals and radial streaks.\n- **Optional Erode and Hydraulic controls:** a drop budget per detail level, detail under cover, drop steering (CPU only) and a Hydraulic batch limit. All are off by default and leave results as they were.\n\n### Changed\n- **Erode is about 23 % faster on the CPU**, with identical results.\n- **The alpine, island, canyon and lake presets were rebuilt** after scoring them against real terrain. A terrain regenerated from one of these presets will look different."
+        },
         {
           "version": "0.1.0",
           "date": "2026-10-29",
