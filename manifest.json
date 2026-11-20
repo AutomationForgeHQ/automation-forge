@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-20T20:28:20Z",
+  "generatedAt": "2026-11-20T20:30:51Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -3388,13 +3388,13 @@
       "source": null,
       "versions": [
         {
-          "version": "0.1.0",
+          "version": "0.2.0",
           "engine": "5.8",
           "platform": "Win64",
           "channel": "stable",
-          "sha256": "854669aa0609517ab915bf9ee680f7770ae7cb63a3fcbb8c7d59d14c16f08824",
-          "size": 8922798,
-          "releasedAt": "2026-10-29T12:09:11Z",
+          "sha256": "21ef5b5a3202e08a4f14c132026fe1beadcbe4e87cd37b0e9dd58ba78e8ffe20",
+          "size": 9045874,
+          "releasedAt": "2026-11-20T20:27:57Z",
           "url": null,
           "symbols": null,
           "notes": null
