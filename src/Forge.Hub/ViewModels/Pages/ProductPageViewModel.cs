@@ -35,6 +35,15 @@ public sealed partial class ProductPageViewModel : PageViewModel
     [ObservableProperty] private int _viewerIndex;
     [ObservableProperty] private bool _earlierOpen;
 
+    /// <summary>The licence line (licensing step 2): "Licensed · bought 20 Nov 2026", "Test licence", or nothing.</summary>
+    [ObservableProperty] private string _licenceLine = "";
+    [ObservableProperty] private bool _canRestoreLicence;
+    public bool HasLicenceLine => LicenceLine.Length > 0;
+    public bool HasLicenceRow => HasLicenceLine || CanRestoreLicence;
+    partial void OnLicenceLineChanged(string value) { OnPropertyChanged(nameof(HasLicenceLine)); OnPropertyChanged(nameof(HasLicenceRow)); }
+    partial void OnCanRestoreLicenceChanged(bool value) => OnPropertyChanged(nameof(HasLicenceRow));
+    [RelayCommand] private Task RestoreLicence() => Hub.RestoreLicenceCommand.ExecuteAsync(null);
+
     public ObservableCollection<ChipModel> Chips { get; } = [];
     public ObservableCollection<EnginePanelModel> Engines { get; } = [];
     public ObservableCollection<PosterModel> Extensions { get; } = [];
@@ -115,6 +124,8 @@ public sealed partial class ProductPageViewModel : PageViewModel
             : State.IsComing ? ""
             : $"{Cat.PriceLabel(State.PriceKey)} · {Words.Size(size)}{(DefaultEngineComponents().Any() ? " with its engines" : "")}";
         if (ProductFacts.FreeTierPromised(Product, Hub.Manifest ?? new Manifest())) ButtonLine = "A free tier is planned. Today this is the full version.";
+        LicenceLine = Hub.LicenceLineOf(Product);
+        CanRestoreLicence = Hub.CanRestoreLicenceFor(Product);
         OnThisComputer = !State.IsInstalled ? "Not installed."
             : State.FromElsewhere ? $"{State.InstalledVersion} · {Hub.TargetProject?.Name ?? "the project"} has it from its engine or a copy of its own"
             : $"{State.InstalledVersion} · {Hub.TargetLabel}" + (IsPinned ? $" · Pinned at {State.InstalledVersion}" : "");

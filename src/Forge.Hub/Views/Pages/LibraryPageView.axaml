@@ -181,6 +181,7 @@
                             <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Version}" Foreground="{StaticResource MuteBrush}" VerticalAlignment="Center" Margin="16,0" MinWidth="60" />
                             <TextBlock Grid.Column="2" Classes="small" Text="{Binding StateLine}" IsVisible="{Binding !HasUpdate}" VerticalAlignment="Center" MinWidth="110" />
                             <Button Grid.Column="2" Classes="link amber smalltext" Content="{Binding StateLine}" Command="{Binding DoUpdateCommand}" IsVisible="{Binding HasUpdate}" VerticalAlignment="Center" MinWidth="110" />
+                            <TextBlock Grid.Column="3" Classes="small" Text="{Binding LicenceLine}" IsVisible="{Binding HasLicenceLine}" VerticalAlignment="Center" Margin="14,0,0,0" />
                             <Button Grid.Column="4" Classes="link" Content="…" FontSize="18" Margin="14,0,0,0" VerticalAlignment="Center" AutomationProperties.Name="More">
                               <Button.Flyout>
                                 <MenuFlyout Placement="BottomEdgeAlignedRight">
@@ -188,6 +189,7 @@
                                   <MenuItem Header="Pin this version" Command="{Binding PinCommand}" IsVisible="{Binding CanPin}" />
                                   <MenuItem Header="Unpin" Command="{Binding UnpinCommand}" IsVisible="{Binding CanUnpin}" />
                                   <MenuItem Header="Show components" Command="{Binding ShowComponentsCommand}" />
+                                  <MenuItem Header="Restore licence" Command="{Binding RestoreLicenceCommand}" IsVisible="{Binding CanRestoreLicence}" />
                                   <MenuItem Header="Remove" Command="{Binding RemoveCommand}" />
                                 </MenuFlyout>
                               </Button.Flyout>

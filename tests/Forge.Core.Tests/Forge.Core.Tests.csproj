@@ -19,6 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Signs test licences with a throwaway key made at run time (shared with the screens and the fake server). -->
+    <Compile Include="..\Shared\LicenceSigning.cs" Link="Shared\LicenceSigning.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Fixtures: a frozen copy of the repository manifest of 19 November 2026 and the catalogue the Hub ships (spec 14.3). -->
     <None Include="fixtures\manifest-2026-11-19.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\src\Forge.Hub\catalogue\catalogue.json" Link="fixtures\catalogue.json" CopyToOutputDirectory="PreserveNewest" />

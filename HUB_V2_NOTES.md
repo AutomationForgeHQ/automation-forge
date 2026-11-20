@@ -110,6 +110,76 @@ version, runners with that Unreal installed, an add-an-asset dispatch for a vers
 `build_manifest.py`/`refresh_paid_manifest.py` already read the version from the asset name. Declared statuses
 ("planned", "preview") and `compatibleChangelist` are not in the manifest yet, so the Hub can only say "not built".
 
+## The signed licence (licensing plan step 2, 20 November 2026; not released yet)
+
+Built from `LICENSING_STRATEGY.md` (step 2) and `KOVATI_HUB_PLAN.md` 5.3, against the account API's `GET /licence`.
+Code: `src/Forge.Core/Licence/`; the window in `MainViewModel.Licence.cs`; the CLI `forge licence`.
+
+- **When.** At sign-in (always), at start and from the 15-minute watcher (only once the last good fetch is 20 hours old),
+  and always on Check now, Restore licence and `forge licence refresh`. A 429's `Retry-After` holds for every call
+  (the server allows 20 an hour per account). After a 429, 5xx or licence-off the automatic check waits an hour.
+- **Outcomes.** 200: verified, for this account, newer: stored. 401/403: the file is removed. 503 `licence-off` or a
+  404 (route not there): "licences are off", nothing alarming. 429, 5xx, offline, a timeout: the file stays, nothing
+  is said. A licence that does not verify or is for another account is never stored.
+- **Keys.** `LicenceKeys.BuiltIn` (kid to base64url raw 32-byte Ed25519 key); `k1` is the live key. A kid holding
+  `LicenceKeys.Placeholder`, or any key that is not 32 bytes, verifies nothing. Ed25519 is `BouncyCastle.Cryptography`
+  (managed, no native library). `FORGE_LICENCE_DEV_KEYS=kid=base64url;...` adds keys only in a Debug build of
+  Forge.Core or when `FORGE_HUB_INSTANCE` is set, never under a built-in kid, and a licence verified only by a dev key
+  is never written into the real `%LOCALAPPDATA%\AutomationForge` (only into a `FORGE_DATA_DIR`).
+- **Words.** `LicenceWords.Line`: "Licensed · bought 20 Nov 2026", "Test licence"; "Offline, 7 days left", "Running as
+  Lite until you are online", "Not licensed: this runs as Lite" and "Sign in to get Full back" only for a product whose
+  catalogue entry has `freeTierLive: true` (none today). Settings → LICENCE: account, what it covers, last refreshed,
+  valid offline until, key, and Restore licence.
+- **Screens.** `Forge.Hub.Snapshots.exe <out dir> licence` (headless, throwaway key). A real window against a fake API:
+  `dotnet run --project tools/licence-fake-server -- --port 8791 --data D:\UNREAL\ColonyDownloads\hub-lictest-data`
+  prints the variables for a dev instance (it writes a fake sign-in into that folder and refuses the real one); its
+  modes (`ok empty grace expired other badsig off 401 429 500`) switch with `GET /_mode/<mode>`.
+
+### The licence file: a contract for paid plugins
+
+**Path.** `%LOCALAPPDATA%\AutomationForge\licence.json` (`forge licence path` prints it; under `FORGE_DATA_DIR` it is
+in that folder). Written by Kovati Hub and `forge`; plugins only read it. It is replaced through a temporary file and a
+move: read it whole and close it at once (a reader holding it open blocks the replace; the Hub retries for half a second
+and keeps the old file).
+
+**Format.** Exactly what `GET {api}/licence` returned, byte for byte:
+
+    { "format": "kovati-licence", "v": 1, "kid": "k1", "payload": "<base64url>", "sig": "<base64url>" }
+
+`payload` decodes to UTF-8 JSON:
+
+    { "v": 1, "iss": "kovati", "sub": "<32 hex>", "issuedAt": "<RFC 3339 UTC>", "offlineUntil": "<issuedAt + 30 days>",
+      "products": { "<pluginId>": { "how": "bought|granted|fab|pro|test", "since": "<RFC 3339 UTC>", "maxMajor": 1 } },
+      "test": false }
+
+`products` lists only paid products the account is licensed for (a plugin claimed free in a preview is not listed);
+plugin ids compare without case. `sub` is the first 32 hex digits of SHA-256(`"kovati-licence:" + uid`), never the uid.
+Unknown fields are ignored.
+
+**Verify.** 1. `format == "kovati-licence"` and `v == 1`. 2. Look up `kid` in the plugin's own built-in table of public
+keys (raw 32-byte Ed25519, base64url; `k1` = `NfOKjVJCzXOHKoc6EW24UqZzIYQ6HRJ-eoMysFYm76g`); an unknown kid fails.
+3. Base64url-decode `payload` and `sig` (64 bytes); verify Ed25519 over the **decoded payload bytes**, never a
+re-serialised copy. 4. Parse the payload: `v == 1`, `iss == "kovati"`.
+
+**The 30-day rule.** Valid while `issuedAt - 15 min <= now < min(offlineUntil, issuedAt + 30 days)`. A clock earlier
+than `issuedAt - 15 min` is not valid (it needs a refresh; it is never valid forever). From day 23 after `issuedAt`
+show a quiet "offline, N days left". A product counts as licensed when it is listed, the licence is valid, and its
+major version is at most `maxMajor`. Otherwise it runs as its free tier (Lite, or trial without export) and nothing
+breaks. A plugin that is not signed in does not need the account: the file is the whole answer.
+
+**Refresh from a plugin.** When the file is missing or more than a day old and the Hub may not be running, run the
+installed `forge licence refresh` (`--json` prints `{ outcome, exitCode, path, message }`), then read the file again:
+
+| Exit | Meaning | The file |
+|---|---|---|
+| 0 | A current licence is on disk (fetched now, or the same one again) | read it |
+| 4 | Not signed in, or the account was refused (401/403) | removed, or never there |
+| 5 | Not now: offline, rate limited (Retry-After), server trouble, the file was held open | as it was |
+| 7 | The answer did not verify, or was for another account | as it was |
+| 8 | Licences are not switched on at Kovati yet | as it was |
+
+`forge licence [--json]` shows the state; `forge login` fetches a licence, `forge logout` removes it.
+
 ## Run it beside the installed Hub
 
     git -C C:\UNREAL\AutomationForge switch hub-v2

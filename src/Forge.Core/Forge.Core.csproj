@@ -9,6 +9,11 @@
   <ItemGroup>
     <!-- DPAPI for the stored sign-in on Windows. -->
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="9.0.9" />
+    <!--
+      Ed25519 for the signed licence (Licence/LicenceVerifier.cs): .NET 9 has no Ed25519 on Windows. Fully managed
+      (no native library, so the single-file publish is unchanged), MIT licensed, the reference .NET crypto library.
+    -->
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.1" />
   </ItemGroup>
 
 </Project>

@@ -219,6 +219,8 @@ public partial class MainViewModel : ViewModelBase
         _entitlements = new FirebaseEntitlements(_http);
         _runpod = new RunpodClient(_http);
         if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
+        // The licence at start: only when the last good fetch is 20 hours old (a Hub opened five times a day asks once).
+        if (_entitlements.IsSignedIn) _ = RefreshLicenceAsync(force: false);
         _isNightly = _settings.IsNightly;
         _checkForUpdates = _settings.CheckForUpdates;
         _runInBackground = _settings.RunInBackground;
@@ -292,6 +294,8 @@ public partial class MainViewModel : ViewModelBase
         Say("Checking for updates, the list of tools and your account…");
         var catalogue = FetchCatalogueAsync();
         var hub = _settings.CheckForUpdates ? CheckHubUpdateAsync(quiet: true) : Task.CompletedTask;
+        // The licence too, always asked (the server's Retry-After still holds); quiet unless something is wrong for good.
+        Task licence = _entitlements.IsSignedIn && !_previewSignedIn ? RefreshLicenceAsync(force: true) : Task.CompletedTask;
         // The profile reload reads what the account owns as well, so the refresh does not read it twice.
         await RefreshAsync(loadOwned: false);
         var projectsLook = RefreshProjectsAsync();
@@ -300,7 +304,7 @@ public partial class MainViewModel : ViewModelBase
             try { await LoadProfileAsync(); }
             catch (Exception ex) when (ex is EntitlementException or HttpRequestException or TaskCanceledException) { Say($"Could not read your account: {ex.Message}"); }
         }
-        try { await Task.WhenAll(catalogue, hub, projectsLook); }
+        try { await Task.WhenAll(catalogue, hub, projectsLook, licence); }
         catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException) { }
         CheckedAt = DateTime.Now.ToString("HH:mm");
         OnPropertyChanged(nameof(WatchLine));
@@ -462,6 +466,9 @@ public partial class MainViewModel : ViewModelBase
     private void AccountChanged()
     {
         OnPropertyChanged(nameof(IsSignedIn));
+        // Signing in fetches the licence at once; signing out has already removed it (FirebaseEntitlements.SignOut).
+        if (_entitlements.IsSignedIn) _ = RefreshLicenceAsync(force: true);
+        else LicenceChanged();
         if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
         else { Avatar = null; AccountName = AccountEmail = AccountUid = AccountProviders = OwnedLine = ""; Owned.Clear(); _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase); }
         Rebuild();

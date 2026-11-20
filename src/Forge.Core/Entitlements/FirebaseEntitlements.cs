@@ -39,15 +39,25 @@ public sealed class FirebaseEntitlements : IEntitlementProvider
         _owned = null;
         _auth.Forget();
         AuthState.Save(account);
+        // A licence left by another account is never shown as this one's.
+        new Licence.LicenceStore().DiscardIfNotFor(account.Uid);
     }
 
+    /// <summary>Signs out on this computer: the stored sign-in and the licence go together.</summary>
     public void SignOut()
     {
         _account = null;
         _owned = null;
         _auth.Forget();
         AuthState.Clear();
+        new Licence.LicenceStore().Delete();
     }
+
+    /// <summary>An ID token for the signed-in account (an hour's, renewed on demand). Throws when signed out or revoked.</summary>
+    public Task<string> IdTokenAsync(CancellationToken ct = default) =>
+        _account is null
+            ? throw new EntitlementException(AnonymousEntitlements.SignInMessage, "unauthenticated")
+            : _auth.IdTokenAsync(_account.RefreshToken, ct);
 
     /// <summary>Forget what was read about ownership; the next question asks again.</summary>
     public void Invalidate() => _owned = null;

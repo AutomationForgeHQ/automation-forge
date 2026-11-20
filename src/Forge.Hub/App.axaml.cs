@@ -45,6 +45,7 @@ public partial class App : Application
             _watcher = new UpdateWatcher(_settings);
             _watcher.Checked += r => Dispatcher.UIThread.Post(() => OnChecked(r));
             _watcher.NewFindings += (r, _) => Dispatcher.UIThread.Post(() => Announce(r, force: false));
+            _watcher.LicenceChanged += () => Dispatcher.UIThread.Post(() => (_window?.DataContext as MainViewModel)?.LicenceChanged());
             _watcher.CatalogueUpdated += () => Dispatcher.UIThread.Post(() =>
             {
                 _catalogue = null;
