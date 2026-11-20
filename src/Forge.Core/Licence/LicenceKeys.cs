@@ -4,9 +4,10 @@ namespace Forge.Core.Licence;
 /// The public keys a licence may be signed with, by kid. Built into the Hub and the CLI; the private halves live only
 /// in the account API's secret store.
 ///
-/// **Where the real key goes.** Paste the base64url of the raw 32-byte Ed25519 public key that `GET {api}/licence/keys`
-/// lists for kid "k1" into <see cref="K1"/>, in place of <see cref="Placeholder"/>. A new key later is one more line in
-/// <see cref="BuiltIn"/> (keep the old one until no licence signed with it can still be valid: 30 days).
+/// **Where the key goes.** <see cref="K1"/> holds the base64url of the raw 32-byte Ed25519 public key that
+/// `GET {api}/licence/keys` lists for kid "k1" (pasted 20 November 2026). A new key later is one more line in
+/// <see cref="BuiltIn"/> (keep the old one until no licence signed with it can still be valid: 30 days); a kid whose key
+/// is not known yet can stand in the table as <see cref="Placeholder"/>, which verifies nothing.
 ///
 /// A key that is the placeholder, or that does not decode to exactly 32 bytes, verifies nothing.
 /// </summary>
@@ -15,8 +16,11 @@ public static class LicenceKeys
     /// <summary>Marks a kid whose real key has not been pasted yet. Verifies nothing.</summary>
     public const string Placeholder = "PASTE-K1-PUBLIC-KEY-BASE64URL-HERE";
 
-    /// <summary>kid "k1": the account API's first licence key (base64url, raw 32 bytes).</summary>
-    public const string K1 = Placeholder;
+    /// <summary>
+    /// kid "k1": the account API's first licence key (base64url, raw 32 bytes), as served at
+    /// https://app.kovati.dev/api/licence/keys (pasted 20 November 2026).
+    /// </summary>
+    public const string K1 = "NfOKjVJCzXOHKoc6EW24UqZzIYQ6HRJ-eoMysFYm76g";
 
     /// <summary>Every key a release build trusts.</summary>
     public static IReadOnlyDictionary<string, string> BuiltIn { get; } = new Dictionary<string, string>(StringComparer.Ordinal)

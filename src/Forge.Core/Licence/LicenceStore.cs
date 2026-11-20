@@ -15,7 +15,7 @@ public sealed class LicenceCheck
     [JsonPropertyName("lastOutcome")] public LicenceFetchOutcome? LastOutcome { get; set; }
     /// <summary>A 429's Retry-After: no call, automatic or asked for, is made before this time.</summary>
     [JsonPropertyName("retryNotBefore")] public DateTimeOffset? RetryNotBefore { get; set; }
-    /// <summary>The account these times are for: a different account starts from nothing.</summary>
+    /// <summary>The account (its uid) these times are for: a different account starts from nothing. Local only; the licence itself carries a hash.</summary>
     [JsonPropertyName("sub")] public string? Sub { get; set; }
 }
 
@@ -93,10 +93,10 @@ public sealed class LicenceStore
     {
         verified = LicenceVerifier.Verify(Encoding.UTF8.GetString(body), _keys, out _);
         if (verified is null) return LicenceSave.Invalid;
-        if (!string.Equals(verified.Payload.Sub, accountUid, StringComparison.Ordinal)) return LicenceSave.WrongAccount;
+        if (!verified.Payload.IsFor(accountUid)) return LicenceSave.WrongAccount;
         if (verified.SignedWithDevKey && _isDefaultDataDir) return LicenceSave.DevKeyRefused;
         var current = Load();
-        if (current is not null && string.Equals(current.Payload.Sub, accountUid, StringComparison.Ordinal)
+        if (current is not null && current.Payload.IsFor(accountUid)
             && verified.Payload.IssuedAt <= current.Payload.IssuedAt)
             return LicenceSave.NotNewer;
         try { WriteAtomically(FilePath, body); }
@@ -117,7 +117,7 @@ public sealed class LicenceStore
     {
         var current = Load();
         if (current is null) return false;
-        if (accountUid is not null && string.Equals(current.Payload.Sub, accountUid, StringComparison.Ordinal)) return false;
+        if (current.Payload.IsFor(accountUid)) return false;
         Delete();
         return true;
     }

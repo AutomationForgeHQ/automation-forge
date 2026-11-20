@@ -45,7 +45,7 @@ public sealed class LicencePayload
 {
     [JsonPropertyName("v")] public int V { get; set; }
     [JsonPropertyName("iss")] public string Iss { get; set; } = "";
-    /// <summary>The account's uid (32 hex in the contract; the Hub compares it with the signed-in uid as a string).</summary>
+    /// <summary>32 hex: <see cref="SubjectFor"/> of the account's uid, never the uid itself.</summary>
     [JsonPropertyName("sub")] public string Sub { get; set; } = "";
     [JsonPropertyName("issuedAt")] public DateTimeOffset IssuedAt { get; set; }
     [JsonPropertyName("offlineUntil")] public DateTimeOffset OfflineUntil { get; set; }
@@ -61,6 +61,16 @@ public sealed class LicencePayload
     [JsonIgnore] public DateTimeOffset ValidUntil => OfflineUntil < IssuedAt + LicenceRules.OfflineWindow ? OfflineUntil : IssuedAt + LicenceRules.OfflineWindow;
 
     public LicencedProduct? Product(string? id) => id is not null && Products.TryGetValue(id, out var p) ? p : null;
+
+    /// <summary>
+    /// The licence's subject for an account: the first 32 hex digits of SHA-256("kovati-licence:" + uid), as the
+    /// account API computes it (functions/src/licence.ts subjectFor). The uid itself is never in the file.
+    /// </summary>
+    public static string SubjectFor(string uid) =>
+        Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes("kovati-licence:" + uid)))[..32];
+
+    /// <summary>Whether this licence was issued to the account with this uid.</summary>
+    public bool IsFor(string? uid) => uid is { Length: > 0 } && string.Equals(Sub, SubjectFor(uid), StringComparison.OrdinalIgnoreCase);
 
     private static readonly JsonSerializerOptions Json = new() { PropertyNameCaseInsensitive = false };
 

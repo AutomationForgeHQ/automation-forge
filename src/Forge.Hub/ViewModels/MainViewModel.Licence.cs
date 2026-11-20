@@ -145,7 +145,7 @@ public partial class MainViewModel
     public string LicenceAccountLine => LicenceSnapshot.Payload is null ? "" : $"For {AccountEmail}";
 
     public string LicenceRefreshedLine => LicenceSnapshot.Payload is not { } p ? ""
-        : $"Last refreshed {When(LicenceSnapshot.Check.Sub == p.Sub && LicenceSnapshot.Check.LastSuccessAt is { } at ? at : p.IssuedAt)}";
+        : $"Last refreshed {When(LicenceSnapshot.Check.Sub == LicenceSnapshot.AccountUid && LicenceSnapshot.Check.LastSuccessAt is { } at ? at : p.IssuedAt)}";
 
     public string LicenceValidLine => LicenceSnapshot.Payload is not { } p ? "" : $"Valid offline until {When(p.ValidUntil)}";
 

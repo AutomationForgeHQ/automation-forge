@@ -14,6 +14,9 @@ public sealed class LicenceTests : IDisposable
 {
     private const string Uid = "0123456789abcdef0123456789abcdef";
     private const string OtherUid = "fedcba9876543210fedcba9876543210";
+    /// <summary>What the API puts in "sub" for these accounts: a hash, never the uid.</summary>
+    private static readonly string S = LicencePayload.SubjectFor(Uid);
+    private static readonly string SO = LicencePayload.SubjectFor(OtherUid);
     private static readonly DateTimeOffset T0 = new(2026, 11, 20, 10, 0, 0, TimeSpan.Zero);
 
     private static readonly Dictionary<string, (string how, string since, int maxMajor)> Bought = new()
@@ -47,11 +50,11 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public void A_good_licence_verifies_and_reads_its_payload()
     {
-        var env = _key.Envelope(Uid, T0, Bought);
+        var env = _key.Envelope(S, T0, Bought);
         var v = LicenceVerifier.Verify(env, _key.Ring(), out var error);
         Assert.Null(error);
         Assert.NotNull(v);
-        Assert.Equal(Uid, v.Payload.Sub);
+        Assert.Equal(S, v.Payload.Sub);
         Assert.Equal(T0, v.Payload.IssuedAt);
         Assert.Equal(T0.AddDays(30), v.Payload.OfflineUntil);
         Assert.Equal("bought", v.Payload.Product("terrainforge")!.How); // ids compare without case
@@ -63,14 +66,14 @@ public sealed class LicenceTests : IDisposable
     public void A_signature_from_another_key_does_not_verify()
     {
         var other = TestLicenceKey.Generate("dev1");
-        Assert.Null(LicenceVerifier.Verify(other.Envelope(Uid, T0, Bought), _key.Ring(), out var error));
+        Assert.Null(LicenceVerifier.Verify(other.Envelope(S, T0, Bought), _key.Ring(), out var error));
         Assert.Contains("does not verify", error);
     }
 
     [Fact]
     public void A_flipped_signature_bit_does_not_verify()
     {
-        var env = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(_key.Envelope(Uid, T0, Bought))!;
+        var env = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(_key.Envelope(S, T0, Bought))!;
         var sig = Base64Url.TryDecode(env["sig"].GetString())!;
         sig[10] ^= 1;
         var tampered = JsonSerializer.Serialize(new { format = "kovati-licence", v = 1, kid = "dev1", payload = env["payload"].GetString(), sig = Base64Url.Encode(sig) });
@@ -80,7 +83,7 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public void A_payload_changed_by_one_byte_does_not_verify()
     {
-        var env = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(_key.Envelope(Uid, T0, Bought))!;
+        var env = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(_key.Envelope(S, T0, Bought))!;
         var bytes = Base64Url.TryDecode(env["payload"].GetString())!;
         var text = Encoding.UTF8.GetString(bytes).Replace("\"maxMajor\":1", "\"maxMajor\":9");
         Assert.NotEqual(Encoding.UTF8.GetString(bytes), text);
@@ -95,7 +98,7 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public void An_unknown_kid_verifies_nothing()
     {
-        Assert.Null(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, T0), kid: "k9"), _key.Ring(), out var error));
+        Assert.Null(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, T0), kid: "k9"), _key.Ring(), out var error));
         Assert.Contains("no usable key", error);
     }
 
@@ -107,15 +110,43 @@ public sealed class LicenceTests : IDisposable
         Assert.Null(LicenceKeys.Usable("short"));
         Assert.Null(LicenceKeys.Usable(Base64Url.Encode(new byte[32]))); // all zero
         Assert.Null(LicenceKeys.Usable(Base64Url.Encode(new byte[33])));
-        // The table as shipped today: k1 is the placeholder, so a licence that claims k1 fails, whatever its signature.
-        Assert.Equal(LicenceKeys.Placeholder, LicenceKeys.K1);
-        var ring = new LicenceKeyRing(LicenceKeys.BuiltIn);
-        Assert.Null(ring.Find("k1"));
-        Assert.Null(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, T0), kid: "k1"), ring, out _));
+        // A kid still holding the placeholder: a licence that claims it fails, whatever its signature.
+        var placeholderRing = new LicenceKeyRing(new Dictionary<string, string> { ["k1"] = LicenceKeys.Placeholder });
+        Assert.Null(placeholderRing.Find("k1"));
+        Assert.Null(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, T0), kid: "k1"), placeholderRing, out _));
         // A placeholder in a table that also holds a real key: the real kid works, the placeholder kid does not.
         var mixed = new LicenceKeyRing(new Dictionary<string, string> { ["k1"] = LicenceKeys.Placeholder, ["dev1"] = _key.PublicKeyBase64Url });
-        Assert.NotNull(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, T0)), mixed, out _));
-        Assert.Null(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, T0), kid: "k1"), mixed, out _));
+        Assert.NotNull(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, T0)), mixed, out _));
+        Assert.Null(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, T0), kid: "k1"), mixed, out _));
+    }
+
+    [Fact]
+    public void The_built_in_k1_is_the_live_account_API_key_and_a_throwaway_signature_claiming_it_fails()
+    {
+        Assert.Equal("NfOKjVJCzXOHKoc6EW24UqZzIYQ6HRJ-eoMysFYm76g", LicenceKeys.K1);
+        Assert.NotEqual(LicenceKeys.Placeholder, LicenceKeys.K1);
+        Assert.Equal(32, LicenceKeys.Usable(LicenceKeys.K1)!.Length);
+        var ring = new LicenceKeyRing(LicenceKeys.BuiltIn);
+        Assert.NotNull(ring.Find("k1"));
+        Assert.False(ring.Find("k1")!.Value.IsDev);
+        Assert.Null(LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, T0, Bought), kid: "k1"), ring, out var error));
+        Assert.Contains("does not verify", error);
+    }
+
+    [Fact]
+    public void The_subject_is_a_hash_of_the_uid_as_the_account_API_makes_it()
+    {
+        // sha256("kovati-licence:" + uid), first 32 hex (functions/src/licence.ts subjectFor); values from Python's hashlib.
+        Assert.Equal("f0a46c43778d8fce049285f2c793431c", LicencePayload.SubjectFor("0123456789abcdef0123456789abcdef"));
+        Assert.Equal("b8f6674e3fcb41c381de9d475fef9506", LicencePayload.SubjectFor("AbCdEf1234567890XyZ0987654321"));
+        // The live API's sample payload (20 November 2026) reads, and is for the account whose subject it carries.
+        var live = LicencePayload.Parse(Encoding.UTF8.GetBytes("""{"v":1,"iss":"kovati","sub":"c9aa0b8e3c3cc4ff2b10a8942533c1c3","issuedAt":"2026-11-20T01:40:09Z","offlineUntil":"2026-12-20T01:40:09Z","products":{"TerrainForge":{"how":"bought","since":"2026-11-19T22:56:00Z","maxMajor":1}},"test":false}"""), out var e)!;
+        Assert.Null(e);
+        Assert.Equal(new DateOnly(2026, 11, 19), live.Product("TerrainForge")!.SinceDate);
+        Assert.Equal(new DateTimeOffset(2026, 12, 20, 1, 40, 9, TimeSpan.Zero), live.ValidUntil);
+        Assert.False(live.IsFor("c9aa0b8e3c3cc4ff2b10a8942533c1c3")); // the subject is not a uid
+        Assert.True(LicencePayload.Parse(Encoding.UTF8.GetBytes(TestLicenceKey.Payload(S, T0)), out _)!.IsFor(Uid));
+        Assert.False(LicencePayload.Parse(Encoding.UTF8.GetBytes(TestLicenceKey.Payload(Uid, T0)), out _)!.IsFor(Uid)); // a raw uid is not accepted
     }
 
     [Fact]
@@ -134,7 +165,9 @@ public sealed class LicenceTests : IDisposable
             Assert.Equal(Environment.GetEnvironmentVariable("FORGE_HUB_INSTANCE") is { Length: > 0 }, LicenceKeys.DevKeysAllowed);
 #endif
             Assert.False(dev.ContainsKey("k1"));
-            Assert.Null(LicenceKeyRing.Default().Find("k1"));
+            // k1 stays the built-in key: the dev key offered under its name is ignored.
+            Assert.False(LicenceKeyRing.Default().Find("k1")!.Value.IsDev);
+            Assert.Equal(LicenceKeys.Usable(LicenceKeys.K1), LicenceKeyRing.Default().Find("k1")!.Value.Key);
         }
         finally { Environment.SetEnvironmentVariable(LicenceKeys.DevKeysVariable, before); }
     }
@@ -150,10 +183,10 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public void A_signed_payload_with_the_wrong_issuer_or_version_is_refused()
     {
-        var wrongIss = TestLicenceKey.Payload(Uid, T0).Replace("\"iss\":\"kovati\"", "\"iss\":\"someone\"");
+        var wrongIss = TestLicenceKey.Payload(S, T0).Replace("\"iss\":\"kovati\"", "\"iss\":\"someone\"");
         Assert.Null(LicenceVerifier.Verify(_key.Envelope(wrongIss), _key.Ring(), out var e1));
         Assert.Contains("issuer", e1);
-        var wrongV = TestLicenceKey.Payload(Uid, T0).Replace("\"v\":1", "\"v\":2");
+        var wrongV = TestLicenceKey.Payload(S, T0).Replace("\"v\":1", "\"v\":2");
         Assert.Null(LicenceVerifier.Verify(_key.Envelope(wrongV), _key.Ring(), out _));
     }
 
@@ -162,7 +195,7 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public void The_store_keeps_the_envelope_byte_for_byte()
     {
-        var body = Encoding.UTF8.GetBytes(_key.Envelope(Uid, T0, Bought).Replace(",", ",  ")); // spacing the API might use
+        var body = Encoding.UTF8.GetBytes(_key.Envelope(S, T0, Bought).Replace(",", ",  ")); // spacing the API might use
         Assert.Equal(LicenceSave.Stored, Store().Offer(body, Uid, out _));
         Assert.Equal(body, File.ReadAllBytes(Store().FilePath));
         Assert.NotNull(Store().Load());
@@ -171,10 +204,10 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public void A_licence_for_another_account_is_not_stored_and_a_stored_one_is_discarded()
     {
-        Assert.Equal(LicenceSave.WrongAccount, Store().Offer(_key.Envelope(OtherUid, T0, Bought), Uid, out _));
+        Assert.Equal(LicenceSave.WrongAccount, Store().Offer(_key.Envelope(SO, T0, Bought), Uid, out _));
         Assert.False(File.Exists(Store().FilePath));
 
-        Assert.Equal(LicenceSave.Stored, Store().Offer(_key.Envelope(OtherUid, T0, Bought), OtherUid, out _));
+        Assert.Equal(LicenceSave.Stored, Store().Offer(_key.Envelope(SO, T0, Bought), OtherUid, out _));
         Assert.False(Store().DiscardIfNotFor(OtherUid));
         Assert.True(Store().DiscardIfNotFor(Uid));
         Assert.False(File.Exists(Store().FilePath));
@@ -184,11 +217,11 @@ public sealed class LicenceTests : IDisposable
     public void Only_a_newer_licence_replaces_the_stored_one()
     {
         var s = Store();
-        Assert.Equal(LicenceSave.Stored, s.Offer(_key.Envelope(Uid, T0, Bought), Uid, out _));
-        Assert.Equal(LicenceSave.NotNewer, s.Offer(_key.Envelope(Uid, T0.AddHours(-1)), Uid, out _));
-        Assert.Equal(LicenceSave.NotNewer, s.Offer(_key.Envelope(Uid, T0), Uid, out _));
+        Assert.Equal(LicenceSave.Stored, s.Offer(_key.Envelope(S, T0, Bought), Uid, out _));
+        Assert.Equal(LicenceSave.NotNewer, s.Offer(_key.Envelope(S, T0.AddHours(-1)), Uid, out _));
+        Assert.Equal(LicenceSave.NotNewer, s.Offer(_key.Envelope(S, T0), Uid, out _));
         Assert.True(s.Load()!.Payload.Products.ContainsKey("TerrainForge"));
-        Assert.Equal(LicenceSave.Stored, s.Offer(_key.Envelope(Uid, T0.AddHours(1)), Uid, out _));
+        Assert.Equal(LicenceSave.Stored, s.Offer(_key.Envelope(S, T0.AddHours(1)), Uid, out _));
         Assert.Empty(s.Load()!.Payload.Products); // an account that owns nothing still gets a valid, empty licence
     }
 
@@ -196,9 +229,9 @@ public sealed class LicenceTests : IDisposable
     public void A_licence_that_does_not_verify_never_replaces_a_good_one()
     {
         var s = Store();
-        s.Offer(_key.Envelope(Uid, T0, Bought), Uid, out _);
+        s.Offer(_key.Envelope(S, T0, Bought), Uid, out _);
         var before = File.ReadAllBytes(s.FilePath);
-        Assert.Equal(LicenceSave.Invalid, s.Offer(TestLicenceKey.Generate("dev1").Envelope(Uid, T0.AddDays(1)), Uid, out _));
+        Assert.Equal(LicenceSave.Invalid, s.Offer(TestLicenceKey.Generate("dev1").Envelope(S, T0.AddDays(1)), Uid, out _));
         Assert.Equal(before, File.ReadAllBytes(s.FilePath));
     }
 
@@ -206,12 +239,12 @@ public sealed class LicenceTests : IDisposable
     public void The_replace_is_atomic_and_leaves_no_temporary_files()
     {
         var s = Store();
-        s.Offer(_key.Envelope(Uid, T0, Bought), Uid, out _);
+        s.Offer(_key.Envelope(S, T0, Bought), Uid, out _);
         // A plugin holding the file open: Windows will not replace it. The old file stays whole, nothing half-written.
         var old = File.ReadAllBytes(s.FilePath);
         using (var reader = new FileStream(s.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
-            Assert.Equal(LicenceSave.WriteFailed, s.Offer(_key.Envelope(Uid, T0.AddHours(2)), Uid, out _));
+            Assert.Equal(LicenceSave.WriteFailed, s.Offer(_key.Envelope(S, T0.AddHours(2)), Uid, out _));
             var seen = new byte[old.Length];
             reader.ReadExactly(seen);
             Assert.Equal(old, seen);
@@ -220,7 +253,7 @@ public sealed class LicenceTests : IDisposable
         // A reader that lets go within the half second does not stop the replace.
         var late = new FileStream(s.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         _ = Task.Delay(150).ContinueWith(_ => late.Dispose());
-        Assert.Equal(LicenceSave.Stored, s.Offer(_key.Envelope(Uid, T0.AddHours(2)), Uid, out _));
+        Assert.Equal(LicenceSave.Stored, s.Offer(_key.Envelope(S, T0.AddHours(2)), Uid, out _));
         Assert.Equal(T0.AddHours(2), s.Load()!.Payload.IssuedAt);
         Assert.Equal([LicenceStore.FileName], _dir.GetFiles().Select(f => f.Name));
     }
@@ -229,7 +262,7 @@ public sealed class LicenceTests : IDisposable
     public void A_dev_key_licence_is_never_written_into_the_real_data_folder()
     {
         var real = Store(isDefault: true);
-        Assert.Equal(LicenceSave.DevKeyRefused, real.Offer(_key.Envelope(Uid, T0, Bought), Uid, out _));
+        Assert.Equal(LicenceSave.DevKeyRefused, real.Offer(_key.Envelope(S, T0, Bought), Uid, out _));
         Assert.False(File.Exists(real.FilePath));
     }
 
@@ -237,7 +270,7 @@ public sealed class LicenceTests : IDisposable
     public void Delete_removes_the_licence_and_its_check_record()
     {
         var s = Store();
-        s.Offer(_key.Envelope(Uid, T0, Bought), Uid, out _);
+        s.Offer(_key.Envelope(S, T0, Bought), Uid, out _);
         s.SaveCheck(new LicenceCheck { Sub = Uid, LastSuccessAt = T0 });
         s.Delete();
         Assert.False(File.Exists(s.FilePath));
@@ -247,7 +280,7 @@ public sealed class LicenceTests : IDisposable
     // ── the state function ───────────────────────────────────────────────
 
     private LicencePayload P(IDictionary<string, (string how, string since, int maxMajor)>? products = null, bool test = false, DateTimeOffset? issued = null) =>
-        LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, issued ?? T0, products ?? Bought, test)), _key.Ring(), out _)!.Payload;
+        LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, issued ?? T0, products ?? Bought, test)), _key.Ring(), out _)!.Payload;
 
     [Theory]
     [InlineData(0, LicenceStanding.Licensed, 30)]
@@ -299,10 +332,10 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public void A_far_offlineUntil_is_capped_at_30_days_after_issue()
     {
-        var far = LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, T0, Bought, offlineUntil: T0.AddYears(5))), _key.Ring(), out _)!.Payload;
+        var far = LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, T0, Bought, offlineUntil: T0.AddYears(5))), _key.Ring(), out _)!.Payload;
         Assert.Equal(T0.AddDays(30), far.ValidUntil);
         Assert.Equal(LicenceStanding.Expired, LicenceRules.Evaluate(far, Uid, "TerrainForge", T0.AddDays(31)).Standing);
-        var near = LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, T0, Bought, offlineUntil: T0.AddDays(10))), _key.Ring(), out _)!.Payload;
+        var near = LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, T0, Bought, offlineUntil: T0.AddDays(10))), _key.Ring(), out _)!.Payload;
         Assert.Equal(LicenceStanding.Expired, LicenceRules.Evaluate(near, Uid, "TerrainForge", T0.AddDays(11)).Standing);
     }
 
@@ -398,7 +431,7 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public async Task A_200_is_verified_stored_and_sent_with_the_id_token()
     {
-        var rig = Service(_ => StubHandler.Json(_key.Envelope(Uid, T0, Bought)));
+        var rig = Service(_ => StubHandler.Json(_key.Envelope(S, T0, Bought)));
         Assert.Equal(LicenceFetchOutcome.Updated, await rig.Service.RefreshAsync(force: true));
         var req = Assert.Single(rig.Handler.Requests);
         Assert.Equal("http://api.test/api/licence", req.RequestUri!.ToString());
@@ -414,7 +447,7 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public async Task The_same_licence_again_is_unchanged_and_counts_as_a_success()
     {
-        var env = _key.Envelope(Uid, T0, Bought);
+        var env = _key.Envelope(S, T0, Bought);
         var rig = Service(_ => StubHandler.Json(env));
         await rig.Service.RefreshAsync(true);
         rig.Now = T0.AddHours(21);
@@ -426,7 +459,7 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public async Task An_automatic_refresh_within_20_hours_does_not_call_the_server()
     {
-        var rig = Service(_ => StubHandler.Json(_key.Envelope(Uid, T0, Bought)));
+        var rig = Service(_ => StubHandler.Json(_key.Envelope(S, T0, Bought)));
         Assert.Equal(LicenceFetchOutcome.Updated, await rig.Service.RefreshAsync(force: false)); // start, nothing stored
         rig.Now = T0.AddHours(5);
         Assert.Equal(LicenceFetchOutcome.NotDue, await rig.Service.RefreshAsync(force: false)); // the watcher, 5 hours later
@@ -445,7 +478,7 @@ public sealed class LicenceTests : IDisposable
     [InlineData(HttpStatusCode.Forbidden)]
     public async Task A_401_or_403_removes_the_licence(HttpStatusCode code)
     {
-        var answer = StubHandler.Json(_key.Envelope(Uid, T0, Bought));
+        var answer = StubHandler.Json(_key.Envelope(S, T0, Bought));
         var rig = Service(_ => answer);
         await rig.Service.RefreshAsync(true);
         answer = Status(code, """{ "error": "Sign in again.", "code": "unauthenticated" }""");
@@ -465,7 +498,7 @@ public sealed class LicenceTests : IDisposable
     [InlineData(HttpStatusCode.NotFound, "", LicenceFetchOutcome.Off)]
     public async Task Server_trouble_keeps_the_stored_licence_silently(HttpStatusCode code, string body, LicenceFetchOutcome expected)
     {
-        var answer = StubHandler.Json(_key.Envelope(Uid, T0, Bought));
+        var answer = StubHandler.Json(_key.Envelope(S, T0, Bought));
         var rig = Service(_ => answer);
         await rig.Service.RefreshAsync(true);
         var before = File.ReadAllBytes(rig.Store.FilePath);
@@ -487,7 +520,7 @@ public sealed class LicenceTests : IDisposable
         var limited = true;
         var rig = Service(_ =>
         {
-            if (!limited) return StubHandler.Json(_key.Envelope(Uid, T0, Bought));
+            if (!limited) return StubHandler.Json(_key.Envelope(S, T0, Bought));
             var r = Status(HttpStatusCode.TooManyRequests, """{ "error": "Too many requests.", "code": "rate-limited" }""");
             r.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromMinutes(40));
             return r;
@@ -510,14 +543,14 @@ public sealed class LicenceTests : IDisposable
         Assert.Equal(new DateOnly(2026, 11, 1), new LicencedProduct { Since = "2026-11-01T23:59:59Z" }.SinceDate); // UTC date, not local
         Assert.Equal(new DateOnly(2026, 11, 1), new LicencedProduct { Since = "2026-11-01" }.SinceDate);
         Assert.Null(new LicencedProduct { Since = "soon" }.SinceDate);
-        var p = LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, T0, new Dictionary<string, (string, string, int)> { ["TerrainForge"] = ("bought", "2026-11-01T08:30:00Z", 1) })), _key.Ring(), out _)!.Payload;
+        var p = LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(S, T0, new Dictionary<string, (string, string, int)> { ["TerrainForge"] = ("bought", "2026-11-01T08:30:00Z", 1) })), _key.Ring(), out _)!.Payload;
         Assert.Equal("Licensed · bought 1 Nov 2026", LicenceWords.Line(LicenceRules.Evaluate(p, Uid, "TerrainForge", T0), false));
     }
 
     [Fact]
     public void Unknown_fields_in_the_licence_are_ignored()
     {
-        var json = TestLicenceKey.Payload(Uid, T0, Bought).Replace("\"test\":false", "\"test\":false,\"plan\":{\"x\":1}");
+        var json = TestLicenceKey.Payload(S, T0, Bought).Replace("\"test\":false", "\"test\":false,\"plan\":{\"x\":1}");
         Assert.Contains("plan", json);
         Assert.NotNull(LicenceVerifier.Verify(_key.Envelope(json), _key.Ring(), out _));
     }
@@ -536,7 +569,7 @@ public sealed class LicenceTests : IDisposable
     public async Task Offline_keeps_the_stored_licence()
     {
         var online = true;
-        var rig = Service(_ => online ? StubHandler.Json(_key.Envelope(Uid, T0, Bought)) : throw new HttpRequestException("No such host is known."));
+        var rig = Service(_ => online ? StubHandler.Json(_key.Envelope(S, T0, Bought)) : throw new HttpRequestException("No such host is known."));
         await rig.Service.RefreshAsync(true);
         online = false;
         rig.Now = T0.AddDays(24);
@@ -557,7 +590,7 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public async Task A_licence_for_another_account_from_the_server_is_discarded()
     {
-        var rig = Service(_ => StubHandler.Json(_key.Envelope(OtherUid, T0, Bought)));
+        var rig = Service(_ => StubHandler.Json(_key.Envelope(SO, T0, Bought)));
         Assert.Equal(LicenceFetchOutcome.Invalid, await rig.Service.RefreshAsync(true));
         Assert.False(File.Exists(rig.Store.FilePath));
     }
@@ -565,10 +598,10 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public async Task A_bad_signature_from_the_server_keeps_the_good_stored_one()
     {
-        var answer = StubHandler.Json(_key.Envelope(Uid, T0, Bought));
+        var answer = StubHandler.Json(_key.Envelope(S, T0, Bought));
         var rig = Service(_ => answer);
         await rig.Service.RefreshAsync(true);
-        answer = StubHandler.Json(TestLicenceKey.Generate("dev1").Envelope(Uid, T0.AddDays(1)));
+        answer = StubHandler.Json(TestLicenceKey.Generate("dev1").Envelope(S, T0.AddDays(1)));
         Assert.Equal(LicenceFetchOutcome.Invalid, await rig.Service.RefreshAsync(true));
         Assert.True(rig.Store.Load()!.Payload.Products.ContainsKey("TerrainForge"));
     }
@@ -576,18 +609,18 @@ public sealed class LicenceTests : IDisposable
     [Fact]
     public async Task Switching_accounts_drops_the_other_accounts_licence_before_asking()
     {
-        var rig = Service(r => StubHandler.Json(_key.Envelope(r.Headers.Authorization!.Parameter!.Replace("id-token-", ""), T0, Bought)));
+        var rig = Service(r => StubHandler.Json(_key.Envelope(LicencePayload.SubjectFor(r.Headers.Authorization!.Parameter!.Replace("id-token-", "")), T0, Bought)));
         await rig.Service.RefreshAsync(true);
         rig.Account = new StoredAccount(OtherUid, "b@kovati.dev", "refresh-b");
         Assert.Equal(LicenceStanding.NoLicenceYet, rig.Service.Snapshot().For("TerrainForge").Standing); // never shown as b's
         Assert.Equal(LicenceFetchOutcome.Updated, await rig.Service.RefreshAsync(false)); // b has nothing stored: due at once
-        Assert.Equal(OtherUid, rig.Store.Load()!.Payload.Sub);
+        Assert.Equal(SO, rig.Store.Load()!.Payload.Sub);
     }
 
     [Fact]
     public async Task Signed_out_removes_any_licence_and_asks_nothing()
     {
-        var rig = Service(_ => StubHandler.Json(_key.Envelope(Uid, T0, Bought)));
+        var rig = Service(_ => StubHandler.Json(_key.Envelope(S, T0, Bought)));
         await rig.Service.RefreshAsync(true);
         rig.Account = null;
         Assert.Equal(LicenceFetchOutcome.NotSignedIn, await rig.Service.RefreshAsync(true));
@@ -599,7 +632,7 @@ public sealed class LicenceTests : IDisposable
     public async Task A_sign_in_that_no_longer_renews_keeps_the_file_to_run_out_by_itself()
     {
         var store = Store();
-        store.Offer(_key.Envelope(Uid, T0, Bought), Uid, out _);
+        store.Offer(_key.Envelope(S, T0, Bought), Uid, out _);
         var rig = Service(_ => StubHandler.Json(""), tokenFails: true);
         Assert.Equal(LicenceFetchOutcome.NotSignedIn, await rig.Service.RefreshAsync(true));
         Assert.True(File.Exists(store.FilePath));

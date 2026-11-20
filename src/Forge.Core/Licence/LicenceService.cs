@@ -10,7 +10,7 @@ namespace Forge.Core.Licence;
 public sealed record LicenceSnapshot(VerifiedLicence? Licence, LicenceCheck Check, string? AccountUid, DateTimeOffset Now)
 {
     /// <summary>The stored licence when it is for the signed-in account.</summary>
-    public LicencePayload? Payload => Licence is { } l && AccountUid is not null && l.Payload.Sub == AccountUid ? l.Payload : null;
+    public LicencePayload? Payload => Licence is { } l && l.Payload.IsFor(AccountUid) ? l.Payload : null;
 
     public ProductLicence For(string productId, int? major = null) =>
         LicenceRules.Evaluate(Payload, AccountUid, productId, Now, Check.Sub == AccountUid ? Check.LastOutcome : null, major);

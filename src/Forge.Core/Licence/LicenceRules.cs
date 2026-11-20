@@ -93,7 +93,7 @@ public static class LicenceRules
         LicenceFetchOutcome? lastOutcome = null, int? productMajor = null)
     {
         if (string.IsNullOrEmpty(accountUid)) return new ProductLicence(LicenceStanding.SignedOut);
-        if (licence is null || !string.Equals(licence.Sub, accountUid, StringComparison.Ordinal))
+        if (licence is null || !licence.IsFor(accountUid))
             return new ProductLicence(lastOutcome == LicenceFetchOutcome.Refused ? LicenceStanding.SignedOut : LicenceStanding.NoLicenceYet);
 
         var p = licence.Product(productId);

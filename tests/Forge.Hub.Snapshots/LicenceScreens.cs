@@ -22,6 +22,7 @@ namespace Forge.Hub.Snapshots;
 internal static partial class Screens
 {
     private const string LicUid = "0123456789abcdef0123456789abcdef";
+    private static readonly string LicSub = LicencePayload.SubjectFor(LicUid);
 
     public static void RunLicence(string outDir, string[] only)
     {
@@ -49,8 +50,8 @@ internal static partial class Screens
             ["TerrainForge"] = ("bought", "2026-11-20T09:12:00Z", 1),
             ["PerformanceForge"] = ("test", "2026-11-18T16:40:00Z", 1),
         };
-        LicenceScenario("lic_today", key, key.Envelope(LicUid, now.AddHours(-2), products), now.AddHours(-2), catalogue: null);
-        LicenceScenario("lic_offline_today", key, key.Envelope(LicUid, now.AddDays(-25), products), now.AddDays(-25), catalogue: null);
+        LicenceScenario("lic_today", key, key.Envelope(LicSub, now.AddHours(-2), products), now.AddHours(-2), catalogue: null);
+        LicenceScenario("lic_offline_today", key, key.Envelope(LicSub, now.AddDays(-25), products), now.AddDays(-25), catalogue: null);
 
         // The words that wait for a live free tier: a copy of the catalogue with TerrainForge's Lite marked live.
         var cat = JsonNode.Parse(File.ReadAllText(Path.Combine(repo, "src", "Forge.Hub", "catalogue", "catalogue.json")))!;
@@ -58,9 +59,9 @@ internal static partial class Screens
             if (p!["slug"]!.GetValue<string>() is "terrainforge" or "skinforge") p["freeTierLive"] = true;
         var liveCat = Path.Combine(_scratch, "catalogue-lite-live.json");
         File.WriteAllText(liveCat, cat.ToJsonString());
-        LicenceScenario("lic_lite_offline", key, key.Envelope(LicUid, now.AddDays(-25), products), now.AddDays(-25), liveCat);
-        LicenceScenario("lic_lite_expired", key, key.Envelope(LicUid, now.AddDays(-33), products), now.AddDays(-33), liveCat);
-        LicenceScenario("lic_lite_not_licensed", key, key.Envelope(LicUid, now.AddHours(-1), new Dictionary<string, (string, string, int)>()), now.AddHours(-1), liveCat);
+        LicenceScenario("lic_lite_offline", key, key.Envelope(LicSub, now.AddDays(-25), products), now.AddDays(-25), liveCat);
+        LicenceScenario("lic_lite_expired", key, key.Envelope(LicSub, now.AddDays(-33), products), now.AddDays(-33), liveCat);
+        LicenceScenario("lic_lite_not_licensed", key, key.Envelope(LicSub, now.AddHours(-1), new Dictionary<string, (string, string, int)>()), now.AddHours(-1), liveCat);
         Environment.SetEnvironmentVariable("FORGE_CATALOGUE", null);
         Environment.SetEnvironmentVariable(LicenceKeys.DevKeysVariable, null);
         Console.WriteLine($"done: {outDir}");
