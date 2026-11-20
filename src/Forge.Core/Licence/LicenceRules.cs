@@ -178,6 +178,8 @@ public static class LicenceWords
         {
             "bought" when l.Since is { } d => $"Licensed · bought {Date(d)}",
             "granted" when l.Since is { } d => $"Licensed · granted {Date(d)}",
+            "gifted" when l.Since is { } d => $"Licensed · gifted {Date(d)}",
+            "gifted" => "Licensed · gifted",
             "fab" => "Licensed · from Fab",
             "pro" => "Licensed · through Pro",
             _ => "Licensed",

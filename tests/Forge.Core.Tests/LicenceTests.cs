@@ -419,6 +419,7 @@ public sealed class LicenceTests : IDisposable
         Assert.Equal("Licensed · from Fab", LicenceWords.Line(new ProductLicence(LicenceStanding.Licensed) { How = "fab" }, true));
         Assert.Equal("Licensed · through Pro", LicenceWords.Line(new ProductLicence(LicenceStanding.Licensed) { How = "pro" }, true));
         Assert.Equal("Licensed · granted 1 Dec 2026", LicenceWords.Line(new ProductLicence(LicenceStanding.Licensed) { How = "granted", Since = new DateOnly(2026, 12, 1) }, true));
+        Assert.Equal("Licensed · gifted 1 Dec 2026", LicenceWords.Line(new ProductLicence(LicenceStanding.Licensed) { How = "gifted", Since = new DateOnly(2026, 12, 1) }, true));
     }
 
     // ── the service over HTTP ────────────────────────────────────────────
