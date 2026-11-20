@@ -39,6 +39,35 @@ public sealed record PlanInputs
     public IReadOnlyDictionary<string, string> Installed { get; init; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     /// <summary>Component id to pinned version (8.3).</summary>
     public IReadOnlyDictionary<string, string> Pins { get; init; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// A project target only: components the project already has from somewhere else, id to version. Its engine's
+    /// copies, and copies inside the project that Kovati Hub did not put there (a source tree under Plugins). They
+    /// count as here, are never installed into the project a second time (Unreal refuses two plugins of one name),
+    /// and are never offered as an update for the project: an engine copy updates with its engine.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> ProvidedElsewhere { get; init; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// A project target only: carry the Kovati foundation into the project, each piece its engine does not
+    /// already provide (<see cref="ProvidedElsewhere"/>). Kovati Hub and `forge` set it from 0.5.0-beta.3: a
+    /// project whose engine has no Kovati menu, keys page or ledger gets them in the project. Off, a project
+    /// install carries no foundation, the rule before beta.3.
+    /// </summary>
+    public bool FoundationInProject { get; init; }
+
+    /// <summary>Installed on the target, or provided to it from elsewhere.</summary>
+    public bool Has(string id) => Installed.ContainsKey(id) || ProvidedElsewhere.ContainsKey(id);
+}
+
+/// <summary>Whether a component has a build for the chosen Unreal Engine version.</summary>
+public enum BuildAvailability
+{
+    /// <summary>Built for this version.</summary>
+    Built,
+    /// <summary>Released, but only for other versions: "Not built for Unreal Engine 5.7 yet."</summary>
+    NotBuiltForEngine,
+    /// <summary>Not released at all, or not in the manifest: Coming soon.</summary>
+    NoRelease,
 }
 
 /// <summary>What a person ticked on a track page: capability ids, and per capability the engine product slugs.</summary>
@@ -119,12 +148,32 @@ public static class TrackPlanner
         var latest = first?.Latest(inputs.Engine, inputs.Channel);
         if (first is null || latest is null) return ProductStatus.Coming;
         if (Stages.Of(latest.Version) == Stage.Labs) return ProductStatus.Labs;
-        if (product.Plugins.Any(id => m.Plugin(id) is { IsPaid: true } && !inputs.Owned.Contains(id) && !inputs.Installed.ContainsKey(id)))
+        if (product.Plugins.Any(id => m.Plugin(id) is { IsPaid: true } && !inputs.Owned.Contains(id) && !inputs.Has(id)))
             return ProductStatus.NeedsPurchase;
-        if (inputs.Installed.ContainsKey(product.Plugins[0]))
+        if (inputs.Has(product.Plugins[0]))
             return HasUpdate(product, inputs) ? ProductStatus.Update : ProductStatus.Installed;
         return ProductStatus.Available;
     }
+
+    /// <summary>
+    /// Whether the product's first component has a build for the target's Unreal Engine version. A product that is
+    /// <see cref="ProductStatus.Coming"/> on this version is either not released at all, or released for another
+    /// version only; the screens say the second as "Not built for Unreal Engine 5.7 yet."
+    /// </summary>
+    public static BuildAvailability AvailabilityOf(Product product, PlanInputs inputs) =>
+        product.Plugins.Count == 0 ? BuildAvailability.NoRelease : AvailabilityOf(product.Plugins[0], inputs);
+
+    public static BuildAvailability AvailabilityOf(string id, PlanInputs inputs)
+    {
+        var plugin = inputs.Manifest.Plugin(id);
+        if (plugin is null) return BuildAvailability.NoRelease;
+        if (plugin.Latest(inputs.Engine, inputs.Channel) is not null) return BuildAvailability.Built;
+        return plugin.Versions.Any(v => inputs.Channel == Settings.Nightly || v.Channel == Settings.Stable)
+            ? BuildAvailability.NotBuiltForEngine : BuildAvailability.NoRelease;
+    }
+
+    /// <summary>"Not built for Unreal Engine 5.7 yet." in the site's plain voice.</summary>
+    public static string NotBuiltLine(string engine) => $"Not built for Unreal Engine {engine} yet.";
 
     /// <summary>Any installed component of the product (its own and its agent access) has a newer version that is not pinned away.</summary>
     public static bool HasUpdate(Product product, PlanInputs inputs) =>
@@ -260,17 +309,17 @@ public static class TrackPlanner
         foreach (var o in order)
         {
             var p = m.Plugin(o.id)!;
-            if (p.IsPaid && !inputs.Owned.Contains(p.Id) && !inputs.Installed.ContainsKey(p.Id))
+            if (p.IsPaid && !inputs.Owned.Contains(p.Id) && !inputs.Has(p.Id))
             {
                 dropped.Add(p.Id);
                 drops.Add(new PlanDrop(p.Id, "not-owned", $"{Display(cat, p.Id)} is not on your account."));
             }
         }
 
-        // 6: nothing without a version for this engine.
+        // 6: nothing without a version for this engine. What a project already has from its engine needs none.
         foreach (var o in order)
         {
-            if (dropped.Contains(o.id)) continue;
+            if (dropped.Contains(o.id) || inputs.ProvidedElsewhere.ContainsKey(o.id)) continue;
             if (m.Plugin(o.id)!.Latest(inputs.Engine, inputs.Channel) is null)
             {
                 dropped.Add(o.id);
@@ -298,10 +347,11 @@ public static class TrackPlanner
 
         var kept = order.Where(o => !dropped.Contains(o.id)).ToList();
 
-        // 7: the foundation first, on an engine (catalogue `always`): the editor plugin, the shared ledger, and
-        // with agent access on their agent components, each with what it needs. A piece that cannot be had for
-        // this engine (no build, paid and not owned) is left out quietly, with whatever needs it.
-        if (inputs.TargetKind == "engine" && kept.Count > 0)
+        // 7: the foundation first (catalogue `always`): the editor plugin, the shared ledger, and with agent access
+        // on their agent components, each with what it needs. A piece that cannot be had for this engine (no build,
+        // paid and not owned) is left out quietly, with whatever needs it. On a project the same foundation goes
+        // into the project, except what the project's engine already has: then the engine's copy serves it.
+        if ((inputs.TargetKind == "engine" || inputs.TargetKind == "project" && inputs.FoundationInProject) && kept.Count > 0)
         {
             var foundation = FoundationItems(inputs);
             var ids = new HashSet<string>(foundation.Select(f => f.id), StringComparer.OrdinalIgnoreCase);
@@ -309,10 +359,13 @@ public static class TrackPlanner
             kept.InsertRange(0, foundation);
         }
 
-        // 8: install, update or current, by the receipts. A pinned component that is installed is current.
+        // 8: install, update or current, by the receipts. A pinned component that is installed is current; so is
+        // one the project has from its engine or from a copy of its own.
         var items = kept.Select(o =>
         {
             var p = m.Plugin(o.id)!;
+            if (!inputs.Installed.ContainsKey(p.Id) && inputs.ProvidedElsewhere.TryGetValue(p.Id, out var elsewhere))
+                return new PlanItem(p.Id, PlanAction.Current, elsewhere, elsewhere, 0, o.role, o.cap, o.product, o.neededBy);
             var latest = p.Latest(inputs.Engine, inputs.Channel)!;
             inputs.Installed.TryGetValue(p.Id, out var have);
             var action = have is null ? PlanAction.Install
@@ -336,8 +389,9 @@ public static class TrackPlanner
         var list = new List<(string id, PlanRole role, string? cap, string? product, string? neededBy)>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         bool CanHave(PluginInfo p) =>
-            p.Latest(inputs.Engine, inputs.Channel) is not null
-            && !(p.IsPaid && !inputs.Owned.Contains(p.Id) && !inputs.Installed.ContainsKey(p.Id));
+            inputs.ProvidedElsewhere.ContainsKey(p.Id)
+            || p.Latest(inputs.Engine, inputs.Channel) is not null
+               && !(p.IsPaid && !inputs.Owned.Contains(p.Id) && !inputs.Installed.ContainsKey(p.Id));
         foreach (var a in entries)
             foreach (var id in new[] { a.Plugin }.Concat(inputs.AgentAccess ? a.AgentPlugins : []))
             {

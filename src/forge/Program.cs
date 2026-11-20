@@ -29,21 +29,117 @@ var channelOpt = new Option<string>("--channel") { Description = "stable or nigh
 var offlineOpt = new Option<bool>("--offline") { Description = "Use the cached manifest only." };
 var forceOpt = new Option<bool>("--force") { Description = "Reinstall even if the same version is present." };
 var noElevate = new Option<bool>(Elevation.NoElevateFlag) { Hidden = true, Recursive = true };
+var yesOpt = new Option<bool>("--yes") { Description = "With --project: go ahead when it cannot be told whether Unreal Editor has the project open." };
 
 var root = new RootCommand("Kovati: install, update and manage Kovati's tools for Unreal Engine 5.8.");
 root.Options.Add(noElevate);
 
 // ── engines ───────────────────────────────────────────────────────────────
-var engines = new Command("engines", "List the Unreal Engine installations found on this machine.");
-engines.SetAction(_ =>
+var engines = new Command("engines", "List the Unreal Engine installations found on this machine, and which have Kovati builds.");
+engines.Options.Add(offlineOpt); engines.Options.Add(channelOpt);
+engines.SetAction(async (parse, ct) =>
 {
     var found = EngineLocator.Find();
-    if (found.Count == 0) { Console.WriteLine("No Unreal Engine installations found."); return 1; }
+    Manifest? manifest = null;
+    try { (manifest, _) = await manifestClient.GetAsync(parse.GetValue(offlineOpt), ct); }
+    catch (Exception ex) when (ex is InvalidOperationException or HttpRequestException or InvalidDataException or System.Text.Json.JsonException)
+    {
+        Console.Error.WriteLine($"  (no list of tools to compare with: {ex.Message})");
+    }
+    var channel = parse.GetValue(channelOpt)!;
+    if (found.Count == 0) Console.WriteLine("No Unreal Engine installations found.");
     foreach (var e in found)
-        Console.WriteLine($"  UE {e.FullVersion,-8} {e.Path}{(e.IsLauncherBuild ? "" : "  (source build)")}  plugins → {e.PluginRoot}");
-    return 0;
+    {
+        var builds = manifest is null ? "" : manifest.BuiltFor(e.Version, channel) is var n and > 0 ? $"{n} Kovati tools built for {e.Version}" : $"no Kovati builds for {e.Version} yet";
+        var kind = e.IsLauncherBuild ? "" : e.RegistryId is { } id ? $"  (source build {id})" : "  (source build)";
+        Console.WriteLine($"  UE {e.FullVersion,-8} {builds,-34} {e.Path}{kind}");
+    }
+    if (manifest is not null)
+    {
+        var have = found.Select(e => e.Version).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var missing = manifest.EnginesWithBuilds(channel).Where(v => !have.Contains(v)).ToList();
+        if (missing.Count > 0) Console.WriteLine($"  Kovati also builds for Unreal Engine {string.Join(", ", missing)}, which is not installed here.");
+    }
+    return found.Count == 0 ? 1 : 0;
 });
 root.Subcommands.Add(engines);
+
+// ── projects ──────────────────────────────────────────────────────────────
+var jsonOpt = new Option<bool>("--json") { Description = "Print the list as JSON." };
+var projects = new Command("projects",
+    "List the Unreal projects Kovati Hub knows, with their engine and their Kovati tools. Found from Unreal's and the Epic launcher's own records, "
+    + "the project folders chosen in Kovati Hub's Settings, and the projects installed into before; the disk is never searched.");
+projects.Options.Add(jsonOpt); projects.Options.Add(offlineOpt); projects.Options.Add(channelOpt);
+projects.SetAction(async (parse, ct) =>
+{
+    var hubState = HubState.Load();
+    var discovery = ProjectLocator.Discover(ProjectService.InputsFor(hubState, state), ct);
+    Manifest? manifest = null;
+    try { (manifest, _) = await manifestClient.GetAsync(parse.GetValue(offlineOpt), ct); }
+    catch (Exception ex) when (ex is InvalidOperationException or HttpRequestException or InvalidDataException or System.Text.Json.JsonException) { }
+    var channel = parse.GetValue(channelOpt)!;
+    var allEngines = EngineLocator.Find();
+    var registry = EngineLocator.RegisteredBuilds();
+    var ids = new HashSet<string>(manifest?.Plugins.Select(p => p.Id) ?? [], StringComparer.OrdinalIgnoreCase);
+    var deps = (manifest?.Plugins ?? []).ToDictionary(p => p.Id, p => (IReadOnlyList<string>)p.Dependencies, StringComparer.OrdinalIgnoreCase);
+    var reports = discovery.Projects.Select(p => ProjectInspector.Inspect(p, allEngines, ids, deps, state.Items, registry)).ToList();
+
+    if (parse.GetValue(jsonOpt))
+    {
+        var doc = new
+        {
+            sources = discovery.Sources.Select(s => new { source = s.Source, where = s.Where, found = s.Found, note = s.Note }),
+            projects = reports.Select(r => new
+            {
+                name = r.Name, path = r.Path,
+                foundIn = ProjectService.SourceNames(r.Found.Sources),
+                lastOpened = r.Found.LastOpened?.ToString("yyyy-MM-ddTHH:mm:ss"),
+                engineAssociation = r.Engine.Association, engine = r.Engine.Version, engineInstalled = r.Engine.IsInstalled,
+                enginePath = r.Engine.Engine?.Path, cpp = r.IsCodeProject, readOnly = r.IsReadOnly, sourceControl = r.SourceControl, error = r.Error,
+                plugins = r.Plugins.Select(pl => new
+                {
+                    id = pl.Id, enabled = pl.Enabled, reason = pl.Reason.ToString(), neededBy = pl.NeededBy, entry = pl.Entry,
+                    project = pl.ProjectCopy is { } pc ? new { version = pc.Version, folder = pc.Folder, managedByHub = pc.ManagedByHub } : null,
+                    engine = pl.EngineCopy is { } ec ? new { version = ec.Version, folder = ec.Folder } : null,
+                    latest = r.Engine.Version is { } v ? manifest?.Plugin(pl.Id)?.Latest(v, channel)?.Version : null,
+                }),
+            }),
+        };
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(doc, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        return 0;
+    }
+
+    foreach (var s in discovery.Sources)
+        Console.WriteLine($"  {s.Source}: {s.Found}{(s.Note is null ? "" : $" ({s.Note})")}  {s.Where}");
+    Console.WriteLine();
+    if (reports.Count == 0) { Console.WriteLine("No projects found. Add a folder in Kovati Hub's Settings, Project folders."); return 0; }
+    foreach (var r in reports)
+    {
+        Console.WriteLine($"{r.Name}  ·  {r.Engine.Label}{(r.IsCodeProject ? "  ·  C++" : "")}{(r.SourceControl is { } vcs ? $"  ·  {vcs}" : "")}");
+        Console.WriteLine($"  {r.Path}");
+        if (r.Error is { } err) { Console.WriteLine($"  {err}"); continue; }
+        if (r.Plugins.Count == 0) Console.WriteLine("  no Kovati tools");
+        foreach (var pl in r.Plugins)
+        {
+            var where = pl.Overrides ? "project (overrides the engine's copy)" : pl.InProject ? (pl.ProjectCopy!.ManagedByHub ? "project" : "project, its own copy") : pl.InEngine ? "engine" : "missing";
+            var latest = r.Engine.Version is { } v ? manifest?.Plugin(pl.Id)?.Latest(v, channel)?.Version : null;
+            var version = pl.Loaded?.Version ?? "";
+            var update = latest is not null && version.Length > 0 && TrackPlanner.IsNewer(latest, version) ? $"  update {latest}" : "";
+            var onOff = pl.Enabled ? "on " : "off";
+            var why = pl.Reason switch
+            {
+                EnabledReason.Explicit => "",
+                EnabledReason.ProjectDefault => pl.Enabled ? " (on by default in the project)" : " (off: its descriptor is off by default)",
+                EnabledReason.EngineDefault => pl.Enabled ? " (on by default from the engine)" : " (not turned on in the project)",
+                EnabledReason.NeededByEnabled => $" (needed by {pl.NeededBy})",
+                _ => " (named in the project, not found)",
+            };
+            Console.WriteLine($"  {onOff}  {pl.Id,-28} {version,-10} {where}{why}{update}");
+        }
+    }
+    return 0;
+});
+root.Subcommands.Add(projects);
 
 // ── list ──────────────────────────────────────────────────────────────────
 var list = new Command("list", "Show the sets and plugins in the manifest, with what is installed.");
@@ -52,7 +148,7 @@ list.SetAction(async (parse, ct) =>
 {
     var (manifest, fromCache) = await manifestClient.GetAsync(parse.GetValue(offlineOpt), ct);
     var target = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
-    var engineVersion = target.engine?.Version ?? "5.8";
+    var engineVersion = target.version;
     var channel = parse.GetValue(channelOpt)!;
     var owned = await OwnedOrEmptyAsync(ct);
     Console.WriteLine($"manifest {manifest.GeneratedAt}{(fromCache ? " (cached)" : "")} · target {target.target.Label} · channel {channel}"
@@ -88,6 +184,7 @@ var install = new Command("install", "Download, verify and install plugins, whol
 install.Arguments.Add(whatArg);
 install.Options.Add(engineOpt); install.Options.Add(projectOpt); install.Options.Add(channelOpt); install.Options.Add(offlineOpt); install.Options.Add(forceOpt);
 install.Options.Add(trackOpt); install.Options.Add(onlyOpt); install.Options.Add(enginesOpt); install.Options.Add(agentsOpt); install.Options.Add(noAgentsOpt); install.Options.Add(dryRunOpt);
+install.Options.Add(yesOpt);
 install.SetAction(async (parse, ct) =>
 {
     if (parse.GetValue(trackOpt) is { Length: > 0 } trackName)
@@ -96,8 +193,10 @@ install.SetAction(async (parse, ct) =>
 
     var (manifest, _) = await manifestClient.GetAsync(parse.GetValue(offlineOpt), ct);
     var target = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
-    var engineVersion = target.engine?.Version ?? new ProjectDescriptor(parse.GetValue(projectOpt)!).EngineAssociation ?? "5.8";
+    // A GUID association is a source build, resolved through the registry: never a version (before beta.3 it was).
+    var engineVersion = target.version;
     var channel = parse.GetValue(channelOpt)!;
+    if (!GuardProject(target.target, parse.GetValue(yesOpt))) return 6;
 
     var wanted = new List<PluginInfo>();
     foreach (var name in parse.GetValue(whatArg) ?? [])
@@ -109,8 +208,21 @@ install.SetAction(async (parse, ct) =>
         else { Console.Error.WriteLine($"Unknown plugin or set: {name}"); return 2; }
     }
     var order = wanted.SelectMany(manifest.Closure).DistinctBy(p => p.Id, StringComparer.OrdinalIgnoreCase).ToList();
-    // An engine install carries the editor plugin (menu, update badge) whenever the manifest has it.
-    order = manifest.WithHubPlugin(order.Select(p => p.Id), target.target.Kind).Select(id => manifest.Plugin(id)!).ToList();
+    // An engine install carries the editor plugin (menu, update badge) whenever the manifest has it; a project
+    // install does too, unless the project has it already from its engine (0.5.0-beta.3).
+    var elsewhere = ProvidedTo(target.target, manifest);
+    order = manifest.WithHubPlugin(order.Select(p => p.Id), target.target.Kind, elsewhere is null ? null : new HashSet<string>(elsewhere.Keys, StringComparer.OrdinalIgnoreCase))
+        .Select(id => manifest.Plugin(id)!).ToList();
+    if (elsewhere is not null)
+    {
+        // Unreal refuses two plugins of one name: what the project has from its engine or a copy of its own stays there.
+        foreach (var p in order.Where(p => elsewhere.ContainsKey(p.Id) && state.Find(target.target, p.Id) is null).ToList())
+        {
+            Console.WriteLine($"  here already: {p.Id} {elsewhere[p.Id]} (from the engine or the project's own copy; not installed into the project again)");
+            order.Remove(p);
+        }
+        if (order.Count == 0) return 0;
+    }
 
     if (!entitlements.IsSignedIn) { Console.Error.WriteLine($"  {AnonymousEntitlements.SignInMessage}  (forge login)"); return 4; }
     var owned = await OwnedOrEmptyAsync(ct);
@@ -148,6 +260,7 @@ install.SetAction(async (parse, ct) =>
             Console.Write("\r"); Console.Error.WriteLine($"  failed: {p.Id} — {ex.Message}"); failures++;
         }
     }
+    AfterProjectChange(target.target);
     return failures == 0 ? (unbought.Count == 0 ? 0 : 5) : 1;
 });
 root.Subcommands.Add(install);
@@ -187,12 +300,13 @@ root.Subcommands.Add(claim);
 var includePinnedOpt = new Option<bool>("--include-pinned") { Description = "Update pinned components too (Kovati Hub's Pin this version)." };
 var update = new Command("update", "Update every installed plugin on a target to its latest version. Pinned components are left as they are.");
 update.Options.Add(includePinnedOpt);
-update.Options.Add(engineOpt); update.Options.Add(projectOpt); update.Options.Add(channelOpt); update.Options.Add(offlineOpt);
+update.Options.Add(engineOpt); update.Options.Add(projectOpt); update.Options.Add(channelOpt); update.Options.Add(offlineOpt); update.Options.Add(yesOpt);
 update.SetAction(async (parse, ct) =>
 {
     var (manifest, _) = await manifestClient.GetAsync(parse.GetValue(offlineOpt), ct);
     var target = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
     var channel = parse.GetValue(channelOpt)!;
+    if (!GuardProject(target.target, parse.GetValue(yesOpt))) return 6;
     var pending = new List<(PluginInfo p, VersionInfo v)>();
     var pins = HubState.Load().Pins;
     foreach (var i in state.On(target.target))
@@ -231,10 +345,11 @@ root.Subcommands.Add(update);
 // ── uninstall ─────────────────────────────────────────────────────────────
 var uninstallArg = new Argument<string[]>("plugins") { Description = "Plugin ids to remove." };
 var uninstall = new Command("uninstall", "Remove installed plugins from a target.");
-uninstall.Arguments.Add(uninstallArg); uninstall.Options.Add(engineOpt); uninstall.Options.Add(projectOpt);
+uninstall.Arguments.Add(uninstallArg); uninstall.Options.Add(engineOpt); uninstall.Options.Add(projectOpt); uninstall.Options.Add(yesOpt);
 uninstall.SetAction(parse =>
 {
     var target = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
+    if (!GuardProject(target.target, parse.GetValue(yesOpt))) return 6;
     if (!Installer.IsWritable(target.target.Root) && !parse.GetValue(noElevate) && !Elevation.IsElevated())
     {
         var code = Elevation.RelaunchElevated(args);
@@ -278,12 +393,26 @@ foreach (var (verb, enabled) in new[] { ("enable", true), ("disable", false) })
     var arg = new Argument<string[]>("plugins") { Description = "Plugin ids." };
     var projReq = new Option<string>("--project", "-p") { Description = "The project (.uproject or its folder).", Required = true };
     var cmd = new Command(verb, $"{(enabled ? "Enable" : "Disable")} plugins in a project — the same edit the Plugins window makes.");
-    cmd.Arguments.Add(arg); cmd.Options.Add(projReq);
+    cmd.Arguments.Add(arg); cmd.Options.Add(projReq); cmd.Options.Add(yesOpt);
     cmd.SetAction(parse =>
     {
         var proj = new ProjectDescriptor(parse.GetValue(projReq)!);
+        // The editor keeps its own copy of the descriptor and may write it back over this edit.
+        if (!GuardUProject(proj.Path, parse.GetValue(yesOpt))) return 6;
+        if (proj.IsReadOnly)
+        {
+            Console.Error.WriteLine($"  {Path.GetFileName(proj.Path)} is read-only. Check it out in your source control (or make it writable), then try again. Nothing changed.");
+            return 1;
+        }
+        var changed = 0;
         foreach (var id in parse.GetValue(arg) ?? [])
-            Console.WriteLine(proj.SetEnabled(id, enabled) ? $"  {verb}d: {id} in {proj.Name}" : $"  unchanged: {id} already {verb}d in {proj.Name}");
+        {
+            var did = proj.SetEnabled(id, enabled);
+            if (did) changed++;
+            Console.WriteLine(did ? $"  {verb}d: {id} in {proj.Name}" : $"  unchanged: {id} already {verb}d in {proj.Name}");
+        }
+        if (changed > 0 && proj.IsCodeProject) Console.WriteLine($"  {proj.Name} is a C++ project: rebuild it in your IDE before opening it.");
+        if (changed > 0 && ProjectInspector.SourceControlOf(proj.Directory) is { } vcs) Console.WriteLine($"  {proj.Name} is in {vcs}: {Path.GetFileName(proj.Path)} now shows as changed.");
         Console.WriteLine("  Restart the editor for the change to take effect.");
         return 0;
     });
@@ -404,7 +533,7 @@ async Task<int> InstallTrackAsync(ParseResult parse, string trackName, Cancellat
     {
         var resolved = ResolveTarget(parse.GetValue(engineOpt), parse.GetValue(projectOpt));
         target = resolved.target;
-        engineVersion = resolved.engine?.Version ?? new ProjectDescriptor(parse.GetValue(projectOpt)!).EngineAssociation ?? "5.8";
+        engineVersion = resolved.version;
     }
     catch (InvalidOperationException) when (dryRun)
     {
@@ -422,6 +551,9 @@ async Task<int> InstallTrackAsync(ParseResult parse, string trackName, Cancellat
         Catalogue = catalogue, Manifest = manifest, Engine = engineVersion, Channel = channel,
         TargetKind = target?.Kind ?? "engine", Owned = owned, SignedIn = entitlements.IsSignedIn,
         AgentAccess = agents, ShowLabs = hubState.ShowLabs, Installed = installed, Pins = hubState.Pins,
+        // A project: what its engine (or a copy of its own) has stays there, and the foundation its engine lacks goes in.
+        ProvidedElsewhere = (target is null ? null : ProvidedTo(target, manifest)) ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+        FoundationInProject = true,
     };
 
     var selection = TrackPlanner.DefaultSelection(track, inputs);
@@ -470,6 +602,7 @@ async Task<int> InstallTrackAsync(ParseResult parse, string trackName, Cancellat
     if (dryRun) return 0;
     if (target is null) { Console.Error.WriteLine("No Unreal Engine installation found."); return 2; }
     if (plan.ComponentCount == 0) { Console.WriteLine("Nothing to install."); return 0; }
+    if (!GuardProject(target, parse.GetValue(yesOpt))) return 6;
     if (!entitlements.IsSignedIn) { Console.Error.WriteLine($"  {AnonymousEntitlements.SignInMessage}  (forge login)"); return 4; }
     if (!Installer.IsWritable(target.Root) && !parse.GetValue(noElevate) && !Elevation.IsElevated())
     {
@@ -494,7 +627,55 @@ async Task<int> InstallTrackAsync(ParseResult parse, string trackName, Cancellat
     hubState.RecordTrack(track.Slug, target.Root, plan.Capabilities, selection.Engines);
     hubState.LastTarget = target.Root;
     hubState.Save();
+    AfterProjectChange(target);
     return failures == 0 ? 0 : 1;
+}
+
+// What a project already has from somewhere other than Kovati Hub's folder in it (its engine, a copy of its
+// own): id to version. Null for an engine target.
+Dictionary<string, string>? ProvidedTo(InstallTarget target, Manifest manifest)
+{
+    if (target.Kind != "project") return null;
+    var uproject = ProjectLocator.UProjectOfReceiptRoot(target.Root);
+    if (uproject is null) return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    var ids = new HashSet<string>(manifest.Plugins.Select(p => p.Id), StringComparer.OrdinalIgnoreCase);
+    var deps = manifest.Plugins.ToDictionary(p => p.Id, p => (IReadOnlyList<string>)p.Dependencies, StringComparer.OrdinalIgnoreCase);
+    var report = ProjectInspector.Inspect(new FoundProject(uproject, ProjectSource.None, null), EngineLocator.Find(), ids, deps, state.Items, EngineLocator.RegisteredBuilds());
+    return ProjectService.ProvidedElsewhere(report);
+}
+
+// Never write into a project whose editor is open: Unreal holds its plugins and keeps its own copy of the .uproject.
+bool GuardProject(InstallTarget target, bool yes) =>
+    target.Kind != "project" || ProjectLocator.UProjectOfReceiptRoot(target.Root) is not { } u || GuardUProject(u, yes);
+
+bool GuardUProject(string uproject, bool yes)
+{
+    switch (EditorProcesses.Check(uproject))
+    {
+        case EditorOnProject.Yes:
+            Console.Error.WriteLine($"  Unreal Editor has {Path.GetFileNameWithoutExtension(uproject)} open. Close it, then try again. Nothing changed.");
+            return false;
+        case EditorOnProject.Unknown when !yes:
+            Console.Error.WriteLine($"  Unreal Editor is running, and it cannot be told whether it has {Path.GetFileNameWithoutExtension(uproject)} open. Close it, or run again with --yes. Nothing changed.");
+            return false;
+        default:
+            return true;
+    }
+}
+
+// After an install into a project: what its owner should know. Kovati Hub never runs a source control command
+// and never deletes Binaries or Intermediate.
+void AfterProjectChange(InstallTarget target)
+{
+    if (target.Kind != "project" || ProjectLocator.UProjectOfReceiptRoot(target.Root) is not { } u) return;
+    try
+    {
+        var d = new ProjectDescriptor(u);
+        if (d.IsCodeProject) Console.WriteLine($"  {d.Name} is a C++ project: rebuild it in your IDE before opening it.");
+        if (ProjectInspector.SourceControlOf(d.Directory) is { } vcs)
+            Console.WriteLine($"  {d.Name} is in {vcs}: add Plugins/{Paths.PluginFolder} to its ignore file, or commit it for the team.");
+    }
+    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or System.Text.Json.JsonException) { }
 }
 
 async Task<IReadOnlySet<string>> OwnedOrEmptyAsync(CancellationToken ct)
@@ -508,11 +689,26 @@ async Task<IReadOnlySet<string>> OwnedOrEmptyAsync(CancellationToken ct)
     }
 }
 
-static (InstallTarget target, EngineInstall? engine) ResolveTarget(string? engineSpec, string? project)
+// The target, its engine when it is on this machine, and the engine version builds are chosen for. A project's
+// version comes from its EngineAssociation: "5.8" as it is, a source build's GUID through the registry (never as
+// a version), or --engine when that is given.
+static (InstallTarget target, EngineInstall? engine, string version) ResolveTarget(string? engineSpec, string? project)
 {
     if (!string.IsNullOrEmpty(project))
-        return (InstallTarget.Project(project), null);
+    {
+        var t = InstallTarget.Project(project);
+        var uproject = ProjectLocator.UProjectOfReceiptRoot(t.Root)!;
+        var all = EngineLocator.Find();
+        if (!string.IsNullOrEmpty(engineSpec))
+        {
+            var chosen = EngineLocator.Resolve(engineSpec, all) ?? throw new InvalidOperationException($"No engine matches '{engineSpec}'. Run `forge engines`.");
+            return (t, chosen, chosen.Version);
+        }
+        var (version, problem) = ProjectService.EngineVersionOf(uproject, all);
+        if (version is null) throw new InvalidOperationException(problem);
+        return (t, all.FirstOrDefault(e => e.Version == version), version);
+    }
     var engine = EngineLocator.Resolve(engineSpec)
                  ?? throw new InvalidOperationException(engineSpec is null ? "No Unreal Engine installation found." : $"No engine matches '{engineSpec}'. Run `forge engines`.");
-    return (InstallTarget.Engine(engine), engine);
+    return (InstallTarget.Engine(engine), engine, engine.Version);
 }

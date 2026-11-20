@@ -28,13 +28,33 @@ public sealed class Manifest
     /// manifest knows it. A project install does not: the project's owner
     /// decides what goes into the project.
     /// </summary>
-    public IReadOnlyList<string> WithHubPlugin(IEnumerable<string> ids, string targetKind)
+    public IReadOnlyList<string> WithHubPlugin(IEnumerable<string> ids, string targetKind) => WithHubPlugin(ids, targetKind, null);
+
+    /// <summary>
+    /// The same, and from 0.5.0-beta.3 for a project too when <paramref name="providedElsewhere"/> is given: the
+    /// editor plugin goes into the project unless the project already has it from its engine or a copy of its own.
+    /// </summary>
+    public IReadOnlyList<string> WithHubPlugin(IEnumerable<string> ids, string targetKind, IReadOnlySet<string>? providedElsewhere)
     {
         var list = ids.ToList();
-        if (targetKind == "engine" && Plugin(HubPlugin) is not null && !list.Contains(HubPlugin, StringComparer.OrdinalIgnoreCase))
+        var wanted = targetKind == "engine" || targetKind == "project" && providedElsewhere is not null && !providedElsewhere.Contains(HubPlugin);
+        if (wanted && Plugin(HubPlugin) is not null && !list.Contains(HubPlugin, StringComparer.OrdinalIgnoreCase))
             list.Insert(0, HubPlugin);
         return list;
     }
+
+    /// <summary>Every Unreal Engine version any plugin has a build for ("5.8"), newest first.</summary>
+    public IReadOnlyList<string> EnginesWithBuilds(string channel = Settings.Stable) =>
+        Plugins.SelectMany(p => p.Versions)
+            .Where(v => channel == Settings.Nightly || v.Channel == Settings.Stable)
+            .Select(v => v.Engine).Where(e => e.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(e => e, Engines.VersionOrder.Instance)
+            .ToList();
+
+    /// <summary>How many plugins have a build for this Unreal Engine version on this channel.</summary>
+    public int BuiltFor(string engine, string channel = Settings.Stable) =>
+        Plugins.Count(p => p.Latest(engine, channel) is not null);
 
     /// <summary>The plugin plus everything it depends on, dependencies first, no duplicates.</summary>
     public IReadOnlyList<PluginInfo> Closure(PluginInfo plugin)

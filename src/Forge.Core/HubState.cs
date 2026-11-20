@@ -34,6 +34,15 @@ public sealed class HubState
     /// <summary>Component id to the version it is held at (8.3).</summary>
     [JsonPropertyName("pins")] public Dictionary<string, string> Pins { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Settings, "Project folders" (0.5.0-beta.3): folders the person added, scanned for projects to a bounded depth.</summary>
+    [JsonPropertyName("projectFolders")] public List<string> ProjectFolders { get; set; } = [];
+
+    /// <summary>The last project discovery, shown at once on the next start while a fresh one runs.</summary>
+    [JsonPropertyName("projectCache")] public ProjectCache? ProjectCache { get; set; }
+
+    /// <summary>Fields a newer Hub wrote that this one does not know: kept, and written back as they were.</summary>
+    [JsonExtensionData] public Dictionary<string, System.Text.Json.JsonElement>? Unknown { get; set; }
+
     /// <summary>Whether the file was on disk when it was read. False on the first start of v2: the migration of 6.3 runs then.</summary>
     [JsonIgnore] public bool Existed { get; private set; }
 
@@ -114,4 +123,28 @@ public sealed class ProjectRecord
 {
     [JsonPropertyName("path")] public string Path { get; set; } = "";
     [JsonPropertyName("addedAt")] public string AddedAt { get; set; } = "";
+}
+
+/// <summary>The projects found last time, and what each of the person's folders gave.</summary>
+public sealed class ProjectCache
+{
+    [JsonPropertyName("scannedAt")] public string ScannedAt { get; set; } = "";
+    [JsonPropertyName("projects")] public List<CachedProject> Projects { get; set; } = [];
+    [JsonPropertyName("folders")] public List<CachedFolder> Folders { get; set; } = [];
+}
+
+public sealed class CachedProject
+{
+    [JsonPropertyName("path")] public string Path { get; set; } = "";
+    /// <summary>recent, created-folder, user-folder, receipt, remembered.</summary>
+    [JsonPropertyName("sources")] public List<string> Sources { get; set; } = [];
+    [JsonPropertyName("lastOpened")] public string? LastOpened { get; set; }
+}
+
+public sealed class CachedFolder
+{
+    [JsonPropertyName("folder")] public string Folder { get; set; } = "";
+    [JsonPropertyName("found")] public int Found { get; set; }
+    [JsonPropertyName("line")] public string Line { get; set; } = "";
+    [JsonPropertyName("complete")] public bool Complete { get; set; }
 }
