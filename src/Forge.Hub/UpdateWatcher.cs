@@ -30,6 +30,8 @@ public sealed class UpdateWatcher : IDisposable
     private readonly ManifestClient _manifest;
     private readonly ReleaseDiscovery _releases;
     private readonly HubReleases _hub;
+    // The stored sign-in, read at each check: the tray watcher runs with no window and no view model.
+    private readonly Forge.Core.Licence.LicenceService _licence;
     private readonly string _notifiedFile = Path.Combine(Paths.DataDir, "notified.json");
     private readonly SemaphoreSlim _gate = new(1, 1);
     private CancellationTokenSource? _cts;
@@ -42,6 +44,9 @@ public sealed class UpdateWatcher : IDisposable
     /// <summary>A check that found versions not announced before. The list is their keys (plugin@version, hub@version).</summary>
     public event Action<WatchResult, IReadOnlyList<string>>? NewFindings;
 
+    /// <summary>The watcher stored a newer licence, or removed one the server refused.</summary>
+    public event Action? LicenceChanged;
+
     public UpdateWatcher(Settings settings)
     {
         _settings = settings;
@@ -49,6 +54,7 @@ public sealed class UpdateWatcher : IDisposable
         _manifest = new ManifestClient(_http);
         _releases = new ReleaseDiscovery(_http);
         _hub = new HubReleases(_http);
+        _licence = Forge.Core.Licence.LicenceService.ForStoredAccount(_http);
     }
 
     public void Start(TimeSpan firstDelay)
@@ -72,12 +78,24 @@ public sealed class UpdateWatcher : IDisposable
         catch (OperationCanceledException) { }
     }
 
-    /// <summary>One check. Null when the network and the cache both had nothing to say.</summary>
-    public async Task<WatchResult?> CheckAsync(CancellationToken ct = default)
+    /// <summary>
+    /// One check. Null when the network and the cache both had nothing to say. <paramref name="forceLicence"/>: the
+    /// tray's "Check for updates now" asks for the licence whatever its age; the timed check asks once it is 20 hours old,
+    /// which makes the every-4-hours loop the daily licence refresh.
+    /// </summary>
+    public async Task<WatchResult?> CheckAsync(CancellationToken ct = default, bool forceLicence = false)
     {
         await _gate.WaitAsync(ct);
         try
         {
+            // The licence rides on the check; it never fails it. Offline, 429 or 5xx: the file stays as it is.
+            try
+            {
+                var outcome = await _licence.RefreshAsync(forceLicence, ct);
+                if (outcome is Forge.Core.Licence.LicenceFetchOutcome.Updated or Forge.Core.Licence.LicenceFetchOutcome.Refused) LicenceChanged?.Invoke();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) { }
+
             var (manifest, _) = await _manifest.GetAsync(ct: ct);
             await _releases.MergeIntoAsync(manifest, ct: ct);
             var state = new InstallState();

@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Forge.Core;
+using Forge.Core.Catalogue;
 using Forge.Core.Cloud;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
@@ -222,6 +223,8 @@ public partial class MainViewModel : ViewModelBase
         _entitlements = new FirebaseEntitlements(_http);
         _runpod = new RunpodClient(_http);
         if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
+        // The licence at start: only when the last good fetch is 20 hours old (a hub opened five times a day asks once).
+        if (_entitlements.IsSignedIn) _ = RefreshLicenceAsync(force: false);
         _isNightly = _settings.IsNightly;
         _checkForUpdates = _settings.CheckForUpdates;
         _runInBackground = _settings.RunInBackground;
@@ -233,7 +236,7 @@ public partial class MainViewModel : ViewModelBase
         SelectedEngine = Engines.FirstOrDefault(e => preferred is not null && string.Equals(e.Path.TrimEnd('\\', '/'), preferred.Path.TrimEnd('\\', '/'), StringComparison.OrdinalIgnoreCase))
                          ?? Engines.FirstOrDefault();
         RefreshMachineSurface();
-        _ = RefreshAsync();
+        _ = LoadAsync(asked: false);
         if (_settings.CheckForUpdates) _ = CheckHubUpdateAsync(quiet: true);
     }
 
@@ -296,8 +299,11 @@ public partial class MainViewModel : ViewModelBase
 
     private InstallTarget? Target => SelectedEngine is null ? null : InstallTarget.Engine(SelectedEngine);
 
+    /// <summary>Refresh: the catalogue, the account, and the licence, always asked (the server's Retry-After still holds).</summary>
     [RelayCommand]
-    private async Task RefreshAsync()
+    private Task RefreshAsync() => LoadAsync(asked: true);
+
+    private async Task LoadAsync(bool asked)
     {
         Busy = true;
         try
@@ -310,8 +316,10 @@ public partial class MainViewModel : ViewModelBase
             // Ownership too, not just the catalogue. Buying happens in a browser,
             // and Refresh is what a person presses when they come back — without
             // this the row they just paid for still says Buy until the hub restarts.
+            // The licence with it, so a tool bought on the web unlocks as Full here.
             // LoadOwnedAsync rebuilds; only do it ourselves when signed out.
-            if (_entitlements.IsSignedIn) await LoadOwnedAsync(); else Rebuild();
+            if (_entitlements.IsSignedIn) await LoadOwnedAsync(licenceAfter: asked);
+            else { await LoadOffersAsync(asked); Rebuild(); }
             Say(found.Merged > 0 ? $"Found {found.Merged} release{(found.Merged == 1 ? "" : "s")} the manifest did not list yet." : "Up to date with the releases repository.");
         }
         catch (Exception ex)
@@ -355,13 +363,19 @@ public partial class MainViewModel : ViewModelBase
         await LoadOwnedAsync();
     }
 
-    /// <summary>What the account holds, then the rows again so each one knows its standing.</summary>
-    private async Task LoadOwnedAsync()
+    /// <summary>
+    /// What the account holds, then the rows again so each one knows its standing. <paramref name="licenceAfter"/>: fetch
+    /// the licence afterwards (Refresh). A paid plugin that appeared on the account since the last read (a purchase)
+    /// fetches it too, so the tool unlocks as Full at once.
+    /// </summary>
+    private async Task LoadOwnedAsync(bool licenceAfter = false)
     {
+        var purchased = false;
         try
         {
             _entitlements.Invalidate();
             var owned = await _entitlements.OwnedAsync();
+            purchased = await LoadHoldingsAsync(owned, asked: licenceAfter);
             _owned = owned;
             Owned.Clear();
             foreach (var id in owned.OrderBy(x => x)) Owned.Add(id);
@@ -372,9 +386,12 @@ public partial class MainViewModel : ViewModelBase
         catch (Exception ex) when (ex is EntitlementException or HttpRequestException)
         {
             _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            _licensed = null;
             OwnedLine = ex.Message;
         }
         Rebuild();
+        // RefreshLicenceAsync rebuilds the rows again once the licence is in.
+        if (licenceAfter || purchased) await RefreshLicenceAsync(force: true);
     }
 
     [RelayCommand]
@@ -417,8 +434,11 @@ public partial class MainViewModel : ViewModelBase
     private void AccountChanged()
     {
         OnPropertyChanged(nameof(IsSignedIn));
+        // Signing in fetches the licence at once; signing out has already removed it (FirebaseEntitlements.SignOut).
+        if (_entitlements.IsSignedIn) _ = RefreshLicenceAsync(force: true);
+        else LicenceChanged();
         if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
-        else { Avatar = null; AccountName = AccountEmail = AccountUid = AccountProviders = OwnedLine = ""; Owned.Clear(); _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase); }
+        else { Avatar = null; AccountName = AccountEmail = AccountUid = AccountProviders = OwnedLine = ""; Owned.Clear(); _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase); _licensed = null; _heldFor = null; }
         Rebuild();
     }
 
@@ -629,8 +649,9 @@ public partial class MainViewModel : ViewModelBase
         Process.Start(new ProcessStartInfo { FileName = Paths.DataDir, UseShellExecute = true });
     }
 
+    /// <summary>Settings' Check now: a newer hub, and the licence (always asked).</summary>
     [RelayCommand]
-    private Task CheckHubUpdate() => CheckHubUpdateAsync(quiet: false);
+    private Task CheckHubUpdate() => Task.WhenAll(CheckHubUpdateAsync(quiet: false), RefreshLicenceAsync(force: true));
 
     private async Task CheckHubUpdateAsync(bool quiet)
     {
@@ -688,15 +709,15 @@ public partial class MainViewModel : ViewModelBase
     {
         var keep = SelectedSet?.Id;
         Sets.Clear();
-        if (_manifest is null || Target is null) return;
-        var engine = SelectedEngine!.Version;
+        if (_manifest is null || Target is null || Access() is not { } access) return;
         foreach (var set in _manifest.Sets)
         {
             var group = new SetGroup(set.Id, set.Name, this);
             foreach (var id in set.Members)
             {
                 if (_manifest.Plugin(id) is not { } p) continue;
-                group.Plugins.Add(new PluginRow(p, p.Latest(engine, Channel), _state.Find(Target, p.Id), this, _entitlements.IsSignedIn, _owned.Contains(p.Id)));
+                var installed = _state.Find(Target, p.Id);
+                group.Plugins.Add(new PluginRow(p, RowState(p, installed, access), installed, this));
             }
             group.Refresh();
             Sets.Add(group);
@@ -752,9 +773,12 @@ public partial class MainViewModel : ViewModelBase
     internal Task InstallSetAsync(SetGroup set)
     {
         if (!_entitlements.IsSignedIn) return SignInAsync();
-        var ids = set.Plugins.Where(r => r.Latest is not null && (!r.IsPaid || r.Owned)).Select(r => r.Id).ToArray();
-        var left = set.Plugins.Where(r => r.Latest is not null && r.IsPaid && !r.Owned).Select(r => r.Id).ToList();
+        // A paid plugin with a free tier installs with the rest, as Lite; one that must be bought is left out and named.
+        var ids = set.Plugins.Where(r => r.Latest is not null && !r.NeedsPurchase).Select(r => r.Id).ToArray();
+        var left = set.Plugins.Where(r => r.Latest is not null && r.NeedsPurchase).Select(r => r.Id).ToList();
         if (left.Count > 0) Say($"not on your account, so not installed: {string.Join(", ", left)}. Buy at {CloudConfig.PluginsUrl}");
+        var lite = set.Plugins.Where(r => r.Latest is not null && r.IsFreeTier && r.Installed is null).Select(r => r.Id).ToList();
+        if (lite.Count > 0) Say($"not licensed, so {string.Join(", ", lite)} install{(lite.Count == 1 ? "s" : "")} as Lite. Buy Full and it becomes Full with no reinstall.");
         return ids.Length > 0 ? RunAsync(ids) : Task.CompletedTask;
     }
 
@@ -786,7 +810,8 @@ public partial class MainViewModel : ViewModelBase
                 {
                     if (uninstall) { if (!installer.Uninstall(Target, id)) Say($"not installed: {id}"); continue; }
                     var p = _manifest.Plugin(id)!;
-                    var v = p.Latest(SelectedEngine.Version, Channel);
+                    // The newest build, or a free tier's newest free-tier build for a paid plugin not held licensed.
+                    var v = BuildToInstall(p);
                     if (v is null) { Say($"skipped: {id} has no release for UE {SelectedEngine.Version}"); continue; }
                     try
                     {
@@ -802,7 +827,7 @@ public partial class MainViewModel : ViewModelBase
             }
             else
             {
-                await RunElevatedAsync(uninstall ? "uninstall" : "install", ids);
+                await RunElevatedAsync(uninstall ? "uninstall" : "install", uninstall ? ids : WithVersions(ids));
             }
         }
         finally
@@ -899,21 +924,30 @@ public sealed partial class SetGroup(string id, string name, MainViewModel owner
     [RelayCommand] private Task InstallSet() => owner.InstallSetAsync(this);
 }
 
-public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, InstalledPlugin? installed, MainViewModel owner, bool signedIn, bool owned) : ObservableObject
+/// <summary>
+/// One plugin on the selected engine. The words and the main action come from <see cref="PluginRowState"/> (Forge.Core),
+/// so they are tested without a window: a free plugin and a paid one without a free tier read as in 0.4.4; a paid one
+/// with a live free tier that the account does not hold licensed reads "Install Lite", with "Buy Full" beside it, and
+/// a line in Kovati Hub's words says where its licence stands.
+/// </summary>
+public sealed partial class PluginRow(PluginInfo plugin, PluginRowState state, InstalledPlugin? installed, MainViewModel owner) : ObservableObject
 {
     public PluginInfo Plugin { get; } = plugin;
-    public VersionInfo? Latest { get; } = latest;
+    public PluginRowState State { get; } = state;
+    /// <summary>The build this row offers: the newest, or a free tier's newest free-tier build.</summary>
+    public VersionInfo? Latest => State.Offered;
     public InstalledPlugin? Installed { get; } = installed;
     /// <summary>Whether a person is signed in at all; without it nothing installs.</summary>
-    public bool SignedIn { get; } = signedIn;
+    public bool SignedIn => State.SignedIn;
     /// <summary>Whether the account holds this plugin. A free one is added on the first install.</summary>
-    public bool Owned { get; } = owned;
+    public bool Owned => State.Owned;
 
     public string Id => Plugin.Id;
     public string Meta => $"{Plugin.Role} · {(Plugin.Distribution == "open" ? "open source · free" : Plugin.IsPaid ? "paid" : "free")}" + (Plugin.Dependencies.Count > 0 ? $" · needs {string.Join(", ", Plugin.Dependencies)}" : "");
     public bool IsPaid => Plugin.IsPaid;
-    public bool NeedsPurchase => IsPaid && !Owned;
-    public bool HasUpdate => Installed is not null && Latest is not null && Installed.Version != Latest.Version;
+    public bool NeedsPurchase => State.NeedsPurchase;
+    public bool IsFreeTier => State.IsFreeTier;
+    public bool HasUpdate => State.HasUpdate;
 
     private string LatestLabel => Latest is null ? "" : Latest.Channel == Settings.Nightly ? $"{Latest.Version} · nightly" : Latest.Version;
 
@@ -923,23 +957,17 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
         : HasUpdate ? $"{Installed.Version} installed → {LatestLabel}"
         : $"{Installed.Version} installed";
 
-    public string Status =>
-        Latest is null ? "not released"
-        : !SignedIn ? "sign in to install"
-        : NeedsPurchase ? "paid · not on your account"
-        : Installed is null ? (Owned ? "on your account" : "not installed")
-        : HasUpdate ? "update available"
-        : "up to date";
+    public string Status => State.Status;
+    public string? StatusTip => State.StatusTip;
+    public string ActionLabel => State.ActionLabel;
 
-    public string ActionLabel =>
-        Latest is null ? "—"
-        : !SignedIn ? "Sign in"
-        : NeedsPurchase ? "Buy"
-        : Installed is null ? (Owned ? "Install" : "Add & install")
-        : HasUpdate ? "Update"
-        : "Installed";
+    /// <summary>"Licensed · bought 20 Nov 2026", "Not licensed: this runs as Lite", "Offline, 5 days left", or nothing.</summary>
+    public string LicenceLine => State.LicenceLine;
+    public bool HasLicenceLine => LicenceLine.Length > 0 || CanRestoreLicence;
+    public bool CanRestoreLicence => State.CanRestoreLicence;
+    public bool CanBuyFull => State.CanBuyFull;
 
-    public bool CanAct => Latest is not null && (!SignedIn || NeedsPurchase || Installed is null || HasUpdate);
+    public bool CanAct => State.CanAct;
     public bool CanUninstall => Installed is not null;
     public bool IsCurrent => Installed is not null && !HasUpdate;
 
@@ -955,10 +983,21 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
     [RelayCommand] private void ShowChanges() => owner.ShowChanges(this);
 
     [RelayCommand(CanExecute = nameof(CanAct))]
-    private Task Act() =>
-        !SignedIn ? owner.SignInFromRowAsync()
-        : NeedsPurchase ? Run(() => owner.OpenBuyPage(Id))
-        : owner.InstallAsync(this);
+    private Task Act() => State.Action switch
+    {
+        RowAction.SignIn => owner.SignInFromRowAsync(),
+        RowAction.Buy => Run(() => owner.OpenBuyPage(Id)),
+        RowAction.Install => owner.InstallAsync(this),
+        _ => Task.CompletedTask,
+    };
+
+    /// <summary>The store page, beside "Install Lite": the existing Buy, for the full tool.</summary>
+    [RelayCommand(CanExecute = nameof(CanBuyFull))]
+    private void BuyFull() => owner.OpenBuyPage(Id);
+
+    /// <summary>Ask Kovati for the licence now: a purchase that still shows as Lite.</summary>
+    [RelayCommand(CanExecute = nameof(CanRestoreLicence))]
+    private Task RestoreLicence() => owner.RestoreLicenceAsync();
 
     private static Task Run(Action a) { a(); return Task.CompletedTask; }
     [RelayCommand(CanExecute = nameof(CanUninstall))] private Task Uninstall() => owner.UninstallAsync(this);

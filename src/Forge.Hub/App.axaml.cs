@@ -45,6 +45,7 @@ public partial class App : Application
             _watcher = new UpdateWatcher(_settings);
             _watcher.Checked += r => Dispatcher.UIThread.Post(() => OnChecked(r));
             _watcher.NewFindings += (r, _) => Dispatcher.UIThread.Post(() => Announce(r, force: false));
+            _watcher.LicenceChanged += () => Dispatcher.UIThread.Post(() => (_window?.DataContext as MainViewModel)?.LicenceChanged());
 
             SetupTray();
             SingleInstance.ListenForShow(() => Dispatcher.UIThread.Post(ShowWindow));
@@ -99,7 +100,8 @@ public partial class App : Application
         var check = new NativeMenuItem("Check for updates now");
         check.Click += async (_, _) =>
         {
-            var r = await _watcher.CheckAsync();
+            // Asked for: the licence too, whatever its age (a tool bought on the web unlocks as Full).
+            var r = await _watcher.CheckAsync(forceLicence: true);
             if (r is null) Toasts.Show("Automation Forge", "Could not reach the releases. The last known state stands.");
             else if (r.Count == 0) Toasts.Show("Automation Forge", "Everything is current.");
             else Announce(r, force: true);

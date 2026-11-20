@@ -143,12 +143,21 @@
                       </StackPanel>
                       <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" MinWidth="170">
                         <TextBlock Classes="mono" Text="{Binding VersionLine}" />
-                        <TextBlock Classes="stamp" Text="{Binding Status}" />
+                        <TextBlock Classes="stamp" Text="{Binding Status}" ToolTip.Tip="{Binding StatusTip}" />
+                        <!-- A paid plugin's licence, in Kovati Hub's words: one line, and Restore licence when it is not Full. -->
+                        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasLicenceLine}">
+                          <TextBlock Classes="stamp" Text="{Binding LicenceLine}" Foreground="{StaticResource BoneBrush}" VerticalAlignment="Center"
+                                     IsVisible="{Binding LicenceLine, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                          <Button Classes="link" Content="Restore licence" Command="{Binding RestoreLicenceCommand}" IsVisible="{Binding CanRestoreLicence}"
+                                  ToolTip.Tip="Ask Kovati for this account's licence now. A tool you bought unlocks as Full, with no reinstall." />
+                        </StackPanel>
                       </StackPanel>
                       <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <Button Classes="ghost" Content="Remove" Command="{Binding UninstallCommand}" IsVisible="{Binding CanUninstall}" />
                         <Button Classes="ghost" Content="What's new" Command="{Binding ShowChangesCommand}" IsVisible="{Binding CanShowChanges}"
                                 ToolTip.Tip="{Binding ChangesTip}" />
+                        <Button Classes="ghost" Content="Buy Full" Command="{Binding BuyFullCommand}" IsVisible="{Binding CanBuyFull}"
+                                ToolTip.Tip="Buy the full tool on the web. This copy becomes Full with no reinstall." />
                         <Button Classes="primary" Content="{Binding ActionLabel}" Command="{Binding ActCommand}" MinWidth="92" HorizontalContentAlignment="Center" />
                       </StackPanel>
                     </Grid>
@@ -511,7 +520,7 @@
 
             <StackPanel Spacing="10">
               <TextBlock Classes="label" Text="DATA" />
-              <TextBlock Classes="stamp" Text="Receipts, settings and the download cache." />
+              <TextBlock Classes="stamp" Text="Receipts, settings, the download cache, and licence.json, which paid plugins read. The licence is refreshed once a day and stays valid for 30 days offline." TextWrapping="Wrap" />
               <TextBlock Classes="mono" Text="{Binding DataDir}" TextWrapping="Wrap" FontSize="12" />
               <Button Classes="ghost" Content="Open folder" Command="{Binding OpenDataFolderCommand}" HorizontalAlignment="Left" />
             </StackPanel>

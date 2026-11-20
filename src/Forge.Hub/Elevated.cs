@@ -38,7 +38,9 @@ public static class Elevated
             using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
             http.DefaultRequestHeaders.UserAgent.ParseAdd(AppInfo.UserAgent("hub-elevated"));
             var state = new InstallState();
-            var installer = new Installer(http, state, new AnonymousEntitlements(), Say);
+            // The signed-in account of this Windows user (as in Kovati Hub): an anonymous provider refuses every download
+            // (since 2026-09-06 nothing installs without an account), so an engine in Program Files could not install at all.
+            var installer = new Installer(http, state, new FirebaseEntitlements(http), Say);
 
             if (verb == "uninstall")
             {
@@ -55,11 +57,22 @@ public static class Elevated
             var (manifest, _) = new ManifestClient(http).GetAsync().GetAwaiter().GetResult();
             new ReleaseDiscovery(http).MergeIntoAsync(manifest).GetAwaiter().GetResult();
             var failures = 0;
+            // id@version: the window chose that build (a free tier's newest free-tier build); a bare id takes the newest.
+            var chosen = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            ids = ids.Select(x =>
+            {
+                var at = x.IndexOf('@');
+                if (at <= 0) return x;
+                chosen[x[..at]] = x[(at + 1)..];
+                return x[..at];
+            }).ToList();
             foreach (var id in manifest.WithHubPlugin(ids, target.Kind))
             {
                 var p = manifest.Plugin(id);
                 if (p is null) { Say($"unknown plugin: {id}"); failures++; continue; }
-                var v = p.Latest(e.Version, channel);
+                var v = chosen.TryGetValue(id, out var want)
+                    ? p.Versions.FirstOrDefault(x => x.Version == want && x.Engine == e.Version) ?? p.Latest(e.Version, channel)
+                    : p.Latest(e.Version, channel);
                 if (v is null) { Say($"skipped: {id} has no {channel} release for UE {e.Version}"); continue; }
                 try
                 {

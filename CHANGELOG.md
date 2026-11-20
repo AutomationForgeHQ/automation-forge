@@ -12,6 +12,39 @@ The file started with 0.4.3. The notes for 0.4.1 and 0.4.2 are copied from their
 to 0.4.0 were released without notes, so their sections were written afterwards from the commits that went into
 each one.
 
+## 0.4.5 — unreleased
+
+### Added
+- **Paid plugins unlock through a licence the hub keeps up to date.** SkinForge and TerrainForge are one build with
+  two tiers: without a licence they run as *Lite*, with one as *Full*. The plugin reads a signed licence file that the
+  hub fetches for your account and keeps in `%LOCALAPPDATA%\AutomationForge\licence.json`. The hub gets it when you
+  sign in, once a day while it runs in the tray, when you press **Refresh**, and as soon as it sees a purchase on your
+  account. It stays valid for 30 days offline. Signing out removes it.
+- **Lite installs for free.** Signed in, a paid plugin with a free tier shows **Install Lite**, with **Buy Full** beside
+  it. Installing its set, or a plugin that needs it, installs it as Lite with the rest. When you buy it, the copy you
+  have becomes Full with no reinstall.
+- **Each paid plugin says where its licence stands**, under its status: *Licensed · bought 20 Nov 2026*, *Licensed ·
+  gifted …*, *Not licensed: this runs as Lite*, or *Offline, 5 days left* when the hub has not reached Kovati for a
+  while.
+- **`forge licence`** shows the licence on this computer, **`forge licence refresh`** fetches it now (`--json` for
+  scripts; exit 0 when a current licence is on disk), and **`forge licence path`** prints where it is. `forge login`
+  fetches it and `forge logout` removes it. A paid plugin runs `forge licence refresh` by itself when the hub is not
+  running. `forge install` installs a paid plugin's Lite tier too.
+
+### Fixed
+- **Installing into an engine that needs administrator rights works again.** The elevated helper did not use your
+  sign-in, so every install into an engine under `Program Files` stopped with *"Sign in to install"*.
+
+### If a tool you bought still says Lite
+Open the hub and press **Refresh** (or **Check for updates now** in the tray menu, or **Restore licence** on the
+plugin's row). The hub asks Kovati for your licence at once, and the plugin sees it within a minute and runs as
+Full, with no reinstall. Make sure the hub is signed in to the account you bought with.
+
+### Compatibility
+- A paid plugin without a free tier works exactly as before: **Buy** on the web, then **Install**.
+- The new Kovati Hub beta keeps the same licence file and the same sign-in. Both can be installed side by side; whichever
+  runs refreshes the licence for both.
+
 ## 0.4.4 — 2026-11-01
 
 ### Fixed
