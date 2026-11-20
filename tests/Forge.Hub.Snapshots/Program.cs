@@ -34,6 +34,9 @@ internal static class Program
             case "projects":
                 Screens.RunProjects(outDir, args.Skip(2).ToArray());
                 break;
+            case "freetier":
+                Screens.RunFreeTier(outDir, args.Skip(2).ToArray());
+                break;
             case "licence":
                 Screens.RunLicence(outDir, args.Skip(2).ToArray());
                 break;
