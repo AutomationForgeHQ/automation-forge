@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-20T20:34:03Z",
+  "generatedAt": "2026-11-20T20:37:24Z",
   "releases": "https://github.com/AutomationForgeHQ/releases",
   "channels": [
     "stable",
@@ -2799,8 +2799,21 @@
       "dependencies": [
         "SkinForge"
       ],
-      "source": null,
-      "versions": [],
+      "source": "https://github.com/AutomationForgeHQ/SkinForgeToolset",
+      "versions": [
+        {
+          "version": "0.3.1",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "url": "https://github.com/AutomationForgeHQ/releases/releases/download/skinforgetoolset-v0.3.1/SkinForgeToolset-0.3.1-UE5.8-Win64.zip",
+          "size": 153034,
+          "sha256": "edff4f3355af5095dcd6cf3b5cd0c12a5f4229324803591b27f656ab94514094",
+          "symbols": "https://github.com/AutomationForgeHQ/releases/releases/download/skinforgetoolset-v0.3.1/SkinForgeToolset-0.3.1-UE5.8-Win64-symbols.zip",
+          "releasedAt": "2026-11-20T20:36:51Z",
+          "notes": "https://github.com/AutomationForgeHQ/releases/releases/tag/skinforgetoolset-v0.3.1"
+        }
+      ],
       "changelog": [
         {
           "version": "0.3.1",
