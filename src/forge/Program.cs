@@ -5,6 +5,7 @@ using Forge.Core.Cloud;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
 using Forge.Core.Installs;
+using Forge.Core.Licence;
 using Forge.Core.Manifest;
 using Forge.Core.Projects;
 
@@ -451,6 +452,9 @@ login.SetAction(async (parse, ct) =>
     if (account is null) { Console.Error.WriteLine("  Nothing arrived in five minutes; nothing changed."); return 3; }
     entitlements.SignIn(account);
     Console.WriteLine($"  signed in as {account.Email}");
+    // The licence comes with the sign-in, as in the Hub. Whatever the server says, the sign-in stands.
+    var fetched = await LicenceFor().RefreshAsync(force: true, ct);
+    if (fetched is LicenceFetchOutcome.Updated or LicenceFetchOutcome.Unchanged) Console.WriteLine($"  licence: {Paths.LicenceFile}");
     return 0;
 });
 root.Subcommands.Add(login);
@@ -460,11 +464,99 @@ logout.SetAction(_ =>
 {
     if (!entitlements.IsSignedIn) { Console.WriteLine("  not signed in"); return 0; }
     var who = entitlements.AccountLabel;
-    entitlements.SignOut();
+    entitlements.SignOut(); // the licence goes with it
     Console.WriteLine($"  signed out {who}");
     return 0;
 });
 root.Subcommands.Add(logout);
+
+// ── licence ───────────────────────────────────────────────────────────────
+// The signed licence paid plugins read (HUB_V2_NOTES.md, "The licence file"). A plugin calls `forge licence refresh`
+// when the Hub is not running and the file is more than a day old, then reads the file again.
+var licenceJsonOpt = new Option<bool>("--json") { Description = "Print it as JSON." };
+var licenceCmd = new Command("licence", "Show the licence on this computer: which paid tools it covers, until when, and for which account.");
+licenceCmd.Options.Add(licenceJsonOpt);
+licenceCmd.SetAction(async (parse, ct) =>
+{
+    var snap = LicenceFor().Snapshot();
+    // The paid tools in the cached list of tools (never the network), and whatever the licence lists.
+    Manifest? cached = null;
+    try { (cached, _) = await manifestClient.GetAsync(offline: true, ct); }
+    catch (Exception ex) when (ex is InvalidOperationException or HttpRequestException or InvalidDataException or IOException or System.Text.Json.JsonException) { }
+    var products = LicenceProducts(snap, cached);
+    if (parse.GetValue(licenceJsonOpt))
+    {
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(LicenceJson(snap, products), new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        return 0;
+    }
+    Console.WriteLine($"  file: {Paths.LicenceFile}");
+    Console.WriteLine($"  account: {(entitlements.IsSignedIn ? $"{entitlements.AccountLabel} ({snap.AccountUid})" : "not signed in (forge login)")}");
+    if (snap.Payload is not { } p)
+    {
+        Console.WriteLine(snap.ServerOff ? "  no licence: licences are not switched on at Kovati yet." : "  no licence on this computer.");
+        return 0;
+    }
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    Console.WriteLine($"  issued {p.IssuedAt.ToLocalTime().ToString("d MMM yyyy HH:mm", inv)} · valid offline until {p.ValidUntil.ToLocalTime().ToString("d MMM yyyy HH:mm", inv)} · key {snap.Licence!.Envelope.Kid}{(snap.Licence.SignedWithDevKey ? " (development key)" : "")}{(p.Test ? " · test licence" : "")}");
+    if (snap.Check.LastSuccessAt is { } last) Console.WriteLine($"  last refreshed {last.ToLocalTime().ToString("d MMM yyyy HH:mm", inv)}");
+    if (products.Count == 0) Console.WriteLine("  covers no paid tools.");
+    foreach (var (id, l) in products)
+    {
+        var detail = l.Standing switch
+        {
+            LicenceStanding.OfflineGrace => $"offline, {l.DaysLeft} days left",
+            LicenceStanding.Expired when l.ClockBehind => "the clock is behind the licence: set the date, then `forge licence refresh`",
+            LicenceStanding.Expired => "past its 30 days offline: `forge licence refresh`",
+            _ => "",
+        };
+        var how = l.How is { Length: > 0 } h ? $"{h}{(l.Since is { } s ? " " + s.ToString("yyyy-MM-dd", inv) : "")}" : "";
+        Console.WriteLine($"  {id,-24} {l.Standing,-13} {how,-18} {(l.MaxMajor is { } m ? $"up to {m}.x" : ""),-9} {detail}");
+    }
+    return 0;
+});
+
+var licenceRefresh = new Command("refresh",
+    "Fetch the licence for the signed-in account now and store it if it is newer. Exit codes: 0 a current licence is on disk "
+    + "(fetched now, or the same one again); 4 not signed in, or the account was refused (the licence was removed); "
+    + "5 not refreshed now (offline, rate limited, server trouble, the file was held open): the file is as it was; "
+    + "7 the answer did not verify or was for another account: nothing stored; 8 licences are not switched on at Kovati yet.");
+licenceRefresh.Options.Add(licenceJsonOpt);
+licenceRefresh.SetAction(async (parse, ct) =>
+{
+    var outcome = await LicenceFor().RefreshAsync(force: true, ct);
+    var code = outcome switch
+    {
+        LicenceFetchOutcome.Updated or LicenceFetchOutcome.Unchanged => 0,
+        LicenceFetchOutcome.NotSignedIn or LicenceFetchOutcome.Refused => 4,
+        LicenceFetchOutcome.Invalid => 7,
+        LicenceFetchOutcome.Off => 8,
+        _ => 5,
+    };
+    var line = outcome switch
+    {
+        LicenceFetchOutcome.Updated => $"licence refreshed: {Paths.LicenceFile}",
+        LicenceFetchOutcome.Unchanged => $"licence is current: {Paths.LicenceFile}",
+        LicenceFetchOutcome.NotSignedIn => "not signed in (forge login); no licence",
+        LicenceFetchOutcome.Refused => "the account was refused; the licence was removed. Sign in again (forge login)",
+        LicenceFetchOutcome.Invalid => "the answer did not verify; nothing changed",
+        LicenceFetchOutcome.Off => "licences are not switched on at Kovati yet; nothing changed",
+        LicenceFetchOutcome.RateLimited => "asked too often; try again later. Nothing changed",
+        LicenceFetchOutcome.WriteFailed => "the licence file is held open by another program; try again. Nothing changed",
+        LicenceFetchOutcome.Offline => "could not reach Kovati; the licence on disk is kept",
+        _ => "Kovati could not answer just now; the licence on disk is kept",
+    };
+    if (parse.GetValue(licenceJsonOpt))
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { outcome = outcome.ToString(), exitCode = code, path = Paths.LicenceFile, message = line }));
+    else if (code == 0) Console.WriteLine($"  {line}");
+    else Console.Error.WriteLine($"  {line}");
+    return code;
+});
+licenceCmd.Subcommands.Add(licenceRefresh);
+
+var licencePath = new Command("path", "Print where the licence file is (the data folder, or FORGE_DATA_DIR).");
+licencePath.SetAction(_ => { Console.WriteLine(Paths.LicenceFile); return 0; });
+licenceCmd.Subcommands.Add(licencePath);
+root.Subcommands.Add(licenceCmd);
 
 var whoami = new Command("whoami", "Who this machine is signed in as, and what the account holds.");
 whoami.SetAction(async (parse, ct) =>
@@ -676,6 +768,50 @@ void AfterProjectChange(InstallTarget target)
             Console.WriteLine($"  {d.Name} is in {vcs}: add Plugins/{Paths.PluginFolder} to its ignore file, or commit it for the team.");
     }
     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or System.Text.Json.JsonException) { }
+}
+
+// The licence service over this process's sign-in.
+LicenceService LicenceFor() => new(http, () => entitlements.Account, (_, ct) => entitlements.IdTokenAsync(ct));
+
+// Every paid tool the cached manifest knows, and every id the licence lists, each with its standing.
+static List<(string Id, ProductLicence Licence)> LicenceProducts(LicenceSnapshot snap, Manifest? manifest)
+{
+    var ids = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+    foreach (var p in manifest?.Plugins ?? []) if (p.IsPaid) ids.Add(p.Id);
+    foreach (var id in snap.Payload?.Products.Keys ?? Enumerable.Empty<string>()) ids.Add(id);
+    return ids.Select(id => (id, snap.For(id))).ToList();
+}
+
+static object LicenceJson(LicenceSnapshot snap, List<(string Id, ProductLicence Licence)> products)
+{
+    var p = snap.Payload;
+    return new
+    {
+        path = Paths.LicenceFile,
+        exists = File.Exists(Paths.LicenceFile),
+        account = snap.AccountUid,
+        valid = p is not null,
+        serverOff = snap.ServerOff,
+        kid = p is null ? null : snap.Licence!.Envelope.Kid,
+        devKey = p is null ? (bool?)null : snap.Licence!.SignedWithDevKey,
+        test = p?.Test,
+        issuedAt = p?.IssuedAt,
+        offlineUntil = p?.OfflineUntil,
+        validUntil = p?.ValidUntil,
+        lastRefreshedAt = snap.Check.Sub == snap.AccountUid ? snap.Check.LastSuccessAt : null,
+        lastOutcome = snap.Check.Sub == snap.AccountUid ? snap.Check.LastOutcome?.ToString() : null,
+        products = products.Select(x => new
+        {
+            id = x.Id,
+            standing = x.Licence.Standing.ToString(),
+            how = x.Licence.How,
+            since = x.Licence.Since?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+            maxMajor = x.Licence.MaxMajor,
+            test = x.Licence.Test,
+            daysLeft = x.Licence.DaysLeft,
+            clockBehind = x.Licence.ClockBehind,
+        }),
+    };
 }
 
 async Task<IReadOnlySet<string>> OwnedOrEmptyAsync(CancellationToken ct)

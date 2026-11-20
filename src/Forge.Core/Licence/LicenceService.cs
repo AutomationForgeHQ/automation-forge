@@ -86,6 +86,9 @@ public sealed class LicenceService
             var now = _clock();
             var check = Store.LoadCheck();
             if (check.Sub != account.Uid) check = new LicenceCheck { Sub = account.Uid };
+            // The server's Retry-After holds for every call, Check now and the CLI included (20 calls an hour per account).
+            if (check.RetryNotBefore is { } wait && now < wait && wait - now <= LicenceRules.MaxRetryAfter)
+                return LicenceFetchOutcome.RateLimited;
             if (!force && !LicenceRules.RefreshDue(now, check.LastSuccessAt, check.LastServerAnswerAt, check.LastOutcome, Store.Load() is not null))
                 return LicenceFetchOutcome.NotDue;
 
@@ -118,6 +121,7 @@ public sealed class LicenceService
         using (resp)
         {
             check.LastServerAnswerAt = now;
+            check.RetryNotBefore = resp.StatusCode == HttpStatusCode.TooManyRequests ? now + RetryAfter(resp, now) : null;
             byte[] body;
             try { body = await resp.Content.ReadAsByteArrayAsync(ct); }
             catch (HttpRequestException) { return LicenceFetchOutcome.Offline; }
@@ -149,6 +153,15 @@ public sealed class LicenceService
                     return LicenceFetchOutcome.ServerError;
             }
         }
+    }
+
+    /// <summary>A 429's Retry-After (seconds or a date), at least a minute, at most <see cref="LicenceRules.MaxRetryAfter"/>; an hour when it gives none.</summary>
+    private static TimeSpan RetryAfter(HttpResponseMessage resp, DateTimeOffset now)
+    {
+        var r = resp.Headers.RetryAfter;
+        var wait = r?.Delta ?? (r?.Date is { } d ? d - now : LicenceRules.RetryAfterServerAnswer);
+        if (wait < TimeSpan.FromMinutes(1)) wait = TimeSpan.FromMinutes(1);
+        return wait > LicenceRules.MaxRetryAfter ? LicenceRules.MaxRetryAfter : wait;
     }
 
     /// <summary>The API's short reason: { "code": "licence-off" } or { "error": "licence-off" }.</summary>

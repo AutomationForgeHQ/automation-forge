@@ -77,6 +77,8 @@ public static class LicenceRules
     public static readonly TimeSpan ClockTolerance = TimeSpan.FromMinutes(15);
     /// <summary>After the server refused for now (429, 5xx, licence-off), the automatic check waits this long before asking again.</summary>
     public static readonly TimeSpan RetryAfterServerAnswer = TimeSpan.FromHours(1);
+    /// <summary>The longest Retry-After honoured (the server's limit is 20 calls per rolling hour per account).</summary>
+    public static readonly TimeSpan MaxRetryAfter = TimeSpan.FromHours(2);
 
     /// <summary>
     /// One paid product for the selected account.

@@ -18,7 +18,7 @@ public sealed class LicenceTests : IDisposable
 
     private static readonly Dictionary<string, (string how, string since, int maxMajor)> Bought = new()
     {
-        ["TerrainForge"] = ("bought", "2026-11-20", 1),
+        ["TerrainForge"] = ("bought", "2026-11-20T08:30:00Z", 1), // the API sends a full RFC 3339 instant
     };
 
     private readonly DirectoryInfo _dir = Directory.CreateTempSubdirectory("forge-licence-tests-");
@@ -448,7 +448,7 @@ public sealed class LicenceTests : IDisposable
         var answer = StubHandler.Json(_key.Envelope(Uid, T0, Bought));
         var rig = Service(_ => answer);
         await rig.Service.RefreshAsync(true);
-        answer = Status(code, """{ "error": "unauthenticated" }""");
+        answer = Status(code, """{ "error": "Sign in again.", "code": "unauthenticated" }""");
         Assert.Equal(LicenceFetchOutcome.Refused, await rig.Service.RefreshAsync(true));
         Assert.False(File.Exists(rig.Store.FilePath));
         Assert.Equal(2, rig.Changes);
@@ -474,10 +474,52 @@ public sealed class LicenceTests : IDisposable
         Assert.Equal(expected, await rig.Service.RefreshAsync(true));
         Assert.Equal(before, File.ReadAllBytes(rig.Store.FilePath));
         Assert.Equal(LicenceStanding.Licensed, rig.Service.Snapshot().For("TerrainForge").Standing);
-        // And the automatic check leaves the server alone for the next hour.
+        // And the automatic check leaves the server alone for the next hour (a 429: until its Retry-After, for every call).
         rig.Now = T0.AddDays(2).AddMinutes(20);
-        if (expected != LicenceFetchOutcome.Unchanged)
-            Assert.Equal(LicenceFetchOutcome.NotDue, await rig.Service.RefreshAsync(false));
+        var calls = rig.Handler.Requests.Count;
+        Assert.Equal(expected == LicenceFetchOutcome.RateLimited ? LicenceFetchOutcome.RateLimited : LicenceFetchOutcome.NotDue, await rig.Service.RefreshAsync(false));
+        Assert.Equal(calls, rig.Handler.Requests.Count);
+    }
+
+    [Fact]
+    public async Task A_429_Retry_After_holds_even_for_a_refresh_that_was_asked_for()
+    {
+        var limited = true;
+        var rig = Service(_ =>
+        {
+            if (!limited) return StubHandler.Json(_key.Envelope(Uid, T0, Bought));
+            var r = Status(HttpStatusCode.TooManyRequests, """{ "error": "Too many requests.", "code": "rate-limited" }""");
+            r.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromMinutes(40));
+            return r;
+        });
+        Assert.Equal(LicenceFetchOutcome.RateLimited, await rig.Service.RefreshAsync(true));
+        Assert.Equal(T0.AddMinutes(40), rig.Service.Snapshot().Check.RetryNotBefore);
+        limited = false;
+        rig.Now = T0.AddMinutes(39);
+        Assert.Equal(LicenceFetchOutcome.RateLimited, await rig.Service.RefreshAsync(true)); // Restore licence, Check now, the CLI
+        Assert.Single(rig.Handler.Requests);
+        rig.Now = T0.AddMinutes(41);
+        Assert.Equal(LicenceFetchOutcome.Updated, await rig.Service.RefreshAsync(true));
+        Assert.Null(rig.Service.Snapshot().Check.RetryNotBefore);
+    }
+
+    [Fact]
+    public void Since_is_read_as_an_instant_or_a_date_and_shown_as_the_date()
+    {
+        Assert.Equal(new DateOnly(2026, 11, 1), new LicencedProduct { Since = "2026-11-01T08:30:00Z" }.SinceDate);
+        Assert.Equal(new DateOnly(2026, 11, 1), new LicencedProduct { Since = "2026-11-01T23:59:59Z" }.SinceDate); // UTC date, not local
+        Assert.Equal(new DateOnly(2026, 11, 1), new LicencedProduct { Since = "2026-11-01" }.SinceDate);
+        Assert.Null(new LicencedProduct { Since = "soon" }.SinceDate);
+        var p = LicenceVerifier.Verify(_key.Envelope(TestLicenceKey.Payload(Uid, T0, new Dictionary<string, (string, string, int)> { ["TerrainForge"] = ("bought", "2026-11-01T08:30:00Z", 1) })), _key.Ring(), out _)!.Payload;
+        Assert.Equal("Licensed · bought 1 Nov 2026", LicenceWords.Line(LicenceRules.Evaluate(p, Uid, "TerrainForge", T0), false));
+    }
+
+    [Fact]
+    public void Unknown_fields_in_the_licence_are_ignored()
+    {
+        var json = TestLicenceKey.Payload(Uid, T0, Bought).Replace("\"test\":false", "\"test\":false,\"plan\":{\"x\":1}");
+        Assert.Contains("plan", json);
+        Assert.NotNull(LicenceVerifier.Verify(_key.Envelope(json), _key.Ring(), out _));
     }
 
     [Fact]

@@ -13,6 +13,8 @@ public sealed class LicenceCheck
     [JsonPropertyName("lastServerAnswerAt")] public DateTimeOffset? LastServerAnswerAt { get; set; }
     [JsonPropertyName("lastAttemptAt")] public DateTimeOffset? LastAttemptAt { get; set; }
     [JsonPropertyName("lastOutcome")] public LicenceFetchOutcome? LastOutcome { get; set; }
+    /// <summary>A 429's Retry-After: no call, automatic or asked for, is made before this time.</summary>
+    [JsonPropertyName("retryNotBefore")] public DateTimeOffset? RetryNotBefore { get; set; }
     /// <summary>The account these times are for: a different account starts from nothing.</summary>
     [JsonPropertyName("sub")] public string? Sub { get; set; }
 }
