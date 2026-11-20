@@ -57,6 +57,59 @@ are not: the site has no WebP loops yet, so cards keep their stills and "The fil
     $env:FORGE_CATALOGUE_URL = 'off'                   # or another address for the catalogue alone
     $env:FORGE_HUB_OPEN = 'product:roads-kit'          # browse | library | components | track:<slug> | product:<slug>
 
+## 0.5.0-beta.3: Unreal Engine versions and projects (20 November 2026)
+
+Built from `HUB_ENGINES_PROJECTS_DESIGN.md` (slices 1, 2, 3 and 5 of it; the CI matrix of slice 4 is not here).
+
+- **Targets.** The footer, a track's "Install into" and a product page choose from one list: every Unreal Engine
+  ("Unreal Engine 5.8.4 (all projects)"; "· no Kovati builds yet" when the manifest has none for it) and every
+  project whose engine is on this computer ("Colony_NP24 · project on Unreal Engine 5.8.4"). Choosing a project
+  selects its engine too. `HubState.LastTarget` is the target's plugin root, an engine's or a project's.
+- **Availability per version.** `TrackPlanner.AvailabilityOf`: built, not built for this version, or not released.
+  Rows, cards and product pages say "Not built for Unreal Engine 5.7 yet." and are not installable; a track on
+  an engine without any build says "No builds for Unreal Engine 5.7 yet" and which versions have them.
+- **Projects page** (a place in the bar, between Library and Browse: Library is about the one chosen target, this
+  page is about every project, and a project is itself a target). Per project: engine (from EngineAssociation:
+  a version, a source build's GUID through `HKCU\...\Unreal Engine\Builds`, or the engine folder it sits in; "not
+  installed" otherwise), C++ or Blueprint, source control, read-only, open in Unreal; per Kovati tool: in the
+  project (Kovati Hub's own folder or a copy of the project's own), from the engine, or both (the project copy
+  overrides), on or off and why, version, update. Actions: turn on/off (one .uproject entry), update or remove Kovati
+  Hub's own copy, "Install tools here" (the project becomes the target), open folder, open in Unreal.
+- **Discovery** (`ProjectLocator`, the same for `forge projects`), never a disk search: every
+  `%LOCALAPPDATA%\UnrealEngine\<version>\Saved\Config\WindowsEditor\EditorSettings.ini` (`RecentlyOpenedProjectFiles`,
+  `CreatedProjectPaths` one level deep), the launcher's `%LOCALAPPDATA%\EpicGamesLauncher\Saved\Config\WindowsEditor\GameUserSettings.ini`
+  `[Launcher] CreatedProjectPaths`, `Documents\Unreal Projects`, the folders in Settings → Project folders (two
+  levels, 4,000 folders, 4 seconds each, then it says where it stopped), the receipts and the projects chosen
+  before. Merged by path; gone, `Saved\`, `Intermediate\` and `HostProject` projects drop out. Off the UI thread, at
+  start (after the list of tools) and on Check now; the last result is kept in `hub-state.json` (`projectCache`,
+  `projectFolders`; unknown fields are now kept when the file is written).
+- **Safety.** Nothing is written to a project whose editor has it open (`EditorProcesses`: the .uproject on an
+  UnrealEditor command line). An editor whose command line cannot be read asks first. A read-only .uproject is
+  refused, never made writable. C++ projects: "rebuild it in your IDE"; Binaries and Intermediate are never
+  touched. Source control: a line about the changed .uproject or the new Plugins/AutomationForge; no VCS command.
+- **Foundation policy for projects.** A project install carries the Kovati foundation (`always`) into the project,
+  each piece its engine does not already have (`PlanInputs.FoundationInProject`); what the project has from its
+  engine or a copy of its own is never installed a second time (Unreal refuses two plugins of one name) and never
+  offered as a project update.
+- **.uproject edits** keep the file as it was: one token, or one entry in the shape of the others (tabs/CRLF,
+  spaces/LF, one-line files), BOM or none, key order, trailing newline; a temp file and a move.
+- **CLI.** `forge projects [--json]`; `forge engines` shows builds per version; `--project` resolves a GUID
+  association through the registry (before, a GUID was taken for a version and found no build); writes into a
+  project refuse while its editor is open (`--yes` when it cannot be told).
+
+Switches: `FORGE_HUB_OPEN=projects`, `FORGE_HUB_TARGET=<project name or .uproject>`, `FORGE_UNREAL_RECORDS=off|<folder>`
+(no Unreal records, or a folder read in place of `%LOCALAPPDATA%`). Screens from fixed data:
+
+    dotnet build tests/Forge.Hub.Snapshots -o D:\UNREAL\ColonyDownloads\hub-b3-snapshots-bin
+    $env:FORGE_REPO = 'C:\UNREAL\AutomationForge'
+    D:\UNREAL\ColonyDownloads\hub-b3-snapshots-bin\Forge.Hub.Snapshots.exe <out dir> beta3
+
+**Before another Unreal version can be offered** the manifest must carry builds with `engine: "5.7"` (or 5.9):
+the forge monorepo's `build-plugin.yml` builds 5.8 only (one `UE_ROOT`, one runner label). It needs a matrix per
+version, runners with that Unreal installed, an add-an-asset dispatch for a version built later, and
+`build_manifest.py`/`refresh_paid_manifest.py` already read the version from the asset name. Declared statuses
+("planned", "preview") and `compatibleChangelist` are not in the manifest yet, so the Hub can only say "not built".
+
 ## Run it beside the installed Hub
 
     git -C C:\UNREAL\AutomationForge switch hub-v2
