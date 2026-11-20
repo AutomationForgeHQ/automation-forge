@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The account API's real answers, trimmed (LiveCatalogueTests). -->
+    <None Include="Fixtures\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Signs test licences with a throwaway key made at run time (the same file as Kovati Hub's). -->
     <Compile Include="..\Shared\LicenceSigning.cs" Link="Shared\LicenceSigning.cs" />
   </ItemGroup>

@@ -1,0 +1,88 @@
+{
+  "generatedAt": "2026-11-20T20:37:24Z",
+  "sets": [
+    {
+      "id": "performanceforge",
+      "name": "PerformanceForge",
+      "members": [
+        "PerformanceForge",
+        "PerformanceForgeToolset"
+      ]
+    },
+    {
+      "id": "terrainforge",
+      "name": "TerrainForge",
+      "members": [
+        "TerrainForge",
+        "TerrainForgeToolset"
+      ]
+    },
+    {
+      "id": "skinforge",
+      "name": "SkinForge",
+      "members": [
+        "SkinForge",
+        "SkinForgeToolset"
+      ]
+    }
+  ],
+  "plugins": [
+    {
+      "id": "PerformanceForge",
+      "set": "performanceforge",
+      "role": "core",
+      "distribution": "paid",
+      "dependencies": [],
+      "versions": [
+        {
+          "version": "0.1.2",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "sha256": "71cf7e9437318e1f24af98f4665c3aafc1e1b76b73003f92a7ed39ff744a5342",
+          "size": 701932,
+          "releasedAt": "2026-10-04T21:57:24Z",
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "SkinForge",
+      "set": "skinforge",
+      "role": "core",
+      "distribution": "paid",
+      "dependencies": [],
+      "versions": [
+        {
+          "version": "0.4.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "sha256": "db97104f566737a1dee1c6f00ec7f681f087b1454f4eda7686896878ecc9cbe7",
+          "size": 452949571,
+          "releasedAt": "2026-11-20T20:30:28Z",
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "TerrainForge",
+      "set": "terrainforge",
+      "role": "core",
+      "distribution": "paid",
+      "dependencies": [],
+      "versions": [
+        {
+          "version": "0.2.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "sha256": "21ef5b5a3202e08a4f14c132026fe1beadcbe4e87cd37b0e9dd58ba78e8ffe20",
+          "size": 9045874,
+          "releasedAt": "2026-11-20T20:27:57Z",
+          "url": null
+        }
+      ]
+    }
+  ]
+}

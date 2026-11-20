@@ -1,0 +1,101 @@
+{
+  "generatedAt": "2026-11-20T20:37:24Z",
+  "plugins": [
+    {
+      "id": "PerformanceForge",
+      "name": "PerformanceForge",
+      "set": "performanceforge",
+      "role": "core",
+      "distribution": "paid",
+      "free": false,
+      "price": {
+        "amount": 7999,
+        "currency": "usd"
+      },
+      "stripePriceId": null,
+      "taxCode": null,
+      "fab": null,
+      "tier": null,
+      "tierSince": null,
+      "released": true,
+      "forSale": true,
+      "includes": [],
+      "includedWith": null,
+      "versions": [
+        {
+          "version": "0.1.2",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "releasedAt": "2026-10-04T21:57:24Z",
+          "freeTier": false
+        }
+      ]
+    },
+    {
+      "id": "SkinForge",
+      "name": "SkinForge",
+      "set": "skinforge",
+      "role": "core",
+      "distribution": "paid",
+      "free": false,
+      "price": {
+        "amount": 2999,
+        "currency": "usd"
+      },
+      "stripePriceId": null,
+      "taxCode": null,
+      "fab": null,
+      "tier": "lite",
+      "tierSince": "0.4.0",
+      "released": true,
+      "forSale": true,
+      "includes": [],
+      "includedWith": null,
+      "versions": [
+        {
+          "version": "0.4.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "releasedAt": "2026-11-20T20:30:28Z",
+          "freeTier": true
+        }
+      ]
+    },
+    {
+      "id": "TerrainForge",
+      "name": "TerrainForge",
+      "set": "terrainforge",
+      "role": "core",
+      "distribution": "paid",
+      "free": false,
+      "price": {
+        "amount": 9999,
+        "currency": "usd"
+      },
+      "stripePriceId": null,
+      "taxCode": null,
+      "fab": null,
+      "tier": "lite",
+      "tierSince": "0.2.0",
+      "released": true,
+      "forSale": true,
+      "includes": [],
+      "includedWith": null,
+      "versions": [
+        {
+          "version": "0.2.0",
+          "engine": "5.8",
+          "platform": "Win64",
+          "channel": "stable",
+          "releasedAt": "2026-11-20T20:27:57Z",
+          "freeTier": true
+        }
+      ]
+    }
+  ],
+  "payments": "stripe",
+  "paymentsTest": false,
+  "paymentsRestricted": false
+}
