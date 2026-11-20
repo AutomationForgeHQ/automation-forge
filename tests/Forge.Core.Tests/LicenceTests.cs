@@ -47,6 +47,27 @@ public sealed class LicenceTests : IDisposable
         Assert.Equal(sig, seeded.SignBytes([]));
     }
 
+    /// <summary>
+    /// A licence the live API signed on 20 November 2026 for a throwaway test account (no email, only the hashed
+    /// subject). It proves the built-in k1 key and this verifier agree with the server, not only with our own signer.
+    /// </summary>
+    private const string LiveEnvelope =
+        "{\"format\":\"kovati-licence\",\"v\":1,\"kid\":\"k1\",\"payload\":\"eyJ2IjoxLCJpc3MiOiJrb3ZhdGkiLCJzdWIiOiJjOWFhMGI4ZTNjM2NjNGZmMmIxMGE4OTQyNTMzYzFjMyIsImlzc3VlZEF0IjoiMjAyNi0xMS0yMFQwMTo0NTozM1oiLCJvZmZsaW5lVW50aWwiOiIyMDI2LTEyLTIwVDAxOjQ1OjMzWiIsInByb2R1Y3RzIjp7IlRlcnJhaW5Gb3JnZSI6eyJob3ciOiJib3VnaHQiLCJzaW5jZSI6IjIwMjYtMTEtMTlUMjI6NTY6MDBaIiwibWF4TWFqb3IiOjF9fSwidGVzdCI6ZmFsc2V9\",\"sig\":\"15MjdceB-2GAZVDAKMtw7xFYm2GdA0O852i3MKvMsDbv_YsA5Y0qkoUmx2Ok29fX094xFGrZfckrqfGFdUIXCw\"}";
+
+    [Fact]
+    public void A_licence_signed_by_the_live_server_verifies_with_the_built_in_key()
+    {
+        var ring = new LicenceKeyRing(LicenceKeys.BuiltIn);
+        var licence = LicenceVerifier.Verify(LiveEnvelope, ring, out var error);
+        Assert.True(licence is not null, error);
+        Assert.False(licence!.SignedWithDevKey);
+        Assert.Equal("bought", licence.Payload.Product("TerrainForge")?.How);
+        Assert.Equal(1, licence.Payload.Product("TerrainForge")?.MaxMajor);
+
+        // One changed character of the payload, and the same signature no longer fits.
+        Assert.Null(LicenceVerifier.Verify(LiveEnvelope.Replace("eyJ2IjoxLCJpc3Mi", "eyJ2IjoyLCJpc3Mi"), ring, out _));
+    }
+
     [Fact]
     public void A_good_licence_verifies_and_reads_its_payload()
     {
