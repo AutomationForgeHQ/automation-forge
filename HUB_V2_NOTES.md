@@ -180,6 +180,54 @@ installed `forge licence refresh` (`--json` prints `{ outcome, exitCode, path, m
 
 `forge licence [--json]` shows the state; `forge login` fetches a licence, `forge logout` removes it.
 
+## 0.5.0-beta.7: the free tier of a paid tool (20 November 2026)
+
+TerrainForge 0.2.0 and SkinForge 0.4.0 are paid, with a free Lite tier in the same build. The account API says so
+(`functions/src/freetier.ts` in the website repository): `GET catalogue` gives each paid plugin `tier`
+(`lite` | `trial` | null), `tierSince` and per build `freeTier`; `GET me` gives `licensed` (the paid plugins held by a
+licensed route: bought, gifted, Fab, a tester grant; a preview claim is not one); `POST download` serves a free-tier
+build to anyone signed in and answers `freeTier`, and below the floor answers 403 `needs-licence` with a sentence.
+
+- **The rule** (`Forge.Core/Catalogue/FreeTiers.cs`). A paid plugin is installable when the account holds it licensed,
+  or when its offer has a tier and the build has `freeTier: true` (a build the offer does not list is judged against
+  `tierSince`, plain x.y.z only). Not licensed, the planner takes the newest free-tier build for the engine, never one
+  below the floor, and marks it (`PlanItem.FreeTier`); licensed, the newest, as before. Every build here below the floor:
+  "Version 0.1.0 of TerrainForge needs a licence. The free Lite tier starts with 0.2.0." Without the fields (an older
+  API, the account catalogue not read yet) nothing changes: a paid plugin installs only when the account holds it.
+  `PlanInputs.Licensed` is GET me `licensed` plus what the licence on this computer lists as current; null when the API
+  did not say (then holding it counts). `PlanInputs.Offers` is the account catalogue.
+- **The screens.** Product page: "Install Lite" (or "Install trial") with "Buy Full · $99.99" beside it (the store page,
+  as Add to cart opens it); chips FREE TIER before, LITE after; installed, "Not licensed: this runs as Lite" from the
+  licence. The main button narrows to 140 px when Buy Full stands beside it, so both fit side by side at the window's
+  1040 px minimum. A track or a project's "Not in this project" installs it with the rest, marked LITE ("Install
+  Lite" on the project row). OWNED and "On your account" only for a product held in full. A licence refresh (Check
+  now, sign-in, the daily one) rebuilds the rows: a purchase makes the same install Full, with no reinstall. Check now
+  also reads the account catalogue again (it is otherwise kept a day). A 403 `needs-licence` shows its sentence as it
+  is. A plugin `includedWith` another, not held, says "Comes with MeshForge Garment" and is never offered on its own
+  (no such product is in the catalogue yet; Components shows "comes with …").
+- **The CLI.** `forge install TerrainForge` and `install --track` take the free-tier build and say "installs as Lite";
+  the dry run marks the line "Lite (not licensed; Full once bought, no reinstall)".
+- **The bundled catalogue** is the website's `feature/lite-on-sale` output (`freeTierLive: true` for skinforge and
+  terrainforge). The Hub works with the older catalogue too: an offer with a tier makes the free tier live on its own.
+- **Screens.** `Forge.Hub.Snapshots.exe <out dir> freetier`: the product page not installed, installed as Lite and
+  licensed, at 1180 and 1040 px, and the worldbuilding track.
+
+What an older Hub does with these products (0.5.0-beta.6 and before, and 0.4.4): it reads neither `tier` nor
+`licensed`, so for an account that does not hold TerrainForge or SkinForge the tool stays paid ("Add to cart" in the
+v2 betas; "paid · not on your account" with Buy in 0.4.4) and nothing installs. Beta 4 to 6 with the new catalogue also show the price
+chip "Free tier" and, for an installed copy the licence does not list, "Not licensed: this runs as Lite". A preview
+claim holder still installs with an older Hub: it asks for the newest build, which is at or above the floor, and gets
+it as Lite. A build below the floor is refused with the server's sentence.
+
+Release notes (the pre-release page, the form of betas 5 and 6):
+
+    TerrainForge and SkinForge now have a free Lite tier, and the Hub installs it. Signed in, a paid tool with a free
+    tier shows Install Lite, with Buy Full beside it. In a track or a project it installs with the rest, marked Lite.
+    Buy Full and the next licence refresh (Check now, or the daily one) makes the same copy Full, with no reinstall.
+    A gifted tool now says Licensed · gifted.
+
+    Beta: installs beside the Automation Forge Hub and does not touch it.
+
 ## Run it beside the installed Hub
 
     git -C C:\UNREAL\AutomationForge switch hub-v2
