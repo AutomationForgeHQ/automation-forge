@@ -77,6 +77,19 @@ public partial class MainWindow : Window
     }
 
     /// <summary>Enter opens the first result; Esc empties the field.</summary>
+    /// <summary>
+    /// The search field has what the places and the account leave it. Narrow: a shorter prompt and no "Ctrl K";
+    /// too narrow to type in: gone (Ctrl+K still searches once the window is wider), never over the places.
+    /// </summary>
+    private void SearchSlot_SizeChanged(object? sender, SizeChangedEventArgs e)
+    {
+        var w = e.NewSize.Width;
+        SearchHost.IsVisible = w >= 110;
+        SearchHint.IsVisible = w >= 230;
+        SearchBox.PlaceholderText = w >= 290 ? "Search tools, tracks and engines" : w >= 170 ? "Search tools" : "Search";
+        SearchBox.Padding = new Avalonia.Thickness(16, 0, w >= 230 ? 64 : 12, 0);
+    }
+
     private void SearchBox_KeyDown(object? sender, KeyEventArgs e)
     {
         if (Vm is not { } vm) return;
