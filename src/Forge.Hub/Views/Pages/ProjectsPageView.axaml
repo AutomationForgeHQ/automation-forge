@@ -2,63 +2,185 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:p="using:Forge.Hub.ViewModels.Pages"
              xmlns:vm="using:Forge.Hub.ViewModels"
+             xmlns:c="using:Forge.Hub.Controls"
              x:Class="Forge.Hub.Views.Pages.ProjectsPageView"
              x:DataType="p:ProjectsPageViewModel">
 
-  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="32,30,32,32" MaxWidth="1336">
-      <Grid ColumnDefinitions="*,Auto,Auto">
-        <TextBlock Classes="display-l" Text="Projects" />
-        <TextBlock Grid.Column="1" Classes="mono" Text="{Binding CheckedLine}" FontSize="11" Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" Margin="0,0,16,0" />
-        <Button Grid.Column="2" Classes="link smalltext" Content="Check now" Command="{Binding CheckNowCommand}" VerticalAlignment="Center" IsEnabled="{Binding !Scanning}" />
-      </Grid>
-      <Grid ColumnDefinitions="*,Auto" Margin="0,10,0,14">
-        <StackPanel Spacing="4">
-          <TextBlock Text="{Binding SummaryLine}" FontSize="16" FontWeight="SemiBold" />
-          <TextBlock Classes="small" Text="{Binding SourcesLine}" TextWrapping="Wrap" />
+  <!-- Two states of one page: the grid of tiles, and one project opened. Two scrollers, so the grid keeps its place. -->
+  <Panel>
+
+    <!-- ── A. The grid ─────────────────────────────────────────────── -->
+    <ScrollViewer x:Name="GridScroll" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding IsGrid}">
+      <StackPanel Margin="32,30,32,32" MaxWidth="1336">
+        <Grid ColumnDefinitions="*,Auto,Auto">
+          <TextBlock Classes="display-l" Text="Projects" />
+          <TextBlock Grid.Column="1" Classes="mono" Text="{Binding CheckedLine}" FontSize="11" Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" Margin="0,0,16,0" />
+          <Button Grid.Column="2" Classes="link smalltext" Content="Check now" Command="{Binding CheckNowCommand}" VerticalAlignment="Center" IsEnabled="{Binding !Scanning}" />
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" Margin="0,10,0,14">
+          <StackPanel Spacing="4">
+            <TextBlock Text="{Binding SummaryLine}" FontSize="16" FontWeight="SemiBold" />
+            <TextBlock Classes="small" Text="{Binding SourcesLine}" TextWrapping="Wrap" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="link smalltext" Content="Project folders…" Command="{Binding ProjectFoldersCommand}" VerticalAlignment="Bottom" />
+        </Grid>
+        <Border Classes="hairline" />
+
+        <!-- Search, filters, order. -->
+        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,18,0,0" IsVisible="{Binding HasCards}">
+          <TextBox x:Name="SearchField" Text="{Binding SearchText, Mode=TwoWay}" PlaceholderText="Search by name or folder" Width="260" Height="36" MinHeight="36"
+                   FontSize="13" VerticalContentAlignment="Center" AutomationProperties.Name="Search projects" />
+          <ItemsControl Grid.Column="1" ItemsSource="{Binding Filters}" Margin="16,0,16,0" VerticalAlignment="Center">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="8" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="p:ProjectFilterChip">
+                <Button Classes="quiet small" Classes.chosen="{Binding Selected}" Content="{Binding Label}" Command="{Binding ChooseCommand}" Height="36" CornerRadius="18" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <TextBlock Classes="label" Text="SORT" VerticalAlignment="Center" />
+            <ComboBox ItemsSource="{Binding Sorts}" SelectedItem="{Binding SortChoice}" MinWidth="170" Height="36" VerticalAlignment="Center"
+                      AutomationProperties.Name="Sort projects" />
+          </StackPanel>
+        </Grid>
+
+        <!-- No projects at all. -->
+        <StackPanel IsVisible="{Binding !HasCards}" Spacing="12" Margin="0,22,0,0">
+          <TextBlock Text="Kovati Hub found no Unreal projects in Unreal's own records yet." FontSize="15" TextWrapping="Wrap" />
+          <TextBlock Classes="small" Text="Open a project in Unreal once, or add the folder where you keep your projects." TextWrapping="Wrap" />
+          <Button Classes="quiet small" Content="Add a folder…" Command="{Binding AddFolderCommand}" HorizontalAlignment="Left" />
         </StackPanel>
-        <Button Grid.Column="1" Classes="link smalltext" Content="Project folders…" Command="{Binding ProjectFoldersCommand}" VerticalAlignment="Bottom" />
-      </Grid>
-      <Border Classes="hairline" />
 
-      <StackPanel IsVisible="{Binding !HasCards}" Spacing="12" Margin="0,22,0,0">
-        <TextBlock Text="Kovati Hub found no Unreal projects in Unreal's own records yet." FontSize="15" TextWrapping="Wrap" />
-        <TextBlock Classes="small" Text="Open a project in Unreal once, or add the folder where you keep your projects." TextWrapping="Wrap" />
-        <Button Classes="quiet small" Content="Add a folder…" Command="{Binding AddFolderCommand}" HorizontalAlignment="Left" />
+        <!-- Projects, but none passes the search or the filter. -->
+        <StackPanel IsVisible="{Binding IsFilteredEmpty}" Orientation="Horizontal" Spacing="14" Margin="0,34,0,0">
+          <TextBlock Text="{Binding NoMatchLine}" FontSize="15" VerticalAlignment="Center" />
+          <Button Classes="link smalltext amber" Content="Clear" Command="{Binding ClearFilterCommand}" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <ItemsControl ItemsSource="{Binding Tiles}" Margin="0,22,0,0" IsVisible="{Binding HasTiles}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <c:TileGrid MinItemWidth="230" Spacing="20" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:ProjectCardModel">
+              <Panel>
+                <Button Classes="plain card" Command="{Binding OpenCommand}" AutomationProperties.Name="{Binding AutomationName}" ToolTip.Tip="{Binding Folder}"
+                        HorizontalAlignment="Stretch">
+                  <Button.ContextFlyout>
+                    <MenuFlyout Placement="Pointer">
+                      <MenuItem Header="Open in Unreal" Command="{Binding OpenInUnrealCommand}" IsEnabled="{Binding CanOpen}" />
+                      <MenuItem Header="Open folder" Command="{Binding OpenFolderCommand}" />
+                      <MenuItem Header="Install tools here" Command="{Binding InstallHereCommand}" IsEnabled="{Binding CanInstallHere}" />
+                    </MenuFlyout>
+                  </Button.ContextFlyout>
+                  <Border Classes="glow">
+                    <Panel>
+                      <Border CornerRadius="16" ClipToBounds="True" Background="{StaticResource PlateBrush}">
+                        <StackPanel>
+                          <c:Ratio Value="0.5625">
+                          <Panel ClipToBounds="True">
+                            <!-- The initials, under the picture: what shows until it is decoded, and for good without one. -->
+                            <Border Background="{StaticResource LineBrush}">
+                              <TextBlock Classes="mono" Text="{Binding Initials}" FontSize="30" LineHeight="34" LetterSpacing="3"
+                                         Foreground="{StaticResource DimBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <c:FileImage Classes="pic" Path="{Binding Picture}" DecodeWidth="280" />
+                            <StackPanel Orientation="Horizontal" Spacing="6" Margin="10" VerticalAlignment="Top" HorizontalAlignment="Left">
+                              <Border Classes="chip onpicture stage" IsVisible="{Binding IsTarget}">
+                                <TextBlock Classes="chip" Text="INSTALLING HERE" />
+                              </Border>
+                              <Border Classes="chip onpicture free" IsVisible="{Binding IsOpenInUnreal}">
+                                <TextBlock Classes="chip" Text="OPEN IN UNREAL" />
+                              </Border>
+                            </StackPanel>
+                            <Border Classes="chip onpicture" Classes.soon="{Binding IsEngineMissing}" Margin="10" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                              <TextBlock Classes="chip" Text="{Binding EngineBadge}" />
+                            </Border>
+                          </Panel>
+                          </c:Ratio>
+                          <StackPanel Margin="14,11,40,13" Spacing="3">
+                            <TextBlock Classes="cardname" Text="{Binding Name}" FontSize="15" LineHeight="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Classes="small" TextTrimming="CharacterEllipsis">
+                              <Run Text="{Binding ToolsCountLine}" />
+                              <Run Text="{Binding UpdatesPart}" Foreground="{StaticResource AmberBrush}" />
+                            </TextBlock>
+                          </StackPanel>
+                        </StackPanel>
+                      </Border>
+                      <Border Classes="ring" />
+                    </Panel>
+                  </Border>
+                </Button>
+                <!-- The same menu as a right-click, for a keyboard and for those who never right-click. -->
+                <Button Classes="link" Content="…" FontSize="18" Width="28" Height="28" HorizontalContentAlignment="Center"
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,8,12"
+                        AutomationProperties.Name="{Binding Name, StringFormat='More for {0}'}">
+                  <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                      <MenuItem Header="Open in Unreal" Command="{Binding OpenInUnrealCommand}" IsEnabled="{Binding CanOpen}" />
+                      <MenuItem Header="Open folder" Command="{Binding OpenFolderCommand}" />
+                      <MenuItem Header="Install tools here" Command="{Binding InstallHereCommand}" IsEnabled="{Binding CanInstallHere}" />
+                    </MenuFlyout>
+                  </Button.Flyout>
+                </Button>
+              </Panel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
       </StackPanel>
+    </ScrollViewer>
 
-      <ItemsControl ItemsSource="{Binding Cards}" Margin="0,18,0,0">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="p:ProjectCardModel">
-            <Border Classes="panel" Padding="24,20" Margin="0,0,0,16">
-              <StackPanel Spacing="10">
-                <Grid ColumnDefinitions="*,Auto">
-                  <StackPanel Spacing="4">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                      <TextBlock Classes="title" Text="{Binding Name}" FontSize="19" VerticalAlignment="Center" />
-                      <ItemsControl ItemsSource="{Binding Chips}" VerticalAlignment="Center">
-                        <ItemsControl.ItemsPanel>
-                          <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="6" />
-                          </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                      </ItemsControl>
-                    </StackPanel>
+    <!-- ── B. One project ─────────────────────────────────────────── -->
+    <ScrollViewer x:Name="DetailScroll" HorizontalScrollBarVisibility="Disabled" IsVisible="{Binding IsDetail}">
+      <StackPanel Margin="32,26,32,32" MaxWidth="1336">
+        <Button Classes="link" Content="← Projects" Command="{Binding CloseDetailCommand}" FontSize="14" Margin="0,0,0,16" HorizontalAlignment="Left"
+                AutomationProperties.Name="Back to Projects" />
+        <ContentControl Content="{Binding Selected}">
+          <ContentControl.ContentTemplate>
+            <DataTemplate x:DataType="p:ProjectCardModel">
+              <StackPanel Spacing="0">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="26">
+                  <Border Width="288" Height="162" CornerRadius="16" ClipToBounds="True" Background="{StaticResource LineBrush}"
+                          BorderBrush="{StaticResource RingSoftBrush}" BorderThickness="1" VerticalAlignment="Top">
+                    <Panel>
+                      <TextBlock Classes="mono" Text="{Binding Initials}" FontSize="40" LineHeight="44" LetterSpacing="4"
+                                 Foreground="{StaticResource DimBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                      <c:FileImage Path="{Binding Picture}" DecodeWidth="288" />
+                    </Panel>
+                  </Border>
+                  <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Top">
+                    <TextBlock Classes="display-m" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    <ItemsControl ItemsSource="{Binding Chips}" Margin="0,2,0,2">
+                      <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                          <WrapPanel Orientation="Horizontal" ItemSpacing="6" LineSpacing="6" />
+                        </ItemsPanelTemplate>
+                      </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                     <TextBlock Classes="body" Text="{Binding EngineLine}" />
                     <TextBlock Classes="mono" Text="{Binding Folder}" FontSize="12" Foreground="{StaticResource MuteBrush}" TextTrimming="CharacterEllipsis" />
-                  </StackPanel>
-                  <StackPanel Grid.Column="1" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Top">
-                    <Button Classes="primary small" Content="Install tools here" Command="{Binding InstallHereCommand}" IsVisible="{Binding CanInstallHere}" HorizontalAlignment="Right"
-                            ToolTip.Tip="Make this project the install target: the track and product pages then install into it only." />
-                    <TextBlock Classes="small amber" Text="Installing here" IsVisible="{Binding IsTarget}" HorizontalAlignment="Right" />
-                    <StackPanel Orientation="Horizontal" Spacing="14" HorizontalAlignment="Right">
-                      <Button Classes="link smalltext" Content="Open folder" Command="{Binding OpenFolderCommand}" />
-                      <Button Classes="link smalltext" Content="Open in Unreal" Command="{Binding OpenInUnrealCommand}" IsVisible="{Binding CanOpen}" />
+                    <TextBlock Classes="small" Text="{Binding FoundLine}" />
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
+                      <Button Classes="primary small" Content="Install tools here" Command="{Binding InstallHereCommand}" IsVisible="{Binding CanInstallHere}"
+                              ToolTip.Tip="Make this project the install target: the track and product pages then install into it only." />
+                      <Border Classes="chip stage" IsVisible="{Binding IsTarget}" Height="34" CornerRadius="17" Padding="16,0"
+                              ToolTip.Tip="The track and product pages install into this project only.">
+                        <TextBlock Classes="chip" Text="INSTALLING HERE" />
+                      </Border>
+                      <Button Classes="ghost" Content="Open in Unreal" Command="{Binding OpenInUnrealCommand}" IsEnabled="{Binding CanOpen}" />
+                      <Button Classes="ghost" Content="Open folder" Command="{Binding OpenFolderCommand}" />
                     </StackPanel>
                   </StackPanel>
                 </Grid>
 
-                <ItemsControl ItemsSource="{Binding Notes}" IsVisible="{Binding HasNotes}">
+                <ItemsControl ItemsSource="{Binding Notes}" IsVisible="{Binding HasNotes}" Margin="0,18,0,0">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="x:String">
                       <TextBlock Classes="small amber" Text="{Binding}" TextWrapping="Wrap" Margin="0,1" />
@@ -66,51 +188,86 @@
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                  <TextBlock Classes="label" Text="{Binding ToolsLine}" VerticalAlignment="Center" />
-                  <TextBlock Grid.Column="1" Classes="small" Text="{Binding FoundLine}" VerticalAlignment="Center" />
-                </Grid>
+                <!-- In this project: every Kovati tool, as before, all of them. -->
+                <Border Classes="panel" Padding="24,18,24,12" Margin="0,24,0,0">
+                  <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Classes="label" Text="IN THIS PROJECT" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="1" Classes="small" Text="{Binding ToolsLine}" VerticalAlignment="Center" />
+                    </Grid>
+                    <TextBlock Classes="small" Text="No Kovati tools in this project or its engine yet." IsVisible="{Binding !HasRows}" Margin="0,0,0,6" />
+                    <ItemsControl ItemsSource="{Binding Rows}" IsVisible="{Binding HasRows}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="p:ProjectToolRowModel">
+                          <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,9">
+                            <Grid ColumnDefinitions="*,Auto,180,Auto,Auto">
+                              <StackPanel VerticalAlignment="Center" Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                  <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" />
+                                  <TextBlock Classes="mono" Text="{Binding Id}" IsVisible="{Binding ShowId}" FontSize="11" Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock Classes="small" Text="{Binding WhereLine}" />
+                              </StackPanel>
+                              <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Version}" Foreground="{StaticResource MuteBrush}" VerticalAlignment="Center" Margin="16,0" MinWidth="56" />
+                              <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                                <Button Classes="link amber smalltext" Content="{Binding UpdateLabel}" Command="{Binding UpdateCommand}" IsVisible="{Binding CanUpdateHere}" HorizontalAlignment="Left" />
+                                <TextBlock Classes="small" Text="{Binding UpdateElsewhereLine}" IsVisible="{Binding HasUpdateElsewhere}" TextWrapping="Wrap" />
+                              </StackPanel>
+                              <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="12,0,0,0">
+                                <TextBlock Classes="small" Text="{Binding StateLine}" VerticalAlignment="Center" MinWidth="110" TextAlignment="Right" />
+                                <ToggleSwitch IsChecked="{Binding IsOn, Mode=TwoWay}" IsEnabled="{Binding CanToggle}" OnContent="" OffContent="" Margin="0,-6,-10,-6"
+                                              AutomationProperties.Name="{Binding Name}" ToolTip.Tip="On or off in this project's .uproject" />
+                              </StackPanel>
+                              <Panel Grid.Column="4" Width="28" Margin="10,0,0,0">
+                                <Button Classes="link" Content="…" FontSize="18" VerticalAlignment="Center" AutomationProperties.Name="More" IsVisible="{Binding CanRemove}">
+                                  <Button.Flyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                      <MenuItem Header="Remove from the project" Command="{Binding RemoveCommand}" />
+                                    </MenuFlyout>
+                                  </Button.Flyout>
+                                </Button>
+                              </Panel>
+                            </Grid>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
 
-                <ItemsControl ItemsSource="{Binding Rows}" IsVisible="{Binding HasRows}">
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="p:ProjectToolRowModel">
-                      <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,9">
-                        <Grid ColumnDefinitions="*,Auto,180,Auto,Auto">
-                          <StackPanel VerticalAlignment="Center" Spacing="2">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                              <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" />
-                              <TextBlock Classes="mono" Text="{Binding Id}" IsVisible="{Binding ShowId}" FontSize="11" Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" />
-                            </StackPanel>
-                            <TextBlock Classes="small" Text="{Binding WhereLine}" />
-                          </StackPanel>
-                          <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Version}" Foreground="{StaticResource MuteBrush}" VerticalAlignment="Center" Margin="16,0" MinWidth="56" />
-                          <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
-                            <Button Classes="link amber smalltext" Content="{Binding UpdateLabel}" Command="{Binding UpdateCommand}" IsVisible="{Binding CanUpdateHere}" HorizontalAlignment="Left" />
-                            <TextBlock Classes="small" Text="{Binding UpdateElsewhereLine}" IsVisible="{Binding HasUpdateElsewhere}" TextWrapping="Wrap" />
-                          </StackPanel>
-                          <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="12,0,0,0">
-                            <TextBlock Classes="small" Text="{Binding StateLine}" VerticalAlignment="Center" MinWidth="110" TextAlignment="Right" />
-                            <ToggleSwitch IsChecked="{Binding IsOn, Mode=TwoWay}" IsEnabled="{Binding CanToggle}" OnContent="" OffContent="" Margin="0,-6,-10,-6"
-                                          AutomationProperties.Name="{Binding Name}" ToolTip.Tip="On or off in this project's .uproject" />
-                          </StackPanel>
-                          <Button Grid.Column="4" Classes="link" Content="…" FontSize="18" Margin="10,0,0,0" VerticalAlignment="Center" AutomationProperties.Name="More" IsVisible="{Binding CanRemove}">
-                            <Button.Flyout>
-                              <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                <MenuItem Header="Remove from the project" Command="{Binding RemoveCommand}" />
-                              </MenuFlyout>
-                            </Button.Flyout>
-                          </Button>
-                        </Grid>
-                      </Border>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <Button Classes="link smalltext" Content="{Binding ExpandLabel}" Command="{Binding ToggleExpandedCommand}" IsVisible="{Binding CanExpand}" HorizontalAlignment="Left" />
+                <!-- Not in this project: the products built for its engine that it does not have. -->
+                <Border Classes="panel" Padding="24,18,24,12" Margin="0,18,0,0">
+                  <StackPanel Spacing="10">
+                    <TextBlock Classes="label" Text="NOT IN THIS PROJECT" />
+                    <TextBlock Classes="small" Text="{Binding MissingLine}" IsVisible="{Binding HasMissingLine}" TextWrapping="Wrap" Margin="0,0,0,6" />
+                    <TextBlock Classes="small amber" Text="{Binding InstallBlockedLine}" IsVisible="{Binding HasInstallBlockedLine}" TextWrapping="Wrap" />
+                    <ItemsControl ItemsSource="{Binding Missing}" IsVisible="{Binding HasMissing}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="p:MissingProductRowModel">
+                          <Border BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="0,10">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                              <StackPanel VerticalAlignment="Center" Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                  <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                  <ContentControl Content="{Binding Chip}" IsVisible="{Binding HasChip}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock Classes="small" Text="{Binding Line}" TextTrimming="CharacterEllipsis" />
+                              </StackPanel>
+                              <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Version}" Foreground="{StaticResource MuteBrush}" VerticalAlignment="Center" Margin="16,0" MinWidth="56" />
+                              <Button Grid.Column="2" Classes="ghost" Content="{Binding ActionText}" Command="{Binding ActCommand}" IsEnabled="{Binding CanAct}"
+                                      MinWidth="96" VerticalAlignment="Center" ToolTip.Tip="{Binding Tip}" ToolTip.ShowOnDisabled="True" AutomationProperties.Name="{Binding AutomationName}" />
+                            </Grid>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
               </StackPanel>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </StackPanel>
-  </ScrollViewer>
+            </DataTemplate>
+          </ContentControl.ContentTemplate>
+        </ContentControl>
+      </StackPanel>
+    </ScrollViewer>
+  </Panel>
 </UserControl>

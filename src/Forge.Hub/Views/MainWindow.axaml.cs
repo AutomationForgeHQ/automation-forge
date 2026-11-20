@@ -34,12 +34,22 @@ public partial class MainWindow : Window
         if (e.Key == Key.K && e.KeyModifiers == KeyModifiers.Control) { SearchBox.Focus(); SearchBox.SelectAll(); e.Handled = true; }
         else if (e.Key == Key.Escape && vm.ShowAnyPanel) { vm.ClosePanels(); e.Handled = true; }
         else if (e.Key == Key.Escape && vm.ShowSearch) { vm.ClearSearch(); e.Handled = true; }
-        else if (e.Key == Key.Left && e.KeyModifiers == KeyModifiers.Alt && vm.CanGoBack) { vm.GoBack(); e.Handled = true; }
+        else if (e.Key == Key.Escape && vm.CurrentPage?.BackInside() == true) e.Handled = true;
+        else if (e.Key == Key.Left && e.KeyModifiers == KeyModifiers.Alt && Back(vm)) e.Handled = true;
     }
 
     private void OnBackButton(object? sender, PointerPressedEventArgs e)
     {
-        if (e.GetCurrentPoint(this).Properties.IsXButton1Pressed && Vm is { CanGoBack: true } vm) { vm.GoBack(); e.Handled = true; }
+        if (e.GetCurrentPoint(this).Properties.IsXButton1Pressed && Vm is { } vm && Back(vm)) e.Handled = true;
+    }
+
+    /// <summary>Back: out of the page's own state first (a project opened on the Projects page), then the page before.</summary>
+    private static bool Back(MainViewModel vm)
+    {
+        if (vm.CurrentPage?.BackInside() == true) return true;
+        if (!vm.CanGoBack) return false;
+        vm.GoBack();
+        return true;
     }
 
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)

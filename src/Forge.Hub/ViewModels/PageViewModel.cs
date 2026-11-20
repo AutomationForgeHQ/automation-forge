@@ -20,6 +20,12 @@ public abstract class PageViewModel(MainViewModel hub) : ViewModelBase
     /// <summary>"← Home", "← Animation": where the back link goes, named. Empty when the page has none.</summary>
     public virtual string BackLabel => Hub.BackLabel;
     public bool HasBack => Hub.CanGoBack;
+
+    /// <summary>
+    /// Esc, Alt+Left and the mouse's back button, before the window goes back a page: a page with a state of its
+    /// own to step out of (a project opened on the Projects page) steps out and says so. Most pages have none.
+    /// </summary>
+    public virtual bool BackInside() => false;
 }
 
 /// <summary>A chip (9.1): its words and its tone. Order on a card or row: price, trial, stage; three at most.</summary>

@@ -340,6 +340,36 @@ public partial class MainViewModel
     public async Task UpdateInProjectAsync(ProjectReport p, string id) => await WithProjectTarget(p, () => RunAsync([id]));
     public async Task RemoveFromProjectAsync(ProjectReport p, string id) => await WithProjectTarget(p, () => RunAsync([id], uninstall: true));
 
+    /// <summary>
+    /// "Install" on a project's page, under "Not in this project": the product page's own install (its default
+    /// engines, its agent access, the foundation and every dependency, through the planner), with the project as
+    /// the target for that one run. The window's chosen target comes back afterwards, as for Update and Remove.
+    /// </summary>
+    public async Task InstallIntoProjectAsync(ProjectReport p, Forge.Core.Catalogue.Product product) =>
+        await WithProjectTarget(p, () => InstallProductWithEnginesAsync(product));
+
+    /// <summary>
+    /// What the planner would read with this project as the target, without choosing it: its engine's version,
+    /// what Kovati Hub installed into it (receipts and its Plugins\AutomationForge folders), and what it has from
+    /// its engine or a copy of its own. Null until the manifest and the catalogue are in, or when the project's
+    /// engine version cannot be told.
+    /// </summary>
+    public Forge.Core.Catalogue.PlanInputs? InputsFor(ProjectReport p)
+    {
+        if (Inputs() is not { } inputs || p.Engine.Version is not { } version) return null;
+        var installed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var r in _state.Items.Where(r => SamePath(r.TargetRoot, p.PluginRoot))) installed.TryAdd(r.Plugin, r.Version);
+        foreach (var (id, v) in ManagedInProject(p))
+            if (!installed.ContainsKey(id) && v.Length > 0) installed[id] = v;
+        return inputs with
+        {
+            Engine = p.Engine.Engine?.Version ?? version,
+            TargetKind = "project",
+            ProvidedElsewhere = ProjectService.ProvidedElsewhere(p),
+            Installed = installed,
+        };
+    }
+
     private async Task WithProjectTarget(ProjectReport p, Func<Task> action)
     {
         var before = SelectedTarget;

@@ -31,6 +31,9 @@ internal static class Program
             case "beta3":
                 Screens.RunBeta3(outDir, args.Skip(2).ToArray());
                 break;
+            case "projects":
+                Screens.RunProjects(outDir, args.Skip(2).ToArray());
+                break;
             case "licence":
                 Screens.RunLicence(outDir, args.Skip(2).ToArray());
                 break;
