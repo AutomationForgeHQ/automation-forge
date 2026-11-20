@@ -66,7 +66,8 @@ public partial class MainViewModel
     {
         _licenceSnapshot = null;
         AnnounceLicence();
-        CurrentPage?.Refresh();
+        // The rows too: a purchase the licence now lists makes a Lite install Full, with no reinstall.
+        Rebuild();
     }
 
     /// <summary>
@@ -80,7 +81,7 @@ public partial class MainViewModel
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or OperationCanceledException) { outcome = LicenceFetchOutcome.Offline; }
         _licenceSnapshot = null;
         AnnounceLicence();
-        CurrentPage?.Refresh();
+        Rebuild();
         if (say) Say(outcome switch
         {
             LicenceFetchOutcome.Updated or LicenceFetchOutcome.Unchanged => "Licence refreshed.",
@@ -112,9 +113,14 @@ public partial class MainViewModel
     public string? LicenceKeyOf(Product product) =>
         product.MainComponent is { } main && _manifest?.Plugin(main) is { IsPaid: true } ? main : null;
 
-    /// <summary>The product's Lite or trial exists today. Until then nothing may say the tool is limited.</summary>
-    public static bool LimitedTierLive(Product product) =>
-        product.FreeTierLive == true && (product.Price == "free-tier" || product.Trial);
+    /// <summary>
+    /// The product's Lite or trial exists today: the catalogue marks it live, or the account service's offer for it has a
+    /// tier (beta 7: an older bundled catalogue does not hide a free tier the account already serves). Until then nothing
+    /// may say the tool is limited.
+    /// </summary>
+    public bool LimitedTierLive(Product product) =>
+        product.FreeTierLive == true && (product.Price == "free-tier" || product.Trial)
+        || LicenceKeyOf(product) is { } key && AccountCatalogue?.Plugin(key)?.FreeTier is not null;
 
     /// <summary>The product's licence, or null for a product that is not paid.</summary>
     public ProductLicence? LicenceOf(Product product)
@@ -128,7 +134,10 @@ public partial class MainViewModel
 
     /// <summary>The small line for a product: "Licensed · bought 20 Nov 2026", "Test licence", or "" for nothing.</summary>
     public string LicenceLineOf(Product product) =>
-        LicenceOf(product) is { } l ? LicenceWords.Line(l, LimitedTierLive(product), product.Trial && product.Price != "free-tier") : "";
+        LicenceOf(product) is { } l
+            ? LicenceWords.Line(l, LimitedTierLive(product),
+                LicenceKeyOf(product) is { } key && AccountCatalogue?.Plugin(key)?.FreeTier is { } tier ? tier == "trial" : product.Trial && product.Price != "free-tier")
+            : "";
 
     /// <summary>Restore licence belongs beside a paid product whenever someone is signed in.</summary>
     public bool CanRestoreLicenceFor(Product product) => IsSignedIn && LicenceKeyOf(product) is not null;

@@ -258,16 +258,19 @@ public sealed partial class MissingProductRowModel : ObservableObject
         var hub = card.Page.Hub;
         var cat = hub.Catalogue!;
         var status = TrackPlanner.StatusOf(product, inputs);
-        Version = inputs.Manifest.Plugin(product.MainComponent!)?.Latest(inputs.Engine, inputs.Channel)?.Version ?? "";
+        var main = inputs.Manifest.Plugin(product.MainComponent!);
+        Version = (main is null ? null : FreeTiers.BuildFor(main, inputs) ?? main.Latest(inputs.Engine, inputs.Channel))?.Version ?? "";
         IsView = status is ProductStatus.NeedsPurchase or ProductStatus.Coming;
-        var owned = product.Plugins.Any(id => inputs.Manifest.Plugin(id)?.IsPaid == true)
-                    && product.Plugins.All(id => inputs.Owned.Contains(id) || inputs.Manifest.Plugin(id)?.IsPaid != true);
-        var key = ProductFacts.PriceKey(product, inputs.Manifest);
+        var owned = ProductFacts.Owned(product, inputs);
+        // A paid tool this account has as its free tier installs like the rest, marked LITE (beta 7).
+        var tier = owned ? null : ProductFacts.FreeTierOf(product, inputs);
+        var key = ProductFacts.PriceKey(product, inputs);
         Chip = owned ? new ChipModel("OWNED", "owned")
+            : tier is not null ? new ChipModel(FreeTiers.Word(tier).ToUpperInvariant(), "free")
             : key != "free" ? ChipModel.Price(cat, key)
             : status == ProductStatus.Labs ? new ChipModel(cat.StageLabel(Stage.Labs).ToUpperInvariant(), "labs")
             : null;
-        ActionText = IsView ? "View" : hub.IsSignedIn ? "Install" : "Sign in to install";
+        ActionText = IsView ? "View" : !hub.IsSignedIn ? "Sign in to install" : tier is not null ? $"Install {FreeTiers.Word(tier)}" : "Install";
         CanAct = IsView || card.CanInstallMissing;
         Tip = IsView ? $"Open {product.Name}'s page" : card.CanInstallMissing ? $"Install {product.Name} into {card.Name} only, in its Plugins\\{Paths.PluginFolder} folder" : card.InstallBlockedLine;
     }

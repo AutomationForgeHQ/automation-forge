@@ -81,10 +81,13 @@ public partial class MainViewModel
         Dispatcher.UIThread.Post(OpenFromEnvironment);
     }
 
-    private async Task LoadAccountCatalogueAsync()
+    private async Task LoadAccountCatalogueAsync(bool force = false)
     {
-        AccountCatalogue = await AccountCatalogue.GetAsync(_http);
-        CurrentPage?.Refresh();
+        var read = await AccountCatalogue.GetAsync(_http, force: force);
+        // A failed forced read keeps what was there; the screens only redraw when something was read.
+        if (read is null && AccountCatalogue is not null) return;
+        AccountCatalogue = read;
+        Rebuild();
     }
 
     private void RememberTarget()
@@ -205,6 +208,8 @@ public partial class MainViewModel
             ProvidedElsewhere = ProvidedToTarget(),
             FoundationInProject = true,
             Owned = _owned,
+            Licensed = LicensedNow(),
+            Offers = AccountCatalogue,
             SignedIn = IsSignedIn,
             AgentAccess = HubState.AgentsOn,
             ShowLabs = HubState.ShowLabs,
@@ -220,6 +225,33 @@ public partial class MainViewModel
                 i.TargetKind == "project" ? Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(i.TargetRoot))) ?? "a project" : $"Unreal Engine {i.Engine}",
                 i.Path))
             .ToList();
+
+    /// <summary>
+    /// The paid plugins this account holds licensed: what the account service said (GET me `licensed`), and what the
+    /// licence on this computer lists as current, so a purchase counts as soon as the licence refresh brings it (Check
+    /// now, the daily refresh), before what the account holds is read again. Null when the account service did not say.
+    /// </summary>
+    private IReadOnlySet<string>? LicensedNow()
+    {
+        if (_licensed is null) return null;
+        var set = new HashSet<string>(_licensed, StringComparer.OrdinalIgnoreCase);
+        var snap = LicenceSnapshot;
+        foreach (var id in snap.Payload?.Products.Keys ?? Enumerable.Empty<string>())
+            if (snap.For(id).CountsAsLicensed) set.Add(id);
+        return set;
+    }
+
+    /// <summary>The build of a component this account may install on the chosen target: the newest, or its newest free-tier build.</summary>
+    internal Core.Manifest.VersionInfo? BuildToInstall(Core.Manifest.PluginInfo plugin) =>
+        Inputs() is { } inputs ? FreeTiers.BuildFor(plugin, inputs) : plugin.Latest(EngineVersion, Channel);
+
+    /// <summary>
+    /// The ids for the elevated helper, each as id@version when the build to install is not the newest (a free tier whose
+    /// newest build is below its floor); the helper takes the newest otherwise.
+    /// </summary>
+    private string[] WithVersions(string[] ids) => _manifest is null ? ids : ids.Select(id =>
+        _manifest.Plugin(id) is { } p && BuildToInstall(p) is { } v && p.Latest(EngineVersion, Channel) is { } latest && latest.Version != v.Version
+            ? $"{id}@{v.Version}" : id).ToArray();
 
     public bool PaymentsLive => AccountCatalogue?.PaymentsLive == true;
 
@@ -380,9 +412,10 @@ public partial class MainViewModel
     /// For the screenshot harness only: show the window as a signed-in person would see it, without signing in
     /// to anything. Nothing installs in this state (the account service is never asked).
     /// </summary>
-    internal void PreviewAccount(string name, string email, IEnumerable<string> owned)
+    internal void PreviewAccount(string name, string email, IEnumerable<string> owned, IEnumerable<string>? licensed = null)
     {
         _previewSignedIn = true;
+        _licensed = licensed is null ? null : new HashSet<string>(licensed, StringComparer.OrdinalIgnoreCase);
         AccountName = name;
         AccountEmail = email;
         _owned = new HashSet<string>(owned, StringComparer.OrdinalIgnoreCase);
@@ -443,7 +476,10 @@ public partial class MainViewModel
                 {
                     if (ct.IsCancellationRequested) break;
                     var plugin = _manifest.Plugin(item.Id);
-                    var version = plugin?.Latest(SelectedEngine.Version, Channel);
+                    // The build the plan chose (a free tier's newest free-tier build), else the newest.
+                    var version = plugin?.Versions.FirstOrDefault(v => v.Version == item.Version && v.Engine == SelectedEngine.Version
+                                                                       && (Channel == Core.Settings.Nightly || v.Channel == Core.Settings.Stable))
+                                  ?? (plugin is null ? null : BuildToInstall(plugin));
                     if (plugin is null || version is null)
                     {
                         Post(new InstallEvent(item.Id, InstallEventKind.Failed, Message: InstallErrors.NoBuild(nameOf(item.Id), SelectedEngine.Version)));
@@ -496,7 +532,7 @@ public partial class MainViewModel
         var psi = new ProcessStartInfo { FileName = exe, UseShellExecute = true, Verb = "runas", CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden };
         psi.ArgumentList.Add(Elevated.Flag);
         psi.ArgumentList.Add("install");
-        foreach (var id in ids) psi.ArgumentList.Add(id);
+        foreach (var id in WithVersions(ids)) psi.ArgumentList.Add(id);
         AddTargetArguments(psi);
         try
         {
@@ -552,12 +588,15 @@ public static class InstallErrors
     {
         EntitlementException { Code: "unauthenticated" } => "Your sign-in ran out. Sign in again and the install continues.",
         EntitlementException { Code: "not-owned" } => $"{name} is not on your account.",
+        // Below a free tier's floor: the account service's own sentence, as it is ("Version 0.1.0 of TerrainForge needs a licence. ...").
+        EntitlementException { Code: "needs-licence" } => ex.Message,
         EntitlementException { Code: "unreachable" } => "Could not reach Kovati. Check your connection and try again. What is installed keeps working.",
         _ => Describe(ex.Message, name, folder),
     };
 
     public static string Describe(string message, string name, string folder)
     {
+        if (message.Contains("needs a licence", StringComparison.OrdinalIgnoreCase)) return message;
         if (message.StartsWith("Checksum mismatch", StringComparison.Ordinal))
             return $"The download of {name} was damaged, so it was not installed. Try again. If it happens twice, tell us on Discord.";
         if (message.Contains("in use", StringComparison.OrdinalIgnoreCase) || message.Contains("has it loaded", StringComparison.OrdinalIgnoreCase))

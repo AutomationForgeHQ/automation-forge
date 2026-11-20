@@ -76,8 +76,12 @@
             <TextBlock Text="{Binding LabsLine}" IsVisible="{Binding IsLabs}" FontSize="13" Foreground="{StaticResource HotBrush}" TextWrapping="Wrap" Margin="0,10,0,0" />
             <TextBlock Classes="title" Text="{Binding Promise}" IsVisible="{Binding HasPromise}" TextWrapping="Wrap" Margin="0,18,0,0" />
             <TextBlock Text="{Binding Subline}" FontSize="14" LineHeight="21" Foreground="{StaticResource Bone80Brush}" TextWrapping="Wrap" Margin="0,8,0,0" />
-            <Button Classes="primary" Content="{Binding ButtonText}" Command="{Binding ActCommand}" IsEnabled="{Binding ButtonEnabled}" HorizontalAlignment="Left" MinWidth="200" Margin="0,22,0,0" />
-            <TextBlock Classes="small" Text="{Binding ButtonLine}" TextWrapping="Wrap" Margin="0,8,0,0" />
+            <!-- The main button, and for a free tier (beta 7) "Buy Full · $99.99" beside it; they wrap in a narrow column. -->
+            <WrapPanel Orientation="Horizontal" Margin="0,22,0,0">
+              <Button Classes="primary" Content="{Binding ButtonText}" Command="{Binding ActCommand}" IsEnabled="{Binding ButtonEnabled}" MinWidth="{Binding PrimaryMinWidth}" Margin="0,0,12,8" />
+              <Button Classes="quiet" Content="{Binding BuyFullText}" Command="{Binding BuyFullCommand}" IsEnabled="{Binding BuyFullEnabled}" IsVisible="{Binding HasBuyFull}" Margin="0,0,0,8" />
+            </WrapPanel>
+            <TextBlock Classes="small" Text="{Binding ButtonLine}" TextWrapping="Wrap" Margin="0,0,0,0" />
             <!-- The licence (licensing step 2): one quiet line, and Restore licence, which is only the refresh. -->
             <StackPanel Orientation="Horizontal" Spacing="16" Margin="0,10,0,0" IsVisible="{Binding HasLicenceRow}">
               <TextBlock Classes="small" Text="{Binding LicenceLine}" IsVisible="{Binding HasLicenceLine}" Foreground="{StaticResource Bone80Brush}" VerticalAlignment="Center" />

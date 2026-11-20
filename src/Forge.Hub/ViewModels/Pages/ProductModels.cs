@@ -18,6 +18,18 @@ public sealed class ProductState
     public string? Price { get; init; }
     public bool PaymentsLive { get; init; }
     public bool SignedIn { get; init; }
+    /// <summary>"lite" or "trial" when this account has the product as its free tier (beta 7); null otherwise.</summary>
+    public string? Tier { get; init; }
+    /// <summary>The name of the paid tool it comes with, when the account service says it is included with another.</summary>
+    public string? IncludedWithName { get; init; }
+    /// <summary>The product's free tier is live (the catalogue, or the account service's tier).</summary>
+    public bool FreeTierLive { get; init; }
+
+    /// <summary>Installs, or is installed, as Lite (or a trial): never called Owned, Bought or Licensed.</summary>
+    public bool IsFreeTier => Tier is not null;
+    /// <summary>"Lite" or "trial".</summary>
+    public string TierWord => FreeTiers.Word(Tier);
+    public bool IsIncluded => NeedsPurchase && IncludedWithName is not null;
 
     /// <summary>Whether the first component has a build for the target's Unreal Engine version.</summary>
     public BuildAvailability Availability { get; init; } = BuildAvailability.Built;
@@ -48,16 +60,22 @@ public sealed class ProductState
             elsewhere = true;
             installed = ev.Length > 0 ? ev : "here";
         }
-        var latest = main is null ? null : inputs.Manifest.Plugin(main)?.Latest(inputs.Engine, inputs.Channel)?.Version;
-        var owned = p.Plugins.Count > 0 && p.Plugins.Any(id => inputs.Manifest.Plugin(id)?.IsPaid == true)
-                    && p.Plugins.All(id => inputs.Owned.Contains(id) || inputs.Manifest.Plugin(id)?.IsPaid != true);
+        // The build this account may have: the newest, or a free tier's newest free-tier build.
+        var latest = main is null || inputs.Manifest.Plugin(main) is not { } mp ? null
+            : (FreeTiers.BuildFor(mp, inputs) ?? mp.Latest(inputs.Engine, inputs.Channel))?.Version;
+        var owned = ProductFacts.Owned(p, inputs);
+        var parent = ProductFacts.IncludedWith(p, inputs);
         return new ProductState
         {
             Product = p,
             Status = status,
             Stage = TrackPlanner.StageOf(p, inputs),
-            PriceKey = ProductFacts.PriceKey(p, inputs.Manifest),
+            PriceKey = ProductFacts.PriceKey(p, inputs),
             Owned = owned,
+            Tier = owned ? null : ProductFacts.FreeTierOf(p, inputs),
+            FreeTierLive = ProductFacts.FreeTierLive(p, inputs),
+            IncludedWithName = parent is null ? null
+                : hub.Catalogue?.ProductOfComponent(parent)?.Name ?? inputs.Offers?.Plugin(parent)?.Name ?? parent,
             InstalledVersion = installed,
             LatestVersion = latest,
             HasUpdate = TrackPlanner.HasUpdate(p, inputs),
@@ -73,7 +91,14 @@ public sealed class ProductState
     /// <summary>Price, trial, stage: three chips at most (9.1). Released shows none on cards and rows.</summary>
     public List<ChipModel> Chips(Catalogue cat, bool onPicture, bool showReleased = false)
     {
-        var chips = new List<ChipModel> { Owned ? new ChipModel("OWNED", "owned", onPicture) : ChipModel.Price(cat, PriceKey, onPicture) };
+        // Owned only when held in full; a free-tier install says LITE (or TRIAL), never Owned.
+        var chips = new List<ChipModel>
+        {
+            Owned ? new ChipModel("OWNED", "owned", onPicture)
+            : IsFreeTier && IsInstalled ? new ChipModel(TierWord.ToUpperInvariant(), "free", onPicture)
+            : IsIncluded ? new ChipModel("INCLUDED", "owned", onPicture)
+            : ChipModel.Price(cat, PriceKey, onPicture),
+        };
         if (Product.Trial) chips.Add(new ChipModel(cat.Labels.Trial.ToUpperInvariant(), "free", onPicture));
         if (IsNotBuilt) chips.Add(new ChipModel($"NOT BUILT FOR {Engine}", "soon", onPicture));
         else if (IsComing) chips.Add(new ChipModel(cat.StageLabel(Stage.Coming).ToUpperInvariant(), "soon", onPicture));
@@ -86,11 +111,22 @@ public sealed class ProductState
     {
         if (IsNotBuilt) return productPage ? (NotBuiltLine.TrimEnd('.'), false, true) : ("", false, false);
         if (IsComing) return productPage ? ("See it on kovati.dev ↗", true, true) : ("", false, false);
+        // Included with another paid tool: never offered on its own.
+        if (IsIncluded) return productPage ? ($"Comes with {IncludedWithName}", false, true) : ("", false, false);
         if (NeedsPurchase) return PaymentsLive ? ("Add to cart", true, true) : ("Buying opens soon", false, true);
         if (IsInstalled) return HasUpdate ? ($"Update to {LatestVersion}", true, true) : ("Installed", false, true);
         if (!SignedIn && productPage) return ("Sign in to install", true, true);
         if (IsLabs) return ("Install the Labs build", true, true);
+        if (IsFreeTier) return ($"Install {TierWord}", true, true);
         return ("Install", true, true);
+    }
+
+    /// <summary>"Buy Full · $99.99" beside a free tier's button (beta 7): the store page, as Add to cart opens it.</summary>
+    public (string Text, bool Enabled, bool Visible) BuyFullButton()
+    {
+        if (!IsFreeTier) return ("", false, false);
+        if (!PaymentsLive) return ("Full: buying opens soon", false, true);
+        return (Price is { } price ? $"Buy Full · {price}" : "Buy Full", true, true);
     }
 }
 

@@ -142,11 +142,12 @@ public partial class MainViewModel
     /// <summary>Products the account holds that are not installed on this target: "NEW ON YOUR ACCOUNT".</summary>
     public IReadOnlyList<Product> OwnedNotInstalled()
     {
-        if (!IsSignedIn || Catalogue is null || _manifest is null) return [];
+        if (!IsSignedIn || Catalogue is null || _manifest is null || Inputs() is not { } inputs) return [];
         var installed = InstalledOnTarget();
+        // Held in full only: a paid tool held by a preview claim, with a free tier, runs as Lite and is not "Owned".
         return Catalogue.Products
             .Where(p => p.MainComponent is { } main && _owned.Contains(main) && !installed.ContainsKey(main)
-                        && _manifest.Plugin(main)?.IsPaid == true)
+                        && _manifest.Plugin(main)?.IsPaid == true && ProductFacts.Owned(p, inputs))
             .ToList();
     }
 

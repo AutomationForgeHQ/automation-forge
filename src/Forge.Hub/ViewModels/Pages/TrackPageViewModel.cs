@@ -18,6 +18,8 @@ public sealed partial class TrackPageViewModel : PageViewModel
     private TrackSelection _selection = new([], new Dictionary<string, IReadOnlyCollection<string>>());
     private bool _selectionSet;
     private TrackPlan? _plan;
+    /// <summary>The plan as it stands, for the screenshot harness.</summary>
+    internal TrackPlan? CurrentPlan => _plan;
     private TrackPlan? _planWithAgents;
     private CancellationTokenSource? _cts;
     private bool _refreshing;
@@ -499,14 +501,16 @@ public sealed partial class CapabilityRowModel : ObservableObject
         Status = status;
         var hub = page.Hub;
         var cat = hub.Catalogue!;
-        PriceKey = product is null || inputs is null ? product?.Price ?? "free" : ProductFacts.PriceKey(product, inputs.Manifest);
-        var owned = product is not null && inputs is not null && product.Plugins.Count > 0
-                    && product.Plugins.All(id => inputs.Owned.Contains(id) || inputs.Manifest.Plugin(id)?.IsPaid != true)
-                    && product.Plugins.Any(id => inputs.Manifest.Plugin(id)?.IsPaid == true);
+        PriceKey = product is null || inputs is null ? product?.Price ?? "free" : ProductFacts.PriceKey(product, inputs);
+        var owned = product is not null && inputs is not null && ProductFacts.Owned(product, inputs);
+        // A paid tool this account has as its free tier installs with the rest, marked LITE (beta 7).
+        Tier = product is null || inputs is null || owned ? null : ProductFacts.FreeTierOf(product, inputs);
         var stage = product is null || inputs is null ? Stage.Coming : TrackPlanner.StageOf(product, inputs);
 
         // Chips: price (or Owned), stage. Released shows none on a row.
-        Chips.Add(owned ? new ChipModel("OWNED", "owned") : ChipModel.Price(cat, PriceKey));
+        Chips.Add(owned ? new ChipModel("OWNED", "owned")
+            : Tier is not null ? new ChipModel(FreeTiers.Word(Tier).ToUpperInvariant(), "free")
+            : ChipModel.Price(cat, PriceKey));
         if (product?.Trial == true) Chips.Add(new ChipModel(cat.Labels.Trial.ToUpperInvariant(), "free"));
         var notBuilt = status == ProductStatus.Coming && product is not null && inputs is not null
                        && TrackPlanner.AvailabilityOf(product, inputs) == BuildAvailability.NotBuiltForEngine;
@@ -530,7 +534,7 @@ public sealed partial class CapabilityRowModel : ObservableObject
             UpdateText = status == ProductStatus.Update ? $"Update to {TrackPlanner.NewerVersion(main2, inputs) ?? newer}" : "";
         }
 
-        if (product is not null && ProductFacts.FreeTierPromised(product, inputs?.Manifest ?? new Core.Manifest.Manifest()))
+        if (product is not null && (inputs is not null ? ProductFacts.FreeTierPromised(product, inputs) : ProductFacts.FreeTierPromised(product, new Core.Manifest.Manifest())))
             ExtraLine = "A free tier is planned. Today this is the full version.";
         else if (status == ProductStatus.Labs)
             ExtraLine = cat.LabsLine;
@@ -563,6 +567,8 @@ public sealed partial class CapabilityRowModel : ObservableObject
     public Product? Product { get; }
     public ProductStatus Status { get; }
     public string PriceKey { get; }
+    /// <summary>"lite" or "trial" when the product goes in as its free tier.</summary>
+    public string? Tier { get; }
     public string Name => Capability.Name;
     public string Line => Capability.Line;
     public string? Poster => Capability.Media.Poster;
@@ -660,7 +666,8 @@ public sealed record ComponentLineModel(string Id, string Version, string? Note,
     public bool HasNote => !string.IsNullOrEmpty(Note);
 
     public static ComponentLineModel From(PlanItem i, string? note, bool muted) =>
-        new(i.Id, i.Action == PlanAction.Current ? "here" : i.Version, note, muted);
+        new(i.Id, i.Action == PlanAction.Current ? "here" : i.Version,
+            i.IsFreeTier ? (note is { Length: > 0 } n ? $"{n} · {FreeTiers.Word(i.FreeTier)}" : FreeTiers.Word(i.FreeTier)) : note, muted);
 }
 
 /// <summary>"Capture · Paid · $79.99" with "Add to cart" (4.3, NOT INCLUDED).</summary>

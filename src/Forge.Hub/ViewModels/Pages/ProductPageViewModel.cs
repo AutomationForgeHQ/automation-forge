@@ -27,6 +27,13 @@ public sealed partial class ProductPageViewModel : PageViewModel
     [ObservableProperty] private string _buttonText = "";
     [ObservableProperty] private bool _buttonEnabled;
     [ObservableProperty] private string _buttonLine = "";
+    /// <summary>"Buy Full · $99.99" beside "Install Lite" (beta 7); hidden for everything that is not a free tier.</summary>
+    [ObservableProperty] private string _buyFullText = "";
+    [ObservableProperty] private bool _buyFullEnabled;
+    [ObservableProperty] private bool _hasBuyFull;
+    /// <summary>The main button gives way when Buy Full stands beside it, so both fit side by side in the narrowest window.</summary>
+    public double PrimaryMinWidth => HasBuyFull ? 140 : 200;
+    partial void OnHasBuyFullChanged(bool value) => OnPropertyChanged(nameof(PrimaryMinWidth));
     [ObservableProperty] private string _onThisComputer = "";
     [ObservableProperty] private bool _showRemoveDialog;
     [ObservableProperty] private string _removeTitle = "";
@@ -117,13 +124,20 @@ public sealed partial class ProductPageViewModel : PageViewModel
         Chips.Clear();
         foreach (var c in State.Chips(Cat, onPicture: false, showReleased: true)) Chips.Add(c);
         (ButtonText, ButtonEnabled, _) = State.Button(productPage: true);
-        var size = Product.Plugins.Concat(DefaultEngineComponents()).Select(id => Hub.Manifest?.Plugin(id)?.Latest(Hub.EngineVersion, Hub.Channel)?.Size ?? 0).Sum();
-        ButtonLine = State.NeedsPurchase
+        (BuyFullText, BuyFullEnabled, HasBuyFull) = State.BuyFullButton();
+        var size = Product.Plugins.Concat(DefaultEngineComponents())
+            .Select(id => Hub.Manifest?.Plugin(id) is { } p ? (Hub.BuildToInstall(p) ?? p.Latest(Hub.EngineVersion, Hub.Channel))?.Size ?? 0 : 0).Sum();
+        ButtonLine = State.IsIncluded ? $"It is part of {State.IncludedWithName}: buying {State.IncludedWithName} adds it to your account."
+            : State.NeedsPurchase
             ? (State.PaymentsLive ? "Opens your Kovati account in the browser. It appears here as soon as it is yours." : "You can read about it on kovati.dev.")
             : State.IsNotBuilt ? $"Built for Unreal Engine {string.Join(", ", BuiltFor())} today. Choose another target under Install into, or come back when it is built."
             : State.IsComing ? ""
-            : $"{Cat.PriceLabel(State.PriceKey)} · {Words.Size(size)}{(DefaultEngineComponents().Any() ? " with its engines" : "")}";
-        if (ProductFacts.FreeTierPromised(Product, Hub.Manifest ?? new Manifest())) ButtonLine = "A free tier is planned. Today this is the full version.";
+            : $"{(State.Owned && State.FreeTierLive ? "Full" : Cat.PriceLabel(State.PriceKey))} · {Words.Size(size)}{(DefaultEngineComponents().Any() ? " with its engines" : "")}";
+        if (State.IsFreeTier && State.IsInstalled) ButtonLine = State.PaymentsLive
+            ? "Buying Full turns this copy Full, with no reinstall."
+            : $"Installed as {State.TierWord}.";
+        if (Hub.Inputs() is { } pageInputs ? ProductFacts.FreeTierPromised(Product, pageInputs) : ProductFacts.FreeTierPromised(Product, Hub.Manifest ?? new Manifest()))
+            ButtonLine = "A free tier is planned. Today this is the full version.";
         LicenceLine = Hub.LicenceLineOf(Product);
         CanRestoreLicence = Hub.CanRestoreLicenceFor(Product);
         OnThisComputer = !State.IsInstalled ? "Not installed."
@@ -183,11 +197,19 @@ public sealed partial class ProductPageViewModel : PageViewModel
         return cap.Engines.Where(e => e.Default && !e.Labs).SelectMany(e => Cat.Product(e.Product)?.Plugins ?? []);
     }
 
+    /// <summary>"Buy Full": the store page, as Add to cart opens it.</summary>
+    [RelayCommand]
+    private void BuyFull()
+    {
+        if (State?.IsFreeTier == true && State.PaymentsLive) Hub.AddToCart(Product);
+    }
+
     [RelayCommand]
     private Task Act()
     {
         if (State is null) return Task.CompletedTask;
         if (State.IsComing) { Hub.OpenUrl(Hub.SiteUrl(Product.Site)); return Task.CompletedTask; }
+        if (State.IsIncluded) return Task.CompletedTask;
         if (State.NeedsPurchase) { if (State.PaymentsLive) Hub.AddToCart(Product); return Task.CompletedTask; }
         if (!Hub.IsSignedIn) return Hub.SignInCommand.ExecuteAsync(null);
         if (State.IsInstalled && State.HasUpdate) return Hub.UpdateProductAsync(Product);

@@ -227,13 +227,25 @@ install.SetAction(async (parse, ct) =>
 
     if (!entitlements.IsSignedIn) { Console.Error.WriteLine($"  {AnonymousEntitlements.SignInMessage}  (forge login)"); return 4; }
     var owned = await OwnedOrEmptyAsync(ct);
-    var unbought = order.Where(p => p.IsPaid && !owned.Contains(p.Id)).Select(p => p.Id).ToList();
+    // Free tiers (0.5.0-beta.7): a paid plugin the account does not hold licensed installs as its free tier when its
+    // offer has one and a build for this engine is at or above the floor. Without those fields, as before.
+    var installed = state.On(target.target).GroupBy(i => i.Plugin, StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g.First().Version, StringComparer.OrdinalIgnoreCase);
+    // Without receipts: a paid plugin with no free tier installs only when the account holds it, as before.
+    var access = await AccessInputsAsync(manifest, engineVersion, channel, target.target.Kind, owned, parse.GetValue(offlineOpt), ct);
+    var unbought = order.Where(p => FreeTiers.AccessOf(p, access) == PaidAccess.NotOwned).Select(p => p.Id).ToList();
+    var belowFloor = order.Where(p => FreeTiers.AccessOf(p, access) == PaidAccess.NeedsLicence && !installed.ContainsKey(p.Id)).ToList();
+    foreach (var p in belowFloor)
+        Console.Error.WriteLine($"  {FreeTiers.NeedsLicenceLine(p.Id, p.Latest(engineVersion, channel)?.Version, FreeTiers.TierOf(p.Id, access), FreeTiers.FloorOf(p.Id, access))} Buy it at {CloudConfig.PluginsUrl}");
+    if (unbought.Count > 0)
+        Console.Error.WriteLine($"  not on your account: {string.Join(", ", unbought)} — buy at {CloudConfig.PluginsUrl}");
+    unbought.AddRange(belowFloor.Select(p => p.Id));
     if (unbought.Count > 0)
     {
-        Console.Error.WriteLine($"  not on your account: {string.Join(", ", unbought)} — buy at {CloudConfig.PluginsUrl}");
         order.RemoveAll(p => unbought.Contains(p.Id, StringComparer.OrdinalIgnoreCase));
         if (order.Count == 0) return 5;
     }
+    foreach (var p in order.Where(p => FreeTiers.AccessOf(p, access) == PaidAccess.FreeTier))
+        Console.WriteLine($"  {p.Id}: not licensed, so it installs as {FreeTiers.Word(FreeTiers.TierOf(p.Id, access))}. Buy Full at {CloudConfig.PluginsUrl} and it becomes Full with no reinstall.");
 
     if (!Installer.IsWritable(target.target.Root) && !parse.GetValue(noElevate) && !Elevation.IsElevated())
     {
@@ -246,15 +258,16 @@ install.SetAction(async (parse, ct) =>
     var failures = 0;
     foreach (var p in order)
     {
-        var version = p.Latest(engineVersion, channel);
-        if (version is null) { Console.WriteLine($"  skipped: {p.Id} has no {channel} release for UE {engineVersion}"); continue; }
+        // The build this account may have: the newest, or a free tier's newest free-tier build.
+        var version = FreeTiers.BuildFor(p, access) ?? (installed.ContainsKey(p.Id) ? null : p.Latest(engineVersion, channel));
+        if (version is null) { Console.WriteLine($"  skipped: {p.Id} has no {channel} release for UE {engineVersion}{(installed.ContainsKey(p.Id) ? " that this account may install" : "")}"); continue; }
         try
         {
             var lastPct = -1;
             var progress = new Progress<double>(f => { var pct = (int)(f * 100); if (pct / 10 != lastPct / 10) { lastPct = pct; Console.Write($"\r  {p.Id} {pct,3}%"); } });
             var result = await installer.InstallAsync(new InstallRequest(p, version, target.target), parse.GetValue(forceOpt), progress, ct);
             Console.Write("\r");
-            if (result.Outcome == "already-current") Console.WriteLine($"  current: {p.Id} {version.Version}");
+            if (result.Outcome == "already-current") Console.WriteLine($"  current: {p.Id} {version.Version}{(FreeTiers.AccessOf(p, access) == PaidAccess.FreeTier ? $" ({FreeTiers.Word(FreeTiers.TierOf(p.Id, access))})" : "")}");
         }
         catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException or UnauthorizedAccessException)
         {
@@ -642,6 +655,9 @@ async Task<int> InstallTrackAsync(ParseResult parse, string trackName, Cancellat
     {
         Catalogue = catalogue, Manifest = manifest, Engine = engineVersion, Channel = channel,
         TargetKind = target?.Kind ?? "engine", Owned = owned, SignedIn = entitlements.IsSignedIn,
+        // Free tiers (0.5.0-beta.7): what the account holds licensed, and each paid plugin's tier and builds.
+        Licensed = entitlements.IsSignedIn ? await entitlements.LicensedAsync(ct) : null,
+        Offers = await AccountCatalogue.GetAsync(http, offline, ct),
         AgentAccess = agents, ShowLabs = hubState.ShowLabs, Installed = installed, Pins = hubState.Pins,
         // A project: what its engine (or a copy of its own) has stays there, and the foundation its engine lacks goes in.
         ProvidedElsewhere = (target is null ? null : ProvidedTo(target, manifest)) ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
@@ -686,6 +702,7 @@ async Task<int> InstallTrackAsync(ParseResult parse, string trackName, Cancellat
             _ => track.Capability(item.Capability)?.Name ?? "",
         };
         var action = item.Action switch { PlanAction.Install => "install", PlanAction.Update => "update ", _ => "here   " };
+        if (item.IsFreeTier) what = $"{what} · {FreeTiers.Word(item.FreeTier)} (not licensed; Full once bought, no reinstall)";
         Console.WriteLine($"  {action}  {item.Id,-26} {item.Version,-8} {Words.Size(item.Size),8}   {what}");
     }
     foreach (var drop in plan.Drops) Console.WriteLine($"  left out  {drop.Id,-24} {drop.Message}");
@@ -708,7 +725,8 @@ async Task<int> InstallTrackAsync(ParseResult parse, string trackName, Cancellat
     foreach (var item in plan.ToChange)
     {
         var p = manifest.Plugin(item.Id)!;
-        var version = p.Latest(engineVersion, channel)!;
+        // The build the plan chose: for a free tier, its newest free-tier build.
+        var version = p.Versions.FirstOrDefault(v => v.Version == item.Version && v.Engine == engineVersion) ?? p.Latest(engineVersion, channel)!;
         try { await installer.InstallAsync(new InstallRequest(p, version, target), parse.GetValue(forceOpt), null, ct); }
         catch (Exception ex) when (ex is EntitlementException or InvalidDataException or HttpRequestException or UnauthorizedAccessException or IOException)
         {
@@ -813,6 +831,18 @@ static object LicenceJson(LicenceSnapshot snap, List<(string Id, ProductLicence 
         }),
     };
 }
+
+// What the free-tier rules read for a plain `forge install`: the account's licensed plugins and the account service's
+// offers, with the catalogue only because the planner's inputs need one.
+async Task<PlanInputs> AccessInputsAsync(Manifest manifest, string engineVersion, string channel, string kind, IReadOnlySet<string> owned, bool offline, CancellationToken ct) =>
+    new()
+    {
+        Catalogue = CatalogueLoader.Load() ?? new Forge.Core.Catalogue.Catalogue(),
+        Manifest = manifest, Engine = engineVersion, Channel = channel, TargetKind = kind,
+        Owned = owned, SignedIn = entitlements.IsSignedIn,
+        Licensed = entitlements.IsSignedIn ? await entitlements.LicensedAsync(ct) : null,
+        Offers = await AccountCatalogue.GetAsync(http, offline, ct),
+    };
 
 async Task<IReadOnlySet<string>> OwnedOrEmptyAsync(CancellationToken ct)
 {

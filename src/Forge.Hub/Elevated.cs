@@ -67,11 +67,22 @@ public static class Elevated
             var (manifest, _) = new ManifestClient(http).GetAsync().GetAwaiter().GetResult();
             new ReleaseDiscovery(http).MergeIntoAsync(manifest).GetAwaiter().GetResult();
             var failures = 0;
+            // id@version: the window chose that build (a free tier's newest free-tier build); a bare id takes the newest.
+            var chosen = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            ids = ids.Select(x =>
+            {
+                var at = x.IndexOf('@');
+                if (at <= 0) return x;
+                chosen[x[..at]] = x[(at + 1)..];
+                return x[..at];
+            }).ToList();
             foreach (var id in manifest.WithHubPlugin(ids, target.Kind))
             {
                 var p = manifest.Plugin(id);
                 if (p is null) { Say($"unknown plugin: {id}"); failures++; continue; }
-                var v = p.Latest(e.Version, channel);
+                var v = chosen.TryGetValue(id, out var want)
+                    ? p.Versions.FirstOrDefault(x => x.Version == want && x.Engine == e.Version) ?? p.Latest(e.Version, channel)
+                    : p.Latest(e.Version, channel);
                 if (v is null) { Say($"skipped: {id} has no {channel} release for UE {e.Version}"); continue; }
                 Say($"start: {id} {v.Version}");
                 try

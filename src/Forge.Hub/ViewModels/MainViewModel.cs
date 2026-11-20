@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Forge.Core;
+using Forge.Core.Catalogue;
 using Forge.Core.Cloud;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
@@ -36,6 +37,8 @@ public partial class MainViewModel : ViewModelBase
     private Manifest? _manifest;
     private HubRelease? _hubUpdate;
     private IReadOnlySet<string> _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    /// <summary>GET me `licensed`: the paid plugins held by a licensed route. Null when the account service did not say.</summary>
+    private IReadOnlySet<string>? _licensed;
     private readonly RunpodClient _runpod;
     private DeclaredRunner? _cloudRunner;
     private DeclaredKey? _cloudKey;
@@ -293,6 +296,8 @@ public partial class MainViewModel : ViewModelBase
     {
         Say("Checking for updates, the list of tools and your account…");
         var catalogue = FetchCatalogueAsync();
+        // Prices, and each paid tool's free tier and its builds: asked again, whatever the day-old cache says.
+        var offers = LoadAccountCatalogueAsync(force: true);
         var hub = _settings.CheckForUpdates ? CheckHubUpdateAsync(quiet: true) : Task.CompletedTask;
         // The licence too, always asked (the server's Retry-After still holds); quiet unless something is wrong for good.
         Task licence = _entitlements.IsSignedIn && !_previewSignedIn ? RefreshLicenceAsync(force: true) : Task.CompletedTask;
@@ -304,7 +309,7 @@ public partial class MainViewModel : ViewModelBase
             try { await LoadProfileAsync(); }
             catch (Exception ex) when (ex is EntitlementException or HttpRequestException or TaskCanceledException) { Say($"Could not read your account: {ex.Message}"); }
         }
-        try { await Task.WhenAll(catalogue, hub, projectsLook, licence); }
+        try { await Task.WhenAll(catalogue, hub, projectsLook, licence, offers); }
         catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException) { }
         CheckedAt = DateTime.Now.ToString("HH:mm");
         OnPropertyChanged(nameof(WatchLine));
@@ -412,6 +417,8 @@ public partial class MainViewModel : ViewModelBase
             _entitlements.Invalidate();
             var owned = await _entitlements.OwnedAsync();
             _owned = owned;
+            // The paid plugins held by a licensed route (GET me `licensed`); null from an API without the field.
+            _licensed = await _entitlements.LicensedAsync();
             Owned.Clear();
             foreach (var id in owned.OrderBy(x => x)) Owned.Add(id);
             OwnedLine = owned.Count == 0
@@ -421,6 +428,7 @@ public partial class MainViewModel : ViewModelBase
         catch (Exception ex) when (ex is EntitlementException or HttpRequestException)
         {
             _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            _licensed = null;
             OwnedLine = ex.Message;
         }
         Rebuild();
@@ -470,7 +478,7 @@ public partial class MainViewModel : ViewModelBase
         if (_entitlements.IsSignedIn) _ = RefreshLicenceAsync(force: true);
         else LicenceChanged();
         if (_entitlements.IsSignedIn) _ = LoadProfileAsync();
-        else { Avatar = null; AccountName = AccountEmail = AccountUid = AccountProviders = OwnedLine = ""; Owned.Clear(); _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase); }
+        else { Avatar = null; AccountName = AccountEmail = AccountUid = AccountProviders = OwnedLine = ""; Owned.Clear(); _owned = new HashSet<string>(StringComparer.OrdinalIgnoreCase); _licensed = null; }
         Rebuild();
     }
 
@@ -745,13 +753,23 @@ public partial class MainViewModel : ViewModelBase
         Sets.Clear();
         if (_manifest is null || Target is null) { AfterRebuild(); return; }
         var engine = SelectedEngine!.Version;
+        var inputs = Inputs();
         foreach (var set in _manifest.Sets)
         {
             var group = new SetGroup(set.Id, set.Name, this);
             foreach (var id in set.Members)
             {
                 if (_manifest.Plugin(id) is not { } p) continue;
-                group.Plugins.Add(new PluginRow(p, p.Latest(engine, Channel), _state.Find(Target, p.Id), this, _entitlements.IsSignedIn, _owned.Contains(p.Id)));
+                var access = inputs is null ? (p.IsPaid && !_owned.Contains(p.Id) ? PaidAccess.NotOwned : PaidAccess.Full) : FreeTiers.AccessOf(p, inputs);
+                var build = inputs is null ? p.Latest(engine, Channel) : FreeTiers.BuildFor(p, inputs) ?? p.Latest(engine, Channel);
+                var includedWith = access is PaidAccess.NotOwned && AccountCatalogue?.Plugin(p.Id)?.IncludedWith is { Length: > 0 } parent
+                    ? Catalogue?.ProductOfComponent(parent)?.Name ?? AccountCatalogue.Plugin(parent)?.Name ?? parent : null;
+                group.Plugins.Add(new PluginRow(p, build, _state.Find(Target, p.Id), this, _entitlements.IsSignedIn, _owned.Contains(p.Id))
+                {
+                    Access = access,
+                    Tier = access == PaidAccess.FreeTier && inputs is not null ? FreeTiers.TierOf(p.Id, inputs) : null,
+                    IncludedWithName = includedWith,
+                });
             }
             group.Refresh();
             Sets.Add(group);
@@ -808,8 +826,8 @@ public partial class MainViewModel : ViewModelBase
     internal Task InstallSetAsync(SetGroup set)
     {
         if (!_entitlements.IsSignedIn) return SignInAsync();
-        var ids = set.Plugins.Where(r => r.Latest is not null && (!r.IsPaid || r.Owned)).Select(r => r.Id).ToArray();
-        var left = set.Plugins.Where(r => r.Latest is not null && r.IsPaid && !r.Owned).Select(r => r.Id).ToList();
+        var ids = set.Plugins.Where(r => r.Latest is not null && !r.NeedsPurchase).Select(r => r.Id).ToArray();
+        var left = set.Plugins.Where(r => r.Latest is not null && r.NeedsPurchase).Select(r => r.Id).ToList();
         if (left.Count > 0) Say($"not on your account, so not installed: {string.Join(", ", left)}. Buy at {CloudConfig.PluginsUrl}");
         return ids.Length > 0 ? RunAsync(ids) : Task.CompletedTask;
     }
@@ -847,7 +865,7 @@ public partial class MainViewModel : ViewModelBase
                 {
                     if (uninstall) { if (!installer.Uninstall(Target, id)) Say($"not installed: {id}"); continue; }
                     var p = _manifest.Plugin(id)!;
-                    var v = p.Latest(SelectedEngine.Version, Channel);
+                    var v = BuildToInstall(p);
                     if (v is null) { Say($"{id} has no build for Unreal Engine {SelectedEngine.Version} yet."); continue; }
                     try
                     {
@@ -863,7 +881,7 @@ public partial class MainViewModel : ViewModelBase
             }
             else
             {
-                await RunElevatedAsync(uninstall ? "uninstall" : "install", ids);
+                await RunElevatedAsync(uninstall ? "uninstall" : "install", uninstall ? ids : WithVersions(ids));
             }
         }
         finally
@@ -985,7 +1003,14 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
     public string Id => Plugin.Id;
     public string Meta => $"{Plugin.Role} · {(Plugin.Distribution == "open" ? "open source · free" : Plugin.IsPaid ? "paid" : "free")}" + (Plugin.Dependencies.Count > 0 ? $" · needs {string.Join(", ", Plugin.Dependencies)}" : "");
     public bool IsPaid => Plugin.IsPaid;
-    public bool NeedsPurchase => IsPaid && !Owned;
+    /// <summary>How the account may have it (free tiers): set by the window; without it, owning it is all that counts.</summary>
+    public PaidAccess Access { get; init; } = PaidAccess.Full;
+    /// <summary>"lite" or "trial" when it installs as its free tier.</summary>
+    public string? Tier { get; init; }
+    /// <summary>The name of what it comes with, when it is included with another paid tool the account does not hold.</summary>
+    public string? IncludedWithName { get; init; }
+    public bool IsFreeTier => Tier is not null;
+    public bool NeedsPurchase => IsPaid && !Owned && Access is not (PaidAccess.Full or PaidAccess.FreeTier);
     public bool HasUpdate => Installed is not null && Latest is not null && Installed.Version != Latest.Version;
 
     private string LatestLabel => Latest is null ? "" : Latest.Channel == Settings.Nightly ? $"{Latest.Version} · nightly" : Latest.Version;
@@ -999,20 +1024,23 @@ public sealed partial class PluginRow(PluginInfo plugin, VersionInfo? latest, In
     public string Status =>
         Latest is null ? "not released"
         : !SignedIn ? "sign in to install"
+        : NeedsPurchase && IncludedWithName is { } parent ? $"comes with {parent}"
         : NeedsPurchase ? "paid · not on your account"
-        : Installed is null ? (Owned ? "on your account" : "not installed")
+        : Installed is null ? (IsFreeTier ? $"paid · installs as {FreeTiers.Word(Tier)}" : Owned ? "on your account" : "not installed")
+        : IsFreeTier && !HasUpdate ? $"up to date · runs as {FreeTiers.Word(Tier)}"
         : HasUpdate ? "update available"
         : "up to date";
 
     public string ActionLabel =>
         Latest is null ? "—"
         : !SignedIn ? "Sign in"
+        : NeedsPurchase && IncludedWithName is not null ? "—"
         : NeedsPurchase ? "Add to cart"
-        : Installed is null ? "Install"
+        : Installed is null ? (IsFreeTier ? $"Install {FreeTiers.Word(Tier)}" : "Install")
         : HasUpdate ? "Update"
         : "Installed";
 
-    public bool CanAct => Latest is not null && (!SignedIn || NeedsPurchase || Installed is null || HasUpdate);
+    public bool CanAct => Latest is not null && (!SignedIn || NeedsPurchase && IncludedWithName is null || !NeedsPurchase && (Installed is null || HasUpdate));
     public bool CanUninstall => Installed is not null;
     public bool IsCurrent => Installed is not null && !HasUpdate;
 
