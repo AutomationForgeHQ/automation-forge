@@ -111,10 +111,14 @@ public sealed partial class ProductPageViewModel : PageViewModel
         var size = Product.Plugins.Concat(DefaultEngineComponents()).Select(id => Hub.Manifest?.Plugin(id)?.Latest(Hub.EngineVersion, Hub.Channel)?.Size ?? 0).Sum();
         ButtonLine = State.NeedsPurchase
             ? (State.PaymentsLive ? "Opens your Kovati account in the browser. It appears here as soon as it is yours." : "You can read about it on kovati.dev.")
+            : State.IsNotBuilt ? $"Built for Unreal Engine {string.Join(", ", BuiltFor())} today. Choose another target under Install into, or come back when it is built."
             : State.IsComing ? ""
             : $"{Cat.PriceLabel(State.PriceKey)} · {Words.Size(size)}{(DefaultEngineComponents().Any() ? " with its engines" : "")}";
         if (ProductFacts.FreeTierPromised(Product, Hub.Manifest ?? new Manifest())) ButtonLine = "A free tier is planned. Today this is the full version.";
-        OnThisComputer = State.IsInstalled ? $"{State.InstalledVersion} · {Hub.EngineLabel}" + (IsPinned ? $" · Pinned at {State.InstalledVersion}" : "") : "Not installed.";
+        OnThisComputer = !State.IsInstalled ? "Not installed."
+            : State.FromElsewhere ? $"{State.InstalledVersion} · {Hub.TargetProject?.Name ?? "the project"} has it from its engine or a copy of its own"
+            : $"{State.InstalledVersion} · {Hub.TargetLabel}" + (IsPinned ? $" · Pinned at {State.InstalledVersion}" : "");
+        foreach (var name in new[] { nameof(HasManyTargets), nameof(IsProjectTarget), nameof(ProjectTargetLine) }) OnPropertyChanged(name);
 
         Engines.Clear();
         foreach (var e in Cat.Products.Where(e => e.IsEngine && e.Extends == Product.Slug))
@@ -144,6 +148,21 @@ public sealed partial class ProductPageViewModel : PageViewModel
                      nameof(Newest), nameof(HasEarlier), nameof(IsInstalled), nameof(IsPinned), nameof(PinLabel), nameof(AgentsLine), nameof(HasPicture) })
             OnPropertyChanged(name);
     }
+
+    /// <summary>The Unreal Engine versions the product's first component is built for, newest first.</summary>
+    private IEnumerable<string> BuiltFor() =>
+        Product.MainComponent is { } main && Hub.Manifest?.Plugin(main) is { } p
+            ? p.Versions.Where(v => Hub.Channel == Core.Settings.Nightly || v.Channel == Core.Settings.Stable).Select(v => v.Engine).Distinct()
+                .OrderByDescending(v => v, Core.Engines.VersionOrder.Instance)
+            : [];
+
+    // ── Install into (0.5.0-beta.3) ──────────────────────────────────────
+
+    public bool HasManyTargets => Hub.HasManyTargets;
+    public bool IsProjectTarget => Hub.TargetIsProject;
+    public string ProjectTargetLine => Hub.TargetProject is { } p
+        ? $"Installs into {p.Name} only, in its Plugins\\{Core.Paths.PluginFolder} folder." + (p.IsCodeProject ? " It is a C++ project: rebuild it in your IDE before opening it." : "")
+        : "";
 
     private IEnumerable<string> DefaultEngineComponents()
     {
@@ -186,7 +205,7 @@ public sealed partial class ProductPageViewModel : PageViewModel
     private void AskRemove()
     {
         var ids = Hub.RemovalSet(Product);
-        RemoveTitle = $"Remove {Product.Name} from {Hub.EngineLabel}?";
+        RemoveTitle = $"Remove {Product.Name} from {Hub.TargetLabel}?";
         RemoveLine = ids.Count > 1
             ? $"Its engines and its agent access go with it: {Words.Count(ids.Count, "component")}. Your projects keep what you made."
             : "Your projects keep what you made.";

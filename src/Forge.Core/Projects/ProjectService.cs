@@ -10,13 +10,28 @@ namespace Forge.Core.Projects;
 /// </summary>
 public static class ProjectService
 {
+    /// <summary>
+    /// FORGE_UNREAL_RECORDS: "off" reads no Unreal or launcher records; a folder is read in place of %LOCALAPPDATA%
+    /// (and its Documents folder in place of Documents). For the screenshot harness and tests: fixed projects only.
+    /// </summary>
+    public const string RecordsVariable = "FORGE_UNREAL_RECORDS";
+
     /// <summary>The discovery inputs from the Hub's choices and the receipts.</summary>
-    public static ProjectDiscoveryInputs InputsFor(HubState state, InstallState receipts) => new()
+    public static ProjectDiscoveryInputs InputsFor(HubState state, InstallState receipts)
     {
-        UserFolders = state.ProjectFolders.ToList(),
-        ReceiptRoots = receipts.Items.Where(i => i.TargetKind == "project").Select(i => i.TargetRoot).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
-        Remembered = state.Projects.Select(p => p.Path).ToList(),
-    };
+        var inputs = new ProjectDiscoveryInputs
+        {
+            UserFolders = state.ProjectFolders.ToList(),
+            ReceiptRoots = receipts.Items.Where(i => i.TargetKind == "project").Select(i => i.TargetRoot).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
+            Remembered = state.Projects.Select(p => p.Path).ToList(),
+        };
+        return Environment.GetEnvironmentVariable(RecordsVariable) switch
+        {
+            null or "" => inputs,
+            var off when off.Equals("off", StringComparison.OrdinalIgnoreCase) => inputs with { LocalAppData = null, Documents = null },
+            var folder => inputs with { LocalAppData = folder, Documents = Path.Combine(folder, "Documents") },
+        };
+    }
 
     public static ProjectCache ToCache(ProjectDiscovery d, DateTime now) => new()
     {

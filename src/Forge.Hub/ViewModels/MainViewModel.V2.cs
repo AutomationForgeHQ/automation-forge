@@ -10,6 +10,7 @@ using Forge.Core.Cloud;
 using Forge.Core.Engines;
 using Forge.Core.Entitlements;
 using Forge.Core.Installs;
+using Forge.Core.Projects;
 using Forge.Hub.ViewModels.Pages;
 
 namespace Forge.Hub.ViewModels;
@@ -51,6 +52,7 @@ public partial class MainViewModel
     public bool IsLibraryPlace => CurrentPage is LibraryPageViewModel or ComponentsPageViewModel;
     public bool IsRunnersPlace => CurrentPage is RunnersPageViewModel;
     public bool IsBrowsePlace => CurrentPage is BrowsePageViewModel;
+    public bool IsProjectsPlace => CurrentPage is ProjectsPageViewModel;
 
     partial void OnCurrentPageChanged(PageViewModel? value)
     {
@@ -58,6 +60,7 @@ public partial class MainViewModel
         OnPropertyChanged(nameof(IsLibraryPlace));
         OnPropertyChanged(nameof(IsRunnersPlace));
         OnPropertyChanged(nameof(IsBrowsePlace));
+        OnPropertyChanged(nameof(IsProjectsPlace));
         if (ShowSearch) SearchText = "";
         OnPropertyChanged(nameof(CanGoBack));
         OnPropertyChanged(nameof(BackLabel));
@@ -71,6 +74,7 @@ public partial class MainViewModel
     {
         Catalogue = CatalogueLoader.Load();
         if (Catalogue is null) Say($"Could not read the list of tracks. {CatalogueLoader.LastError}");
+        LoadCachedProjects();
         CurrentPage = new HomePageViewModel(this);
         _ = LoadAccountCatalogueAsync();
         _ = FetchCatalogueAsync();
@@ -86,9 +90,10 @@ public partial class MainViewModel
     private void RememberTarget()
     {
         _targetWritable = null;
-        if (SelectedEngine is null) return;
-        if (HubState.LastTarget is { } last && SamePath(last, SelectedEngine.PluginRoot)) return;
-        HubState.LastTarget = SelectedEngine.PluginRoot;
+        // Not while the first start is still choosing: the engine is set before the projects are known.
+        if (!_targetsReady || Target is null) return;
+        if (HubState.LastTarget is { } last && SamePath(last, Target.Root)) return;
+        HubState.LastTarget = Target.Root;
         // Not before the first-start migration: saving first would make the file look as if v2 had run before.
         if (_migrated) TrySaveState();
     }
@@ -144,10 +149,11 @@ public partial class MainViewModel
         }
     }
 
-    /// <summary>Unreal Editor is running from the chosen engine.</summary>
+    /// <summary>Unreal Editor is running from the chosen engine; for a project target, it has that project open.</summary>
     public bool EditorRunningOnTarget()
     {
         if (SelectedEngine is null) return false;
+        if (Target?.Kind == "project" && TargetProject is { } project) return EditorProcesses.Check(project.Path) == EditorOnProject.Yes;
         var root = SelectedEngine.Path.TrimEnd('\\', '/');
         var running = false;
         foreach (var p in Process.GetProcessesByName("UnrealEditor"))
@@ -172,12 +178,20 @@ public partial class MainViewModel
             : "Automation Forge";
     }
 
-    /// <summary>Component id to version installed on the chosen target.</summary>
-    public IReadOnlyDictionary<string, string> InstalledOnTarget() =>
-        Target is null
-            ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            : _state.On(Target).GroupBy(i => i.Plugin, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First().Version, StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// Component id to version installed on the chosen target. For a project, also the folders in its
+    /// Plugins\AutomationForge that have no receipt on this machine (a teammate installed and committed them).
+    /// </summary>
+    public IReadOnlyDictionary<string, string> InstalledOnTarget()
+    {
+        if (Target is null) return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var map = _state.On(Target).GroupBy(i => i.Plugin, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First().Version, StringComparer.OrdinalIgnoreCase);
+        if (Target.Kind == "project" && TargetProject is { } p)
+            foreach (var (id, v) in ManagedInProject(p))
+                if (!map.ContainsKey(id) && v.Length > 0) map[id] = v;
+        return map;
+    }
 
     /// <summary>Everything the planner reads, as the window knows it now. Null until the manifest and the catalogue are in.</summary>
     public PlanInputs? Inputs() =>
@@ -187,7 +201,9 @@ public partial class MainViewModel
             Manifest = _manifest,
             Engine = EngineVersion,
             Channel = Channel,
-            TargetKind = "engine",
+            TargetKind = Target?.Kind ?? "engine",
+            ProvidedElsewhere = ProvidedToTarget(),
+            FoundationInProject = true,
             Owned = _owned,
             SignedIn = IsSignedIn,
             AgentAccess = HubState.AgentsOn,
@@ -411,6 +427,12 @@ public partial class MainViewModel
     {
         if (_manifest is null || Target is null || SelectedEngine is null || items.Count == 0) return;
         void Post(InstallEvent e) => Dispatcher.UIThread.Post(() => report(e));
+        var project = Target.Kind == "project" ? TargetProject : null;
+        if (project is not null && !await MayWriteProjectAsync(project.Path, descriptorChange: false))
+        {
+            foreach (var i in items) Post(new InstallEvent(i.Id, InstallEventKind.Declined, Message: $"Close Unreal Editor on {project.Name}, then try again. Nothing changed."));
+            return;
+        }
         Busy = true;
         try
         {
@@ -454,6 +476,11 @@ public partial class MainViewModel
             Busy = false;
             Status = "Ready.";
         }
+        if (project is not null)
+        {
+            SayAfterProjectChange(project, installed: true);
+            await ReinspectProjectsAsync();
+        }
     }
 
     private static readonly Regex LogLine = new(@"^(?<verb>start|installed|updated|current|failed|skipped|unknown plugin):\s*(?<id>[A-Za-z0-9]+)\s*(?:—\s*(?<msg>.*))?", RegexOptions.Compiled);
@@ -470,8 +497,7 @@ public partial class MainViewModel
         psi.ArgumentList.Add(Elevated.Flag);
         psi.ArgumentList.Add("install");
         foreach (var id in ids) psi.ArgumentList.Add(id);
-        psi.ArgumentList.Add("--engine"); psi.ArgumentList.Add(SelectedEngine!.Path);
-        psi.ArgumentList.Add("--channel"); psi.ArgumentList.Add(Channel);
+        AddTargetArguments(psi);
         try
         {
             if (File.Exists(Elevated.LogPath)) File.Delete(Elevated.LogPath);

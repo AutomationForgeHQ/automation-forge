@@ -28,6 +28,9 @@ internal static class Program
             case "slice0":
                 Slice0.Run(outDir, args[2], args[3]);
                 break;
+            case "beta3":
+                Screens.RunBeta3(outDir, args.Skip(2).ToArray());
+                break;
             case "screens":
                 Screens.Run(outDir, args.Skip(2).ToArray());
                 break;

@@ -19,8 +19,18 @@ public sealed class ProductState
     public bool PaymentsLive { get; init; }
     public bool SignedIn { get; init; }
 
+    /// <summary>Whether the first component has a build for the target's Unreal Engine version.</summary>
+    public BuildAvailability Availability { get; init; } = BuildAvailability.Built;
+    /// <summary>The target's Unreal Engine version, "5.8".</summary>
+    public string Engine { get; init; } = "5.8";
+    /// <summary>A project target has it from its engine or a copy of its own, not from Kovati Hub's folder in it.</summary>
+    public bool FromElsewhere { get; init; }
+
     public bool IsInstalled => InstalledVersion is not null;
     public bool IsComing => Status == ProductStatus.Coming;
+    /// <summary>Released, but not for this Unreal Engine version: "Not built for Unreal Engine 5.7 yet."</summary>
+    public bool IsNotBuilt => IsComing && Availability == BuildAvailability.NotBuiltForEngine;
+    public string NotBuiltLine => TrackPlanner.NotBuiltLine(Engine);
     public bool IsLabs => Stage == Stage.Labs;
     public bool NeedsPurchase => Status == ProductStatus.NeedsPurchase;
 
@@ -32,6 +42,12 @@ public sealed class ProductState
         var status = TrackPlanner.StatusOf(p, inputs);
         var main = p.MainComponent;
         var installed = main is not null && inputs.Installed.TryGetValue(main, out var v) ? v : null;
+        var elsewhere = false;
+        if (installed is null && main is not null && inputs.ProvidedElsewhere.TryGetValue(main, out var ev))
+        {
+            elsewhere = true;
+            installed = ev.Length > 0 ? ev : "here";
+        }
         var latest = main is null ? null : inputs.Manifest.Plugin(main)?.Latest(inputs.Engine, inputs.Channel)?.Version;
         var owned = p.Plugins.Count > 0 && p.Plugins.Any(id => inputs.Manifest.Plugin(id)?.IsPaid == true)
                     && p.Plugins.All(id => inputs.Owned.Contains(id) || inputs.Manifest.Plugin(id)?.IsPaid != true);
@@ -48,6 +64,9 @@ public sealed class ProductState
             Price = hub.PriceOf(p),
             PaymentsLive = hub.PaymentsLive,
             SignedIn = hub.IsSignedIn,
+            Availability = TrackPlanner.AvailabilityOf(p, inputs),
+            Engine = inputs.Engine,
+            FromElsewhere = elsewhere,
         };
     }
 
@@ -56,7 +75,8 @@ public sealed class ProductState
     {
         var chips = new List<ChipModel> { Owned ? new ChipModel("OWNED", "owned", onPicture) : ChipModel.Price(cat, PriceKey, onPicture) };
         if (Product.Trial) chips.Add(new ChipModel(cat.Labels.Trial.ToUpperInvariant(), "free", onPicture));
-        if (IsComing) chips.Add(new ChipModel(cat.StageLabel(Stage.Coming).ToUpperInvariant(), "soon", onPicture));
+        if (IsNotBuilt) chips.Add(new ChipModel($"NOT BUILT FOR {Engine}", "soon", onPicture));
+        else if (IsComing) chips.Add(new ChipModel(cat.StageLabel(Stage.Coming).ToUpperInvariant(), "soon", onPicture));
         else if (ChipModel.Stage(cat, Stage, onPicture, showReleased) is { } s) chips.Add(s);
         return chips;
     }
@@ -64,6 +84,7 @@ public sealed class ProductState
     /// <summary>The main button's words (4.7, 4.10) and whether it can be pressed.</summary>
     public (string Text, bool Enabled, bool Visible) Button(bool productPage)
     {
+        if (IsNotBuilt) return productPage ? (NotBuiltLine.TrimEnd('.'), false, true) : ("", false, false);
         if (IsComing) return productPage ? ("See it on kovati.dev ↗", true, true) : ("", false, false);
         if (NeedsPurchase) return PaymentsLive ? ("Add to cart", true, true) : ("Buying opens soon", false, true);
         if (IsInstalled) return HasUpdate ? ($"Update to {LatestVersion}", true, true) : ("Installed", false, true);

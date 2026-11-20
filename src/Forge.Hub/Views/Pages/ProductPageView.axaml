@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:p="using:Forge.Hub.ViewModels.Pages"
+             xmlns:vm="using:Forge.Hub.ViewModels"
              xmlns:core="using:Forge.Core.Catalogue"
              xmlns:views="using:Forge.Hub.Views"
              xmlns:man="using:Forge.Core.Manifest"
@@ -77,6 +78,18 @@
             <TextBlock Text="{Binding Subline}" FontSize="14" LineHeight="21" Foreground="{StaticResource Bone80Brush}" TextWrapping="Wrap" Margin="0,8,0,0" />
             <Button Classes="primary" Content="{Binding ButtonText}" Command="{Binding ActCommand}" IsEnabled="{Binding ButtonEnabled}" HorizontalAlignment="Left" MinWidth="200" Margin="0,22,0,0" />
             <TextBlock Classes="small" Text="{Binding ButtonLine}" TextWrapping="Wrap" Margin="0,8,0,0" />
+            <!-- Install into (0.5.0-beta.3): the same targets as the footer and the track pages. -->
+            <StackPanel Spacing="4" Margin="0,12,0,0" IsVisible="{Binding HasManyTargets}" MaxWidth="420" HorizontalAlignment="Left">
+              <TextBlock Classes="small" Text="Install into" />
+              <ComboBox ItemsSource="{Binding Hub.Targets}" SelectedItem="{Binding Hub.SelectedTarget}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:TargetOption">
+                    <TextBlock Text="{Binding MenuLabel}" TextTrimming="CharacterEllipsis" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <TextBlock Classes="small" Text="{Binding ProjectTargetLine}" IsVisible="{Binding IsProjectTarget}" TextWrapping="Wrap" />
+            </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="20" Margin="0,16,0,0">
               <Button Classes="link smalltext" Content="Open on kovati.dev ↗" Command="{Binding OpenSiteCommand}" IsVisible="{Binding HasSite}" />
               <Button Classes="link smalltext" Content="Docs ↗" Command="{Binding OpenDocsCommand}" IsVisible="{Binding HasDocs}" />

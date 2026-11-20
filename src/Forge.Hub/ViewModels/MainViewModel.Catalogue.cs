@@ -81,7 +81,7 @@ public partial class MainViewModel
     private bool _openedFromEnvironment;
 
     /// <summary>
-    /// FORGE_HUB_OPEN=browse | library | components | track:&lt;slug&gt; | product:&lt;slug&gt;: open that page as soon as the catalogue has it, once.
+    /// FORGE_HUB_OPEN=browse | library | components | projects | track:&lt;slug&gt; | product:&lt;slug&gt;: open that page as soon as the catalogue has it, once.
     /// For checking a development build (with FORGE_HUB_SNAPSHOT); the door from the web (kovatihub:, slice 6)
     /// will open pages the same way. A slug only a fetched catalogue has opens when that copy arrives.
     /// </summary>
@@ -95,6 +95,7 @@ public partial class MainViewModel
             case "browse": ShowBrowse(); break;
             case "library": ShowLibrary(); break;
             case "components": ShowComponents(); break;
+            case "projects": ShowProjects(); break;
             case "track" when cat.Track(slug) is not null: OpenTrack(slug); break;
             case "product" when cat.Product(slug) is not null: OpenProduct(slug); break;
             default: return; // not in this copy (yet)

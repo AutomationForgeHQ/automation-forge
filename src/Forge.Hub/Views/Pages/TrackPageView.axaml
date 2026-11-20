@@ -188,10 +188,10 @@
               <Border Classes="hairline" Margin="0,16" />
               <TextBlock Classes="small" Text="Install into" />
               <TextBlock Text="{Binding TargetLabel}" FontSize="14" Margin="0,3,0,0" IsVisible="{Binding !HasManyEngines}" />
-              <ComboBox ItemsSource="{Binding Hub.Engines}" SelectedItem="{Binding Hub.SelectedEngine}" IsVisible="{Binding HasManyEngines}" HorizontalAlignment="Stretch" Margin="0,6,0,0">
+              <ComboBox ItemsSource="{Binding Hub.Targets}" SelectedItem="{Binding Hub.SelectedTarget}" IsVisible="{Binding HasManyEngines}" HorizontalAlignment="Stretch" Margin="0,6,0,0">
                 <ComboBox.ItemTemplate>
-                  <DataTemplate x:DataType="eng:EngineInstall">
-                    <TextBlock Text="{Binding FullVersion, StringFormat='Unreal Engine {0}'}" />
+                  <DataTemplate x:DataType="vm:TargetOption">
+                    <TextBlock Text="{Binding MenuLabel}" TextTrimming="CharacterEllipsis" />
                   </DataTemplate>
                 </ComboBox.ItemTemplate>
               </ComboBox>

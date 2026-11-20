@@ -50,7 +50,7 @@ public sealed partial class TrackPageViewModel
         _checklist = list;
         ApplyChecklist(list);
 
-        var record = Hub.SelectedEngine is { } e ? Hub.HubState.Track(Track.Slug, e.PluginRoot) : null;
+        var record = Hub.SelectedEngine is not null ? Hub.HubState.Track(Track.Slug, Hub.TargetRoot) : null;
         HasChecklistLink = Mode != PanelMode.Checklist && !list.AllDone;
         ChecklistLink = record is null ? "Set-up checklist" : $"Set-up checklist ({list.Left} left)";
 

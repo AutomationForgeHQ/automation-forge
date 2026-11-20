@@ -17,7 +17,7 @@ namespace Forge.Hub.Snapshots;
 /// (FORGE_MANIFEST_URL), no GitHub (FORGE_RELEASES_API=off) and no account service. Nothing on this machine's
 /// real engines or sign-in is read or written.
 /// </summary>
-internal static class Screens
+internal static partial class Screens
 {
     private static string _scratch = "";
     private static string _out = "";
@@ -39,6 +39,8 @@ internal static class Screens
         Environment.SetEnvironmentVariable("FORGE_SITE_URL", "http://127.0.0.1:9");
         Environment.SetEnvironmentVariable("FORGE_API_URL", "http://127.0.0.1:9/api");
         Environment.SetEnvironmentVariable("FORGE_ACCOUNT_URL", "http://127.0.0.1:9");
+        // No Unreal or launcher records of this machine: a scenario that wants projects gives its own.
+        Environment.SetEnvironmentVariable("FORGE_UNREAL_RECORDS", "off");
 
         FirstRun();
         NoEngine();
@@ -47,6 +49,7 @@ internal static class Screens
         Setup();
         Updates();
         Browse();
+        Beta3();
         Console.WriteLine($"done: {outDir}");
     }
 
@@ -474,7 +477,7 @@ internal static class Screens
         Snap.Pump(300);
     }
 
-    private static (MainWindow window, MainViewModel vm) Open(string scenario, (string id, string version)[] receipts, bool engine = true, Action<string, string>? prepare = null)
+    private static (MainWindow window, MainViewModel vm) Open(string scenario, (string id, string version)[] receipts, bool engine = true, Action<string, string>? prepare = null, string? extraEngine = null)
     {
         var data = Path.Combine(_scratch, scenario, "data");
         var engineDir = Path.Combine(_scratch, scenario, "UE_5.8");
@@ -495,7 +498,7 @@ internal static class Screens
             Directory.CreateDirectory(Path.Combine(engineDir, "Engine", "Build"));
             File.WriteAllText(Path.Combine(engineDir, "Engine", "Build", "Build.version"),
                 """{ "MajorVersion": 5, "MinorVersion": 8, "PatchVersion": 1, "IsPromotedBuild": 1 }""");
-            Environment.SetEnvironmentVariable("FORGE_ENGINES", engineDir);
+            Environment.SetEnvironmentVariable("FORGE_ENGINES", extraEngine is null ? engineDir : engineDir + ";" + extraEngine);
         }
         else Environment.SetEnvironmentVariable("FORGE_ENGINES", Path.Combine(_scratch, scenario, "no-engine-here"));
 
@@ -521,6 +524,7 @@ internal static class Screens
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Forge.sln"))) dir = dir.Parent;
-        return dir?.FullName ?? throw new InvalidOperationException("Run from inside the repository.");
+        // Built to a folder outside the repository (C: is short on space): FORGE_REPO names it.
+        return dir?.FullName ?? Environment.GetEnvironmentVariable("FORGE_REPO") ?? throw new InvalidOperationException("Run from inside the repository, or set FORGE_REPO.");
     }
 }

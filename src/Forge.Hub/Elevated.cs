@@ -33,15 +33,17 @@ public static class Elevated
         {
             var verb = args.Length > 0 ? args[0] : "";
             var ids = new List<string>();
-            string? engine = null; var channel = Settings.Stable;
+            string? engine = null, project = null; var channel = Settings.Stable;
             for (var i = 1; i < args.Length; i++)
             {
                 if (args[i] == "--engine" && i + 1 < args.Length) engine = args[++i];
+                else if (args[i] == "--project" && i + 1 < args.Length) project = args[++i];
                 else if (args[i] == "--channel" && i + 1 < args.Length) channel = args[++i];
                 else ids.Add(args[i]);
             }
             var e = EngineLocator.Resolve(engine) ?? throw new InvalidOperationException($"No engine at {engine}.");
-            var target = InstallTarget.Engine(e);
+            // A project the window could not write to (a folder that needs rights): builds for its engine, into the project.
+            var target = project is null ? InstallTarget.Engine(e) : InstallTarget.Project(project);
 
             using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
             http.DefaultRequestHeaders.UserAgent.ParseAdd(AppInfo.UserAgent("hub-elevated"));

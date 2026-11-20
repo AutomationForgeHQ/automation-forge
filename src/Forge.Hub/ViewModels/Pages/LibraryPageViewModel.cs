@@ -96,7 +96,7 @@ public sealed partial class LibraryPageViewModel : PageViewModel
         foreach (var r in _list.Pinned) PinnedRows.Add(new UpdateRowModel(this, r));
 
         var count = _list.Count + (Hub.HasHubUpdate ? 1 : 0);
-        SummaryLine = $"{Words.Count(count, "update")} for {Hub.EngineLabel}";
+        SummaryLine = $"{Words.Count(count, "update")} for {Hub.TargetLabel}";
         UpdateAllTip = _list.UpdateAllTip;
         UpdatesTabLabel = count > 0 ? $"Updates {count}" : "Updates";
 
@@ -194,7 +194,7 @@ public sealed partial class LibraryPageViewModel : PageViewModel
     private async Task CopyList()
     {
         if (_list is null) return;
-        var lines = new List<string> { $"Kovati Hub, {Hub.EngineLabel}, {DateTime.Now:d MMMM yyyy}" };
+        var lines = new List<string> { $"Kovati Hub, {Hub.TargetLabel}, {DateTime.Now:d MMMM yyyy}" };
         foreach (var r in _list.Rows.Where(r => !r.IsPinned))
             foreach (var p in r.Parts) lines.Add($"{p.Id} {p.From} -> {p.To}");
         var text = string.Join(Environment.NewLine, lines);

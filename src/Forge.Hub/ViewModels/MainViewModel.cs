@@ -294,19 +294,20 @@ public partial class MainViewModel : ViewModelBase
         var hub = _settings.CheckForUpdates ? CheckHubUpdateAsync(quiet: true) : Task.CompletedTask;
         // The profile reload reads what the account owns as well, so the refresh does not read it twice.
         await RefreshAsync(loadOwned: false);
+        var projectsLook = RefreshProjectsAsync();
         if (_entitlements.IsSignedIn)
         {
             try { await LoadProfileAsync(); }
             catch (Exception ex) when (ex is EntitlementException or HttpRequestException or TaskCanceledException) { Say($"Could not read your account: {ex.Message}"); }
         }
-        try { await Task.WhenAll(catalogue, hub); }
+        try { await Task.WhenAll(catalogue, hub, projectsLook); }
         catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException) { }
         CheckedAt = DateTime.Now.ToString("HH:mm");
         OnPropertyChanged(nameof(WatchLine));
         Say($"Checked {CheckedAt}.");
     }
 
-    partial void OnSelectedEngineChanged(EngineInstall? value) { Rebuild(); RememberTarget(); }
+    partial void OnSelectedEngineChanged(EngineInstall? value) { SyncTargetToEngine(); Rebuild(); RememberTarget(); }
     partial void OnUpdatesCountChanged(int value) { OnPropertyChanged(nameof(HasUpdates)); OnPropertyChanged(nameof(UpdatesLabel)); }
 
     partial void OnIsNightlyChanged(bool value)
@@ -328,7 +329,10 @@ public partial class MainViewModel : ViewModelBase
         _settings.Save();
     }
 
-    private InstallTarget? Target => SelectedEngine is null ? null : InstallTarget.Engine(SelectedEngine);
+    /// <summary>Where installs go: the chosen target (an engine, or one project), else the chosen engine.</summary>
+    internal InstallTarget? Target => SelectedTarget is { } t && SelectedEngine is not null && SamePath(t.Engine.Path, SelectedEngine.Path)
+        ? t.Install
+        : SelectedEngine is null ? null : InstallTarget.Engine(SelectedEngine);
 
     [RelayCommand]
     private Task Refresh() => RefreshAsync(loadOwned: true);
@@ -356,7 +360,11 @@ public partial class MainViewModel : ViewModelBase
             Say($"Could not load the list of tools: {ex.Message}");
         }
         finally { Busy = false; }
+        // The projects, once the list of tools is in (it names the Kovati components): at start, then on Check now.
+        if (!_projectsLooked) { _projectsLooked = true; _ = RefreshProjectsAsync(); }
     }
+
+    private bool _projectsLooked;
 
     public bool IsSignedIn => _previewSignedIn || _entitlements.IsSignedIn;
     public bool HasAvatar => Avatar is not null;
@@ -806,7 +814,21 @@ public partial class MainViewModel : ViewModelBase
     private async Task RunAsync(string[] ids, bool uninstall = false)
     {
         if (_manifest is null || Target is null || SelectedEngine is null) return;
-        if (!uninstall) ids = _manifest.WithHubPlugin(ids, Target.Kind).ToArray();
+        var project = Target.Kind == "project" ? TargetProject : null;
+        if (!uninstall)
+        {
+            if (project is not null)
+            {
+                // A project keeps what it has from its engine or a copy of its own: Unreal refuses two plugins of one name.
+                var elsewhere = ProvidedToTarget();
+                var mine = InstalledOnTarget();
+                ids = _manifest.WithHubPlugin(ids, Target.Kind, new HashSet<string>(elsewhere.Keys, StringComparer.OrdinalIgnoreCase))
+                    .Where(id => mine.ContainsKey(id) || !elsewhere.ContainsKey(id)).ToArray();
+                if (ids.Length == 0) { Say($"{project.Name} has these already, from its engine or a copy of its own."); return; }
+            }
+            else ids = _manifest.WithHubPlugin(ids, Target.Kind).ToArray();
+        }
+        if (project is not null && !await MayWriteProjectAsync(project.Path, descriptorChange: false)) return;
         Busy = true;
         try
         {
@@ -843,6 +865,11 @@ public partial class MainViewModel : ViewModelBase
             if (!uninstall && _entitlements.IsSignedIn) await LoadOwnedAsync(); else Rebuild();
             Busy = false;
         }
+        if (project is not null)
+        {
+            SayAfterProjectChange(project, installed: !uninstall);
+            await ReinspectProjectsAsync();
+        }
     }
 
     /// <summary>A plugin the editor has loaded cannot be replaced; say so before trying, not after.</summary>
@@ -872,8 +899,7 @@ public partial class MainViewModel : ViewModelBase
         psi.ArgumentList.Add(Elevated.Flag);
         psi.ArgumentList.Add(verb);
         foreach (var id in ids) psi.ArgumentList.Add(id);
-        psi.ArgumentList.Add("--engine"); psi.ArgumentList.Add(SelectedEngine!.Path);
-        psi.ArgumentList.Add("--channel"); psi.ArgumentList.Add(Channel);
+        AddTargetArguments(psi);
         try
         {
             if (File.Exists(Elevated.LogPath)) File.Delete(Elevated.LogPath);
@@ -890,6 +916,14 @@ public partial class MainViewModel : ViewModelBase
         {
             Say("Windows permission was declined. Nothing changed.");
         }
+    }
+
+    /// <summary>The elevated helper's target: --engine, and --project when the target is a project (its engine stays the build's engine).</summary>
+    internal void AddTargetArguments(ProcessStartInfo psi)
+    {
+        psi.ArgumentList.Add("--engine"); psi.ArgumentList.Add(SelectedEngine!.Path);
+        if (Target?.Kind == "project" && TargetProject is { } p) { psi.ArgumentList.Add("--project"); psi.ArgumentList.Add(p.Path); }
+        psi.ArgumentList.Add("--channel"); psi.ArgumentList.Add(Channel);
     }
 
     internal void Say(string line)

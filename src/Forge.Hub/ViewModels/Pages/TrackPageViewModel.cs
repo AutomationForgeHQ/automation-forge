@@ -91,8 +91,8 @@ public sealed partial class TrackPageViewModel : PageViewModel
     }
     public bool PaymentsLive => Hub.PaymentsLive;
     public bool NoEngine => !Hub.HasEngine;
-    public bool HasManyEngines => Hub.HasManyEngines;
-    public string TargetLabel => Hub.EngineLabel;
+    public bool HasManyEngines => Hub.HasManyTargets;
+    public string TargetLabel => Hub.TargetLabel;
     public string ShowComponentsLabel => ShowComponents ? "Hide components" : "Show components";
 
     public bool IsReady => Mode == PanelMode.Ready;
@@ -300,13 +300,14 @@ public sealed partial class TrackPageViewModel : PageViewModel
         }
 
         Rows.Clear();
-        int ready = 0, paid = 0, coming = 0, labs = 0;
+        int ready = 0, paid = 0, coming = 0, labs = 0, notBuilt = 0;
         foreach (var cap in Track.Capabilities)
         {
             var product = cat.Product(cap.Product);
             var status = product is null || inputs is null ? ProductStatus.Coming : TrackPlanner.StatusOf(product, inputs);
             switch (status)
             {
+                case ProductStatus.Coming when product is not null && inputs is not null && TrackPlanner.AvailabilityOf(product, inputs) == BuildAvailability.NotBuiltForEngine: notBuilt++; break;
                 case ProductStatus.Coming: coming++; break;
                 case ProductStatus.Labs: labs++; break;
                 case ProductStatus.NeedsPurchase: paid++; break;
@@ -318,6 +319,7 @@ public sealed partial class TrackPageViewModel : PageViewModel
 
         var parts = new List<string> { $"{ready} ready to install" };
         if (paid > 0) parts.Add($"{paid} paid");
+        if (notBuilt > 0) parts.Add($"{notBuilt} not built for Unreal Engine {Hub.EngineVersion} yet");
         if (coming > 0) parts.Add($"{coming} coming soon");
         if (labs > 0) parts.Add($"{labs} in Labs");
         CountLine = string.Join(" · ", parts);
@@ -334,7 +336,7 @@ public sealed partial class TrackPageViewModel : PageViewModel
     private TrackSelection RememberedOrDefault(PlanInputs inputs)
     {
         var fallback = TrackPlanner.DefaultSelection(Track, inputs);
-        if (Hub.SelectedEngine is not { } e || Hub.HubState.Track(Track.Slug, e.PluginRoot) is not { } record) return fallback;
+        if (Hub.SelectedEngine is null || Hub.HubState.Track(Track.Slug, Hub.TargetRoot) is not { } record) return fallback;
         // What was chosen last time on this target, plus anything the person can now have that is new.
         var engines = fallback.Engines.ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
         foreach (var (cap, list) in record.Engines) engines[cap] = list;
@@ -400,11 +402,12 @@ public sealed partial class TrackPageViewModel : PageViewModel
             ButtonEnabled = false;
         }
         else if (Track.Capabilities.All(c => cat.Product(c.Product) is not { } p || TrackPlanner.StatusOf(p, inputs) == ProductStatus.Coming)
-                 && Hub.EngineVersion != "5.8")
+                 && inputs.Manifest.BuiltFor(Hub.EngineVersion, Hub.Channel) == 0)
         {
-            ButtonText = $"No builds for Unreal Engine {Hub.EngineVersion}";
+            ButtonText = $"No builds for Unreal Engine {Hub.EngineVersion} yet";
             ButtonEnabled = false;
-            Notes.Add("These tools need Unreal Engine 5.8.");
+            var built = inputs.Manifest.EnginesWithBuilds(Hub.Channel);
+            Notes.Add(built.Count == 0 ? "Nothing is built yet." : $"Kovati's tools are built for Unreal Engine {string.Join(", ", built)} today.");
         }
         else if (plan.CapabilityCount == 0)
         {
@@ -424,6 +427,11 @@ public sealed partial class TrackPageViewModel : PageViewModel
                 : anyInstalledTicked ? $"Install {Words.Count(plan.NewCapabilityCount, "more capability", "more capabilities")}"
                 : $"Install {Track.Name}";
             if (!Hub.IsSignedIn) Notes.Add("Free. Your tools are added to your Kovati account, so they follow you to any computer.");
+            if (Hub.TargetProject is { } project)
+            {
+                Notes.Add($"Installs into {project.Name} only, in its Plugins\\{Core.Paths.PluginFolder} folder. What it has from Unreal Engine {Hub.EngineVersion} stays there.");
+                if (project.IsCodeProject) Notes.Add($"{project.Name} is a C++ project: rebuild it in your IDE before opening it.");
+            }
             if (Hub.TargetNeedsAdmin) Notes.Add("Windows will ask for permission once: this engine is in Program Files.");
             if (Notes.Count < 2 && Hub.EditorRunningOnTarget()) Notes.Add("Unreal Editor is open. The new tools appear after you restart it.");
         }
@@ -500,7 +508,10 @@ public sealed partial class CapabilityRowModel : ObservableObject
         // Chips: price (or Owned), stage. Released shows none on a row.
         Chips.Add(owned ? new ChipModel("OWNED", "owned") : ChipModel.Price(cat, PriceKey));
         if (product?.Trial == true) Chips.Add(new ChipModel(cat.Labels.Trial.ToUpperInvariant(), "free"));
-        if (status == ProductStatus.Coming) Chips.Add(new ChipModel(cat.StageLabel(Stage.Coming).ToUpperInvariant(), "soon"));
+        var notBuilt = status == ProductStatus.Coming && product is not null && inputs is not null
+                       && TrackPlanner.AvailabilityOf(product, inputs) == BuildAvailability.NotBuiltForEngine;
+        if (notBuilt) Chips.Add(new ChipModel($"NOT BUILT FOR {hub.EngineVersion}", "soon"));
+        else if (status == ProductStatus.Coming) Chips.Add(new ChipModel(cat.StageLabel(Stage.Coming).ToUpperInvariant(), "soon"));
         else if (ChipModel.Stage(cat, stage) is { } chip) Chips.Add(chip);
 
         var price = product is null ? null : hub.PriceOf(product);
@@ -510,19 +521,21 @@ public sealed partial class CapabilityRowModel : ObservableObject
         HasBox = status is ProductStatus.Available || (status == ProductStatus.Labs && hub.HubState.ShowLabs);
         IsComing = status == ProductStatus.Coming;
         NeedsPurchase = status == ProductStatus.NeedsPurchase;
-        if (IsInstalled && product?.MainComponent is { } main && inputs is not null && inputs.Installed.TryGetValue(main, out var have))
+        if (IsInstalled && product?.MainComponent is { } main && inputs is not null && !inputs.Installed.ContainsKey(main) && inputs.ProvidedElsewhere.TryGetValue(main, out var there))
+            InstalledText = $"Here · {there} · from the engine";
+        else if (IsInstalled && product?.MainComponent is { } main2 && inputs is not null && inputs.Installed.TryGetValue(main2, out var have))
         {
             InstalledText = $"Installed · {have}";
             var newer = product.Plugins.Concat(product.AgentPlugins).Select(id => TrackPlanner.NewerVersion(id, inputs)).FirstOrDefault(v => v is not null);
-            UpdateText = status == ProductStatus.Update ? $"Update to {TrackPlanner.NewerVersion(main, inputs) ?? newer}" : "";
+            UpdateText = status == ProductStatus.Update ? $"Update to {TrackPlanner.NewerVersion(main2, inputs) ?? newer}" : "";
         }
 
         if (product is not null && ProductFacts.FreeTierPromised(product, inputs?.Manifest ?? new Core.Manifest.Manifest()))
             ExtraLine = "A free tier is planned. Today this is the full version.";
         else if (status == ProductStatus.Labs)
             ExtraLine = cat.LabsLine;
-        else if (status == ProductStatus.Coming && product?.Plugins.Count > 0 && inputs?.Manifest.Plugin(product.Plugins[0]) is { Versions.Count: > 0 } && hub.EngineVersion != "5.8")
-            ExtraLine = $"No build for Unreal Engine {hub.EngineVersion} yet.";
+        else if (notBuilt)
+            ExtraLine = TrackPlanner.NotBuiltLine(hub.EngineVersion);
 
         CartLabel = hub.PaymentsLive ? "Add to cart" : "Buying opens soon";
         CartNote = hub.PaymentsLive ? "Opens your Kovati account in the browser. It appears here as soon as it is yours." : "You can read about it on kovati.dev.";

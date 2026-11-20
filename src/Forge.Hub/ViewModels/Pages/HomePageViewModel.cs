@@ -95,8 +95,8 @@ public sealed partial class HomePageViewModel : PageViewModel
     private async Task RefreshSetupAsync()
     {
         var gen = ++_generation;
-        if (Hub.Catalogue is not { } cat || Hub.SelectedEngine is not { } engine) { SetupLines.Clear(); return; }
-        var tracks = cat.TracksInOrder.Where(t => Hub.HubState.Track(t.Slug, engine.PluginRoot) is { ChecklistHidden: false }).ToList();
+        if (Hub.Catalogue is not { } cat || Hub.SelectedEngine is null) { SetupLines.Clear(); return; }
+        var tracks = cat.TracksInOrder.Where(t => Hub.HubState.Track(t.Slug, Hub.TargetRoot) is { ChecklistHidden: false }).ToList();
         var results = await Task.Run(() => tracks.Select(t => (t, list: Hub.BuildChecklist(t))).ToList());
         if (gen != _generation) return;
         Dispatcher.UIThread.Post(() =>
@@ -119,7 +119,7 @@ public sealed partial class HomePageViewModel : PageViewModel
     /// </summary>
     private bool IsYours(Track t, Catalogue cat, IReadOnlyDictionary<string, string> installed)
     {
-        if (Hub.SelectedEngine is { } e && Hub.HubState.Track(t.Slug, e.PluginRoot) is not null) return true;
+        if (Hub.SelectedEngine is not null && Hub.HubState.Track(t.Slug, Hub.TargetRoot) is not null) return true;
         return cat.Products.Any(p => p.Track == t.Slug && p.MainComponent is { } main && installed.ContainsKey(main) && p.AddonKind is null);
     }
 

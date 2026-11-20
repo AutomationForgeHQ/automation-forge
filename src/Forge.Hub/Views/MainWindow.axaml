@@ -62,6 +62,12 @@
               <Ellipse Classes="dot" Width="4" Height="4" Fill="{StaticResource AmberBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,-14" />
             </Panel>
           </Button>
+          <Button Classes="place" Classes.selected="{Binding IsProjectsPlace}" Command="{Binding ShowProjectsCommand}">
+            <Panel>
+              <TextBlock Text="Projects" VerticalAlignment="Center" />
+              <Ellipse Classes="dot" Width="4" Height="4" Fill="{StaticResource AmberBrush}" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,-14" />
+            </Panel>
+          </Button>
           <Button Classes="place" Classes.selected="{Binding IsBrowsePlace}" Command="{Binding ShowBrowseCommand}">
             <Panel>
               <TextBlock Text="Browse" VerticalAlignment="Center" />
@@ -435,6 +441,20 @@
         </ScrollViewer>
       </Border>
 
+      <!-- A question asked once (0.5.0-beta.3: an editor that may have the project open). Over everything. -->
+      <Border IsVisible="{Binding ShowConfirm}" Background="{StaticResource ScrimBrush}" ZIndex="40">
+        <Border Classes="panel" Width="460" Padding="28,24" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <StackPanel Spacing="14">
+            <TextBlock Classes="display-xs" Text="{Binding ConfirmTitle}" TextWrapping="Wrap" />
+            <TextBlock Classes="body" Text="{Binding ConfirmLine}" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,6,0,0">
+              <Button Classes="quiet small" Content="Cancel" Command="{Binding ConfirmNoCommand}" />
+              <Button Classes="primary small" Content="{Binding ConfirmOk}" Command="{Binding ConfirmYesCommand}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </Border>
+
       <!-- Settings. -->
       <Border IsVisible="{Binding ShowSettings}" HorizontalAlignment="Right" Width="400" CornerRadius="16,0,0,16"
               Background="{StaticResource PlateBrush}" BorderBrush="{StaticResource RingSoftBrush}" BorderThickness="1,0,0,0">
@@ -524,6 +544,30 @@
               <TextBlock Classes="small" Text="{Binding WatchLine}" TextWrapping="Wrap" />
             </StackPanel>
 
+            <!-- PROJECT FOLDERS (0.5.0-beta.3): Unreal's own records first; these are looked into as well, two levels deep. -->
+            <StackPanel Spacing="10">
+              <TextBlock Classes="label" Text="PROJECT FOLDERS" />
+              <TextBlock Classes="small" TextWrapping="Wrap"
+                         Text="Kovati Hub finds your projects in Unreal's own list of recent projects and in the folders Unreal makes them in. Add the folders where you keep other projects: it looks two levels into each, and never searches the whole disk." />
+              <ItemsControl ItemsSource="{Binding ProjectFolders}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ProjectFolderRow">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                      <StackPanel Spacing="2">
+                        <TextBlock Classes="mono" Text="{Binding Folder}" TextTrimming="CharacterEllipsis" FontSize="12" ToolTip.Tip="{Binding Folder}" />
+                        <TextBlock Classes="small" Text="{Binding Line}" TextWrapping="Wrap" />
+                      </StackPanel>
+                      <Button Grid.Column="1" Classes="link smalltext" Content="Remove" Command="{Binding RemoveCommand}" VerticalAlignment="Top" Margin="10,0,0,0" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button Classes="quiet small" Content="Add a folder…" Command="{Binding AddProjectFolderCommand}" HorizontalAlignment="Left" />
+                <Button Classes="link smalltext" Content="See your projects →" Command="{Binding ShowProjectsCommand}" VerticalAlignment="Center" />
+              </StackPanel>
+            </StackPanel>
+
             <StackPanel Spacing="10">
               <TextBlock Classes="label" Text="WHERE IT LOOKS" />
               <TextBlock Classes="small" TextWrapping="Wrap"
@@ -558,15 +602,17 @@
           </ScrollViewer>
         </Border>
         <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto,Auto" Height="32" Margin="16,0,18,0">
-          <ComboBox Grid.Column="0" Classes="footer" ItemsSource="{Binding Engines}" SelectedItem="{Binding SelectedEngine}" IsVisible="{Binding HasManyEngines}" VerticalAlignment="Center" MaxWidth="300">
+          <!-- The install target (spec 3): an engine for all its projects, or one project. A menu when there is more than one. -->
+          <ComboBox Grid.Column="0" Classes="footer" ItemsSource="{Binding Targets}" SelectedItem="{Binding SelectedTarget}" IsVisible="{Binding HasManyTargets}" VerticalAlignment="Center" MaxWidth="360"
+                    ToolTip.Tip="Where Kovati Hub installs: an Unreal Engine, for every project on it, or one project only.">
             <ComboBox.ItemTemplate>
-              <DataTemplate x:DataType="eng:EngineInstall">
-                <TextBlock Text="{Binding FullVersion, StringFormat='Unreal Engine {0}'}" FontSize="12" />
+              <DataTemplate x:DataType="vm:TargetOption">
+                <TextBlock Text="{Binding MenuLabel}" FontSize="12" TextTrimming="CharacterEllipsis" />
               </DataTemplate>
             </ComboBox.ItemTemplate>
           </ComboBox>
-          <TextBlock Grid.Column="0" Text="{Binding EngineLabel}" FontSize="12" Foreground="{StaticResource Bone80Brush}" VerticalAlignment="Center" Margin="8,0,0,0"
-                     IsVisible="{Binding IsSingleEngine}" />
+          <TextBlock Grid.Column="0" Text="{Binding TargetLabel}" FontSize="12" Foreground="{StaticResource Bone80Brush}" VerticalAlignment="Center" Margin="8,0,0,0"
+                     IsVisible="{Binding IsSingleTarget}" />
           <Button Grid.Column="0" Classes="link amber smalltext" Content="{Binding EngineLabel}" Command="{Binding GetUnrealEngineCommand}" FontSize="12" Margin="8,0,0,0"
                   IsVisible="{Binding !HasEngine}" VerticalAlignment="Center" />
           <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding Busy}" Width="56" Height="2" MinWidth="0" Margin="18,0,0,0" VerticalAlignment="Center" />

@@ -52,7 +52,7 @@ public sealed partial class ComponentsPageViewModel : PageViewModel
         foreach (var o in Hub.OtherTargetReceipts()) Others.Add(o);
 
         var all = Hub.Sets.SelectMany(s => s.Plugins).ToList();
-        SummaryLine = $"{all.Count} components for {Hub.EngineLabel} · {all.Count(p => p.Installed is not null)} installed"
+        SummaryLine = $"{all.Count} components for {Hub.TargetLabel} · {all.Count(p => p.Installed is not null)} installed"
                       + (Hub.UpdatesCount > 0 ? $" · {Hub.UpdatesCount} to update" : "");
         OnPropertyChanged(nameof(HasOthers));
         OnPropertyChanged(nameof(IsEmpty));
