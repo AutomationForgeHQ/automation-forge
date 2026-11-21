@@ -1,21 +1,27 @@
-# Automation Forge
+<p align="center"><a href="https://kovati.dev/download/"><img src="https://raw.githubusercontent.com/AutomationForgeHQ/.github/main/profile/assets/hub.jpg" width="100%" alt="Kovati Hub: one free app that installs and updates every tool you own" /></a></p>
 
-PlayableOps for Unreal Engine 5.8 — motion, voice, faces, meshes, materials and staging generated or recorded in the editor and run as one pipeline, by you and the agents working beside you, so your team plays the design before the assets exist. It's the first implementation of **PlayableOps**: turning creative intent into content a game can actually play, review, trace and safely replace.
+<p align="center">Part of <a href="https://kovati.dev"><b>Kovati</b></a>, production tools for Unreal games<br />
+<a href="https://kovati.dev/download/"><b>Download the Hub</b></a> · <a href="https://kovati.dev">Site</a> · <a href="https://docs.kovati.dev">Documentation</a> · <a href="https://kovati.dev/discord">Discord</a></p>
 
-This repository is the product's front door: the release **manifest**, the `forge` command-line installer, the hub, and the public documentation. Each open plugin has its own repository under this organisation; builds for every free plugin are published on [`releases`](https://github.com/AutomationForgeHQ/releases).
+# Kovati Hub and the forge CLI
 
-Built by [Kovati](https://kovati.dev), founded by MetaWorx LLC. © Bojan Andrejek / MetaWorx LLC.
+[Kovati](https://kovati.dev) makes production tools for Unreal games: characters, animation, worlds and stories, made inside the editor. Every step works by hand, and AI and agents are there when you want them.
+
+This repository is how those tools reach your machine: the **hub**, a free app that installs and updates every tool you own, the `forge` command line that does the same from a terminal, and the release **manifest** both read. Each open plugin has its own repository under this organisation; builds for every free plugin are published on [`releases`](https://github.com/AutomationForgeHQ/releases).
+
+The repository keeps its name, `automation-forge`, because installed hubs, CI and the account service find releases here.
+
+Built by [Kovati](https://kovati.dev), owned by MetaWorx LLC. © Bojan Andrejek / MetaWorx LLC.
 
 ## Documentation
 
-This README is the technical reference: the manifest's shape, the hub and CLI, machine configuration, releases. For everything else — what each Forge set does, how open/Fab/paid is decided, the PlayableOps argument, getting your first plugin installed — see the **[docs/ wiki](docs/README.md)**:
+This README is the technical reference: the manifest's shape, the hub and CLI, machine configuration, releases. What each tool does, with films of it working, is on [kovati.dev](https://kovati.dev) and in the wiki at [docs.kovati.dev](https://docs.kovati.dev). The short pages in **[docs/](docs/README.md)** cover the rest:
 
-- [docs/PLAYABLE-OPS.md](docs/PLAYABLE-OPS.md) — the category, in short: the playable gap, graduation, Trinity architecture.
-- [docs/PLUGINS.md](docs/PLUGINS.md) — every Forge set's goal, current features and honest status.
-- [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md) — open, Fab and paid, explained, with the full per-plugin table.
-- [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) — install the hub, sign in, get a set running.
-- [docs/ACCOUNTS.md](docs/ACCOUNTS.md) — the account system in depth.
-- [docs/MANIFESTO.md](docs/MANIFESTO.md) — PlayableOps as a manifesto.
+- [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md): install the hub, sign in, get a tool running.
+- [docs/PLUGINS.md](docs/PLUGINS.md): every tool's goal, current features and honest status.
+- [docs/DISTRIBUTION.md](docs/DISTRIBUTION.md): open, Fab and paid, explained, with the full per-plugin table.
+- [docs/ACCOUNTS.md](docs/ACCOUNTS.md): the account system in depth.
+- [docs/PLAYABLE-OPS.md](docs/PLAYABLE-OPS.md) and [docs/MANIFESTO.md](docs/MANIFESTO.md): the thinking behind the tools, for those who want it.
 
 Elsewhere: the [site](https://kovati.dev), the [account app](https://app.kovati.dev), the [whitepaper](https://kovati.dev/whitepaper), and the [org profile](https://github.com/AutomationForgeHQ).
 

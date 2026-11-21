@@ -1,16 +1,16 @@
-# Automation Forge documentation
+# Kovati documentation
 
 A short wiki, in a few pages rather than one long one. Start wherever your
 question is.
 
 | Page | What's in it |
 |---|---|
-| [PLAYABLE-OPS.md](PLAYABLE-OPS.md) | The category this product implements — the playable gap, two-speed content, graduation, and Trinity (people and agents as equal clients). The short version of the [whitepaper](https://kovati.dev/whitepaper). |
 | [PLUGINS.md](PLUGINS.md) | Every Forge set: its goal, its current features, its honest status, and every member plugin with a link to its repository. |
 | [DISTRIBUTION.md](DISTRIBUTION.md) | What **open**, **Fab** and **paid** mean, who is behind each, and the full per-plugin table. |
 | [GETTING-STARTED.md](GETTING-STARTED.md) | Install the hub, create an account, get your first Forge set into a project. |
 | [ACCOUNTS.md](ACCOUNTS.md) | The account system in depth: sign-in flow, what the hub and CLI show, Fab linking, emulator variables. |
-| [MANIFESTO.md](MANIFESTO.md) | PlayableOps, as a manifesto rather than an argument. Fourteen short points. |
+| [PLAYABLE-OPS.md](PLAYABLE-OPS.md) | The thinking behind the tools: the playable gap, two-speed content, graduation, and people and agents as equal clients. The short version of the [whitepaper](https://kovati.dev/whitepaper). |
+| [MANIFESTO.md](MANIFESTO.md) | The same thinking as a manifesto. Fourteen short points. |
 
 The [repository root README](../README.md) covers the parts a developer
 touches directly: the release manifest's shape, the `forge` CLI and hub
@@ -19,11 +19,13 @@ the "what is this and why" half; that README is the "how do I drive it" half.
 
 ## In one paragraph
 
-**Automation Forge** is a family of Unreal Engine 5.8 plugins built around
-**PlayableOps** — turning creative intent into content a game can actually
-play, review, trace and safely replace. It is developed by **Kovati**
-(founded by **MetaWorx LLC**, which holds its IP and runs its infrastructure),
-and dogfooded inside a real production, Colony Origins. Every plugin is
+**Kovati** makes production tools for Unreal games: characters, animation,
+worlds and stories, made inside the Unreal Engine 5.8 editor. Every step
+works by hand, and AI and agents are there when you want them. Kovati is
+owned by **MetaWorx LLC**, which holds its IP and runs its infrastructure,
+and the tools are made and used daily in our own game, Colony: New Origins.
+The full picture, with films of every tool, is on
+[kovati.dev](https://kovati.dev). Every plugin is
 **open** (source here, free), **Fab** (free, source stays private) or
 **paid** (bought through [the account app](https://app.kovati.dev)) — never
 a fourth thing, and decided per plugin, not per project. See
